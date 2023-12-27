@@ -123,84 +123,70 @@ const sellerList = [
 const sellerGrid = [
     {
         id: 1,
-        sellerName: "Zibra Fashion Ltd",
-        companyLogo: companyImg5,
-        verified: true,
-        webUrl: "www.zibrafashion.com",
-        stock: "2587",
-        revenue: "438.36"
+        contractName: "Student Transportation Agreement",
+        // companyLogo: companyImg5,
+        // verified: true,
+        contractNumber: "CNTR-2023-1234",
+        pay: " 5,000/Month",
+        status: "Completed"
     }, {
         id: 2,
-        sellerName: "Terry & Jerry",
-        companyLogo: companyImg5,
-        verified: false,
-        webUrl: "www.terry&jerry.com",
-        stock: "850",
-        revenue: "213.52"
+        contractName: "Summer School Transport Agreement",
+        // companyLogo: companyImg5,
+        // verified: false,
+        contractNumber: "CNTR-2023-1234",
+        pay: "8,000/Month",
+        status: "Active"
     }, {
         id: 3,
-        sellerName: "Themesbrand",
-        companyLogo: companyImg1,
-        verified: false,
-        webUrl: "www.themesbrand.com",
-        stock: "1546",
-        revenue: "383.50"
+        contractName: "Extended School Hours Transport",
+        // companyLogo: companyImg1,
+        // verified: false,
+        contractNumber: "CNTR-2023-1234",
+        pay: "5,000/Month",
+        status: "Completed"
     }, {
         id: 4,
-        sellerName: "Digital Galaxy",
-        companyLogo: companyImg4,
-        verified: true,
-        webUrl: "www.digitalgalaxy.com",
-        stock: "241",
-        revenue: "184.20"
+        contractName: "Bus Services for Special Events",
+        // companyLogo: companyImg4,
+        // verified: true,
+        contractNumber: "CNTR-2023-1234",
+        pay: "3,000/Month",
+        status: "Active"
     }, {
         id: 5,
-        sellerName: "Rotic Fashion",
-        companyLogo: companyImg3,
-        verified: false,
-        webUrl: "www.roticfashion.com",
-        stock: "654",
-        revenue: "224.10"
+        contractName: "Weekday School Shuttle Contract",
+        // companyLogo: companyImg3,
+        // verified: false,
+        contractNumber: "CNTR-2023-1234",
+        pay: "1,000/Month",
+        status: "Completed"
     }, {
         id: 6,
-        sellerName: "RND Fashion",
-        companyLogo: companyImg2,
-        verified: true,
-        webUrl: "www.rndfashion.com",
-        stock: "150",
-        revenue: "180.62"
-    }, {
+        contractName: "Safety Standards and Compliance Contract",
+        // companyLogo: companyImg2,
+        // verified: true,
+        contractNumber: "CNTR-2023-1234",
+        pay: "6,000/Month",
+        status: "Active"
+    },
+    {
         id: 7,
-        sellerName: "Jorce Medicines",
-        companyLogo: companyImg7,
-        verified: false,
-        webUrl: "www.jorcemedicines.com",
-        stock: "540",
-        revenue: "947.33"
-    }, {
+        contractName: "Safety Standards and Compliance Contract",
+        // companyLogo: companyImg2,
+        // verified: true,
+        contractNumber: "CNTR-2023-1234",
+        pay: "5,500/Month",
+        status: "Completed"
+    },
+    {
         id: 8,
-        sellerName: "Pich Hub",
-        companyLogo: companyImg6,
-        verified: false,
-        webUrl: "www.pichhub.com",
-        stock: "874",
-        revenue: "365.87"
-    }, {
-        id: 9,
-        sellerName: "Chase Pitkin",
-        companyLogo: companyImg5,
-        verified: true,
-        webUrl: "-",
-        stock: "2587",
-        revenue: "438.36"
-    }, {
-        id: 10,
-        sellerName: "Star Merchant Services",
-        companyLogo: companyImg4,
-        verified: false,
-        webUrl: "www.starmerchant.com",
-        stock: "850",
-        revenue: "213.52"
+        contractName: "Safety Standards and Compliance Contract",
+        // companyLogo: companyImg2,
+        // verified: true,
+        contractNumber: "CNTR-2023-1234",
+        pay: "4,000/Month",
+        status: "Completed"
     }
 ]
 

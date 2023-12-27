@@ -14,7 +14,12 @@ const userList = [
     {
         id: 1,
         user_name: "Alfred Hurst",
+        tripref:"#UYT654",
         user_img: avatar2,
+        pickup_station:"Birmingham Brunel Street",
+        pickup_time:" Feb 01 09:30",
+        dropdown_station:"Colmore Row (Stop SH1)",
+        dropdown_time:"Feb 01 09:30",
         email_id: "alfredH@toner.com",
         date: "18 Dec, 2018",
         status: "Inactive"
@@ -23,6 +28,11 @@ const userList = [
         id: 2,
         user_name: "Tommy Carey",
         user_img: avatar3,
+        tripref:"#UYT655",
+        pickup_station:"Digbeth Coach Station",
+        pickup_time:" Feb 02 09:30",
+        dropdown_station:"Colmore Row (Stop SH1)",
+        dropdown_time:"Feb 02 10:30",
         email_id: "careytommy@toner.com",
         date: "02 Jan, 2023",
         status: "Active"
@@ -31,6 +41,11 @@ const userList = [
         id: 3,
         user_name: "Cassius Brock",
         user_img: avatar4,
+        tripref:"#UYT656",
+        pickup_station:"Bull Street (Stop BS2)",
+        pickup_time:"Feb 02 11:30",
+        dropdown_station:"Colmore Row (Stop SH1)",
+        dropdown_time:" Feb 02 12:30",
         email_id: "brock@toner.com",
         date: "24 Nov, 2022",
         status: "Active"
@@ -39,6 +54,11 @@ const userList = [
         id: 4,
         user_name: "Camilla Winters",
         user_img: avatar5,
+        tripref:"#UYT657",
+        pickup_station:"Birmingham Brunel Street",
+        pickup_time:"Feb 01 09:30",
+        dropdown_station:"Colmore Row (Stop SH1)",
+        dropdown_time:"Feb 01 09:30",
         email_id: "camilla@toner.com",
         date: "12 Jan, 2023",
         status: "Inactive"
@@ -47,6 +67,11 @@ const userList = [
         id: 5,
         user_name: "Gabrielle Holden",
         user_img: avatar6,
+        pickup_station:"Bull Street (Stop BS2)",
+        pickup_time:"Feb 02 11:30",
+        dropdown_station:"Colmore Row (Stop SH1)",
+        dropdown_time:"Feb 02 12:30",
+        tripref:"#UYT658",
         email_id: "gabrielle@toner.com",
         date: "17 Nov, 2022",
         status: "Active"
@@ -55,6 +80,11 @@ const userList = [
         id: 6,
         user_name: "Kristina Hooper",
         user_img: avatar7,
+        tripref:"#UYT659",
+        pickup_station:"Birmingham Brunel Street",
+        pickup_time:"Feb 01 09:30",
+        dropdown_station:"Colmore Row (Stop SH1)",
+        dropdown_time:"Feb 01 09:30",
         email_id: "kristina@toner.com",
         date: "04 Oct, 2020",
         status: "Inactive"
@@ -63,34 +93,16 @@ const userList = [
         id: 7,
         user_name: "Jacques Leon",
         user_img: dummyuser,
+        tripref:"#UYT651",
+        pickup_station:"Birmingham Brunel Street",
+        pickup_time:" Feb 01 09:30",
+        dropdown_station:"Colmore Row (Stop SH1)",
+        dropdown_time:" Feb 01 09:30",
         email_id: "jacques@toner.com",
         date: "07 Feb, 2015",
         status: "Active"
     },
-    {
-        id: 8,
-        user_name: "Theresa Crawford",
-        user_img: avatar8,
-        email_id: "crawford@toner.com",
-        date: "28 Oct, 2014",
-        status: "Active"
-    },
-    {
-        id: 9,
-        user_name: "Alina Holland",
-        user_img: avatar9,
-        email_id: "hollandalina@toner.com",
-        date: "16 Aug, 2016",
-        status: "Active"
-    },
-    {
-        id: 10,
-        user_name: "Edward Rogers",
-        user_img: avatar10,
-        email_id: "edwardro@toner.com",
-        date: "25 Nov, 2021",
-        status: "Inactive"
-    }
+   
 ]
 
 export { userList }

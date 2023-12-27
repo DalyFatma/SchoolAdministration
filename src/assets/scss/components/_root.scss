@@ -111,14 +111,14 @@
     
 
     &:is([data-sidebar="gradient"], [data-sidebar="gradient-2"], [data-sidebar="gradient-3"], [data-sidebar="gradient-4"]) {
-        --#{$prefix}vertical-menu-item-color:                 #{rgba($white, .50)};
-        --#{$prefix}vertical-menu-item-hover-color:           #{$white};
+        --#{$prefix}vertical-menu-item-color:                 #000000;
+        --#{$prefix}vertical-menu-item-hover-color:           #{$purple};
         --#{$prefix}vertical-menu-item-hover-bg:              #1c2932;
-        --#{$prefix}vertical-menu-item-active-color:          #{$white};
-        --#{$prefix}vertical-menu-sub-item-color:             #{rgba($white, .50)};
-        --#{$prefix}vertical-menu-sub-item-hover-color:       #{$white};
-        --#{$prefix}vertical-menu-sub-item-active-color:      #{$white};
-        --#{$prefix}vertical-menu-title-color:                #{rgba($white, .50)};
+        --#{$prefix}vertical-menu-item-active-color:          #{$yellow};
+        --#{$prefix}vertical-menu-sub-item-color:             #000000;
+        --#{$prefix}vertical-menu-sub-item-hover-color:       #{$purple};
+        --#{$prefix}vertical-menu-sub-item-active-color:      #{$yellow};
+        --#{$prefix}vertical-menu-title-color:                #{$white};
     }
 
     &[data-sidebar="gradient"] {
@@ -129,7 +129,7 @@
     }
 
     &[data-sidebar="gradient-2"] {
-        --#{$prefix}vertical-menu-bg:                         linear-gradient(to left, #{$purple-700}, #{$purple-800});
+        --#{$prefix}vertical-menu-bg:                         linear-gradient(white);
         --#{$prefix}vertical-menu-border:                     #{$purple-700};
         --#{$prefix}twocolumn-menu-iconview-bg:               linear-gradient(to left, #{$purple-700}, #{$purple-800});
         --#{$prefix}twocolumn-menu-bg:                        linear-gradient(to left, #{$purple-700}, #{$purple-800});

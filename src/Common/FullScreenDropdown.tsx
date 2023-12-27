@@ -54,7 +54,7 @@ const FullScreenDropdown = () => {
                     type="button"
                     className="btn-icon btn-topbar btn-ghost-dark rounded-circle"
                 >
-                    <i className="bi bi-arrows-fullscreen fs-16"></i>
+                    <i className="ph ph-arrows-out fs-20"></i>
                 </Button>
             </div>
         </React.Fragment>

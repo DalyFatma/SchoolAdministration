@@ -2,7 +2,6 @@ import { Navigate } from "react-router-dom";
 
 import Dashboard from "pages/Dashboard";
 
-
 import Categories from "pages/Products/Categories";
 import SubCategories from "pages/Products/SubCategories";
 
@@ -30,9 +29,6 @@ import UsersList from "pages/UsersList";
 import Shipments from "pages/Shipping/Shipments";
 import ShippingList from "pages/Shipping/ShippingList";
 
-// Coupons
-import Coupons from "pages/Coupons";
-
 //Review & Rating
 import ReviewRating from "pages/Reviews-Rating";
 
@@ -47,76 +43,129 @@ import Transactions from "pages/Localization/Transactions";
 import CurrencyRates from "pages/Localization/CurrencyRates";
 
 // Accounts
-import MyAccount from "pages/Accounts/MyAccount";
-import Settings from "pages/Accounts/Settings";
-import SignIn from "pages/Accounts/AuthenticationInner/SignIn";
-import PasswordReset from "pages/Accounts/AuthenticationInner/PasswordReset";
-import PasswordCreate from "pages/Accounts/AuthenticationInner/PasswordCreate";
-import SuccessMessage from "pages/Accounts/AuthenticationInner/SuccessMessage";
-import TwoStepVerify from "pages/Accounts/AuthenticationInner/TwoStepVerify";
-import BasicLogout from "pages/Accounts/AuthenticationInner/Logout";
-import Error404 from "pages/Accounts/AuthenticationInner/Error404";
-import Error500 from "pages/Accounts/AuthenticationInner/Error500";
-import ComingSoon from "pages/Accounts/AuthenticationInner/ComingSoon";
+// import MyAccount from "pages/Accounts/MyAccount";
+// import Settings from "pages/Accounts/Settings";
+import SignIn from "pages/AccountsAuth/AuthenticationInner/SignIn";
+import PasswordReset from "pages/AccountsAuth/AuthenticationInner/PasswordReset";
+import PasswordCreate from "pages/AccountsAuth/AuthenticationInner/PasswordCreate";
+import SuccessMessage from "pages/AccountsAuth/AuthenticationInner/SucessMessage";
+import TwoStepVerify from "pages/AccountsAuth/AuthenticationInner/TwoStepVerify";
+import BasicLogout from "pages/AccountsAuth/AuthenticationInner/Logout";
+import Error404 from "pages/AccountsAuth/AuthenticationInner/Error404";
+import Error500 from "pages/AccountsAuth/AuthenticationInner/Error500";
+import ComingSoon from "pages/AccountsAuth/AuthenticationInner/ComingSoon";
 
 import UserProfile from "pages/Authentication/user-profile";
-import Vehicles from "pages/Vehicles";
 
 //? Notes
 import Notes from "pages/Notes";
+import AddNewGroup from "pages/Students/Groups/AddNewGroup";
+import AddNewStudent from "pages/Accounts/Students/AddNewStudent";
+
+import InvoiceListTable from "pages/Invoices/InvoiceList/InvoiceListTable";
+import Groups from "pages/Students/Groups/Index";
+import Claims from "pages/Tools/Claims/Index"
+import ReportingManagement from "../pages/Tools/ReportingManagement/index"
+import Tracking from "../pages/Tracking/MapTracking"
+import Attendances from "pages/Students/Attendances/index";
+import PayementManagement from "../pages/Tools/PayementManagment/index"
+import DelaysChanges from "../pages/Tracking/DelaysChanges/index"
+import Programming from "../pages/Promgramming/Scheduling/index"
+import OperationsManagement from "pages/OperationManagement/index";
+import Students from "pages/Accounts/Students/index"
+import AddNewParent from "pages/Accounts/Parents/AddNewParent";
+import Parents from "pages/Accounts/Parents";
+import TripsManagement from "pages/Promgramming/TripsManagement";
+import Offers from "pages/Tools/Offers/index";
+import Station from "pages/Promgramming/Stations/index";
+import Contract from "pages/Promgramming/Contract";
+import ExtraTrip from "pages/ExtraTrip";
+import ListExtraTrip from "pages/ExtraTrip/ListExtraTrip";
+import AddNewStation from "pages/Promgramming/Stations/AddNewStation";
+import SingleProfile from "pages/Accounts/Students/SingleAccount";
+import EditStudent from "pages/Accounts/Students/EditStudent";
+import ContractDetails from "pages/Promgramming/Contract/ContractDetails";
+import ParentDetails from "pages/Accounts/Parents/ParentDetails";
+import ReportError from "pages/Help/RepportError";
+import RequestFeature from "pages/Help/RequestFeature";
+import UserManual from "pages/Help/UserManuel";
+
+
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
 
   //? Tracking
-  { path: "/map-tracking", component: <ShippingList /> },
-  { path: "/delays&changes", component: <Shipments /> },
+  { path: "/map-tracking", component: <Tracking /> },
+  { path: "/delays&changes", component: <DelaysChanges /> },
 
-  //? Visitors Quote
-  { path: "/new-quote", component: <UsersList /> },
-  { path: "/quote-request", component: <Coupons /> },
-  { path: "/listing&management", component: <Calendar /> },
-  //? Visitors Quote ==> Push Jobs
-  { path: "/current-push-jobs", component: <Transactions /> },
-  { path: "/history-push-job", component: <CurrencyRates /> },
+  // ? operations management
 
-  //? Corporate Transport
-  { path: "/list-corporate-transport", component: <InvoiceList /> },
-  { path: "/new-contract", component: <SellersListView /> },
-  //? Corporate Transport ==> Programming
-  { path: "/scheduling", component: <InvoiceDetails /> },
-  { path: "/offers", component: <CreateInvoice /> },
-  { path: "/stations", component: <SellersOverview /> },
+  { path: "/operations-management", component: <OperationsManagement /> },
+  // ? extra trips
+  { path: "/add-extraTrip/extra-trips", component: <ExtraTrip /> },
+    // ? extra trips
+    { path: "/list-extra-trips", component: <ListExtraTrip/> },
+  // ? contracts
+  { path: "/contracts", component: <Contract /> },
+  // contract details
+
+ { path: "/contract/contract-details", component: <ContractDetails /> },
+  // ? Students
+  { path: "/groups", component: <Groups /> },
+  { path: "/attendances", component: <Attendances /> },
+
+  //parent details
+  { path: "/parents/parent-details", component: <ParentDetails /> },
+  //?  add students path
+  { path: "/students/add-student", component: <AddNewStudent /> },
+   //?  add students path
+   { path: "/students/edit-student", component: <EditStudent /> },
+   //?  add parents path
+   { path: "/parents/add-parent", component: <AddNewParent /> },
+ //?  add groups path
+ { path: "/groups/add-group", component: <AddNewGroup /> },
+ //?  add groups path
+ { path: "/students", component: < Students/> },
+ { path: "/parents", component: < Parents/> },
+ // report error 
+ { path: "/report-error", component: < ReportError/> },
+  // request feature 
+  { path: "/request-feature", component: < RequestFeature/> },
+   // user manual 
+ { path: "/user-manual", component: < UserManual/> },
+
+
+
+  
+  //? Programming
+  { path: "/trips-management", component: <TripsManagement /> },
+  { path: "/scheduling", component: <Programming /> },
+  { path: "/offers", component: <Offers /> },
+  { path: "/stations", component: <Station /> },
   { path: "/trip-models", component: <SellersGridView /> },
+  // add station
+  { path: "/add-station/stations", component: <AddNewStation /> },
 
-  //? Corporate
-  { path: "/schools", component: <Categories /> },
-  { path: "/companies", component: <SubCategories /> },
-  //? Corporate ==> Sub-Contractor
-  { path: "/new-applications", component: <OrdersListView /> },
-  { path: "/all-sub-contractors", component: <OrdersOverview /> },
+// View Profile student
+{ path: "/student/view-profile", component: <SingleProfile /> },
+  //? Claims Management
+  {path:"/claims-management", component: <Claims/>},
 
-  //? Feedback & Claims
-  { path: "/feedback&claims", component: <ReviewRating /> },
-
+  //? Payment Management
+  { path: "/payement-management", component: <PayementManagement /> },
   //? Reporting Management
-  { path: "/reporting-management", component: <Brands /> },
+ { path: "/reporting-management", component: <ReportingManagement /> },
 
-  //? Email Templates
-  { path: "/email-templates", component: <Statistics /> },
-
-  //? Accounts
-  { path: "/team", component: <MyAccount /> },
-  { path: "/driver", component: <Settings /> },
-  { path: "/vehicles", component: <Vehicles /> },
-
-   //? Notes
+  //? Notes
   { path: "/notes", component: <Notes /> },
+
+  { path: "/invoices", component: <InvoiceListTable /> },
 
   // this route should be at the end of all other routes
   // eslint-disable-next-line react/display-name
-  { path: "/", exact: true, component: <Navigate to="/dashboard" /> },
-  { path: "*", component: <Navigate to="/dashboard" /> },
+  { path: "/", exact: true, component: <Navigate to="/map-tracking" /> },
+  { path: "*", component: <Navigate to="/map-tracking" /> },
   { path: "/user-profile", component: <UserProfile /> },
 ];
 

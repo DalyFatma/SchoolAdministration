@@ -4,13 +4,14 @@ const Navdata = () => {
     //state data
    
     const [isTracking, setIsTracking] = useState(false);
-    const [isVisitorQuote, setIsVisitorQuote] = useState(false);
-    const [isCorporateTransport, setIsCorporateTransport] = useState(false);
-    const [isCorporate, setIsCorporate] = useState(false);
+    const [isStudents, setIsStudents] = useState(false);
+    const [isSchedle, setIsSchedle] = useState(false);
     const [isFeedbackClaims, setIsFeedbackClaims] = useState(false);
-    const [isReportingManagement, setIsReportingManagement] = useState(false);
-     const [isEmailTemplates, setIsEmailTemplates] = useState(false);
-    const [isAdministration, setIsAdministration] = useState(false);
+    const [isPayement, setIsPayement] = useState(false);
+    const [isAccounts, setIsAccounts] = useState(false);
+    const [isTools, setIsTools] = useState(false);
+    const [isHelp, setIsHelp] = useState(false);
+
 
     // Multi Level
     const [isLevel1, setIsLevel1] = useState(false);
@@ -39,37 +40,38 @@ const Navdata = () => {
         if (iscurrentState !== 'Tracking') {
             setIsTracking(false);
         }
-        if (iscurrentState !== 'VisitorQuote') {
-            setIsVisitorQuote(false);
+        if (iscurrentState !== 'Students') {
+            setIsStudents(false);
         }
-        if (iscurrentState !== 'CorporateTransport') {
-            setIsCorporateTransport(false);
-        }
-        if (iscurrentState !== 'Corporate') {
-            setIsCorporate(false);
+        if (iscurrentState !== 'Programming') {
+            setIsSchedle(false);
         }
         if (iscurrentState !== 'Feedback&Claims') {
             setIsFeedbackClaims(false);
         }
-        if (iscurrentState !== 'ReportingManagement') {
-            setIsReportingManagement(false);
+        if (iscurrentState !== 'Payement') {
+            setIsPayement(false);
         }
-        if (iscurrentState !== 'EmailTemplates') {
-            setIsEmailTemplates(false);
+        if (iscurrentState !== 'Accounts') {
+            setIsAccounts(false);
         }
-        if (iscurrentState !== 'Administration') {
-            setIsAdministration(false);
+        if (iscurrentState !== 'Tools') {
+            setIsTools(false);
         }
+        if (iscurrentState !== 'Help') {
+            setIsHelp(false);
+        }
+      
     }, [
         iscurrentState,
-        isEmailTemplates,
         isTracking,
-        isVisitorQuote,
-        isCorporateTransport,
-        isCorporate,
+        isStudents,
+        isSchedle,
         isFeedbackClaims,
-        isReportingManagement,
-        isAdministration
+        isPayement,
+        isAccounts,
+        isTools,
+        isHelp
     ]);
 
     const menuItems: any = [
@@ -77,191 +79,219 @@ const Navdata = () => {
             label: "Menu",
             isHeader: true,
         },
+       
         {
-            id: "dashboard",
-            label: "Dashboard",
-            icon: "mdi mdi-view-dashboard",
-            link: "/dashboard",
-            badgeName : "Hot",
-            badgeColor : "danger"
+            id: "mapTracking", 
+            label: "Live Tracking",
+            icon: "ph ph-path",
+            link: "/map-tracking",
+
         },
         {
-            id: "tracking",
-            label: "Tracking",
-            icon: "mdi mdi-map-marker-path",
+            id: "operations management", 
+            label: "Trips",
+            icon: "ph ph-kanban",
+            link: "/operations-management",
+
+        },
+        {
+            id: "programming",
+            label: "Programming",
+            icon: "ph ph-gear-six",
             link: "/#",
             click: function (e: any) {
                 e.preventDefault();
-                setIsTracking(!isTracking);
-                setIscurrentState('Tracking');
+                setIsSchedle(!isSchedle);
+                setIscurrentState('Programming');
                 updateIconSidebar(e);
             },
-            stateVariables: isTracking,
+            stateVariables: isSchedle,
+            subItems: [
+               
+                {
+                    id: "scheduling",
+                    label: "Scheduling",
+                    link: "/scheduling",
+                    parentId: "scheduling",
+                    icon: "ph ph-calendar",
+                },
+                {
+                    id: "stations",
+                    icon:"ph ph-map-pin",
+                    label: "Stations",
+                    link: "/stations",
+                    parentId: "stations",
+                },
+                {
+                    id: "tripModels",
+                    label: "Trip Models",
+                    link: "/trip-models",
+                    parentId: "tripModels",
+                    icon:"ph ph-file-plus",
+                },
+                {
+                    id: "Contracts", 
+                    label: "Contracts",
+                    parentId: "contract",
+                    icon: "ph ph-note-pencil",
+                    link: "/Contracts",
+                },
+            ],
+        },
+       
+        {
+            id: "Accounts",
+            label: "Accounts",
+            icon: "ph ph-user-circle-gear",
+            link: "/#",
+            click: function (e: any) {
+                e.preventDefault();
+                setIsStudents(!isStudents);
+                setIscurrentState('Students');
+                updateIconSidebar(e);
+            },
+            stateVariables: isStudents,
             subItems: [
                 {
-                    id: "mapTracking",
-                    label: "Map Tracking",
-                    link: "/map-tracking",
-                    parentId: "tracking",
+                    id: "Groups",
+                    label: "Groups",
+                    icon: "ph ph-users-four",
+                    link: "/groups",
+                    parentId: "groups",
+                    
+                },
+
+                {
+                    id: "parents",
+                    label: "Parents",
+                    link: "/parents",
+                    parentId: "parents",
+                    icon: "ph ph-users",
+                },
+                {
+                    id: "students",
+                    label: "Students",
+                    link: "/students",
+                    parentId: "students",
+                    icon: "ph ph-student",
+                },
+                
+                
+            ],
+        },
+        
+                
+        {
+            id: "Attendances",
+            label: "Attendances",
+            link: "/attendances",
+            parentId: "Attendances",
+            icon:"ph ph-check-square-offset",
+        },
+        {
+            id: "tools",
+            label: "Tools",
+            icon: "ph ph-wrench",
+            link: "/#",
+            click: function (e: any) {
+                e.preventDefault();
+                setIsTools(!isTools);
+                setIscurrentState('Tools');
+                updateIconSidebar(e);
+            },
+            stateVariables: isTools,
+            subItems: [
+                {
+                    id: "claim",
+                    label: "Claims",
+                    icon: "ph ph-quotes",
+                    link: "/claims-management",
+                    parentId: "groups",
+                    
+                },
+
+                {
+                    id: "payment",
+                    label: "Finance",
+                    link: "/payement-management",
+                    parentId: "parents",
+                    icon: "ph ph-currency-gbp",
+                },
+                {
+                    id: "reporting",
+                    label: "Reporting",
+                    link: "/reporting-management",
+                    parentId: "students",
+                    icon: "ph ph-chart-line-up",
+                },
+                {
+                    id: "extra",
+                    label: "Extra Trips",
+                    link: "/list-extra-trips",
+                    parentId: "students",
+                    icon: "ph ph-bus",
+                },
+                {
+                    id: "offer",
+                    label: "Offer",
+                    link: "/offers",
+                    parentId: "students",
+                    icon: "ph ph-megaphone",
                 },
                 {
                     id: "delays&changes",
                     label: "Delays and changes",
                     link: "/delays&changes",
                     parentId: "tracking",
+                    icon: "ph ph-timer",
                 },
+
+
+                
             ],
         },
+
         {
-            id: "VisitorQuote",
-            label: "Visitors Quote",
-            icon: "mdi mdi-file-compare",
+            id: "Help",
+            label: "Help",
+            icon: "ph ph-info",
             link: "/#",
             click: function (e: any) {
-                e.preventDefault();
-                setIsVisitorQuote(!isVisitorQuote);
-                setIscurrentState('VisitorQuote');
-                updateIconSidebar(e);
+              e.preventDefault();
+              setIsHelp(!isHelp);
+              setIscurrentState("Help");
+              updateIconSidebar(e);
             },
-            stateVariables: isVisitorQuote,
+            stateVariables: isHelp,
             subItems: [
-                { id: "level1.1", label: "New Quote", link: "/new-quote", parentId: "VisitorQuote" },
-                { id: "level1.3", label: "Quote Request", link: "/quote-request", parentId: "VisitorQuote" },
-                { id: "level1.4", label: "Listing & Management", link: "/listing&management", parentId: "VisitorQuote" },
-                {
-                    id: "level1.2",
-                    label: "Push Jobs",
-                    link: "/#",
-                    isChildItem: true,
-                    click: function (e: any) {
-                        e.preventDefault();
-                        setIsLevel1(!isLevel1);
-                    },
-                    stateVariables: isLevel1,
-                    childItems: [
-                        { id: 1, label: "Current ", link: "/current-push-jobs" },
-                        { id: 2, label: "History ", link: "/history-push-job" },
-                    ]
-                },
+              {
+                id: "User Manual",
+                label: "User Manual",
+                link: "/user-manual",
+                icon: "ph ph-book-open",
+                parentId: "Help",
+              },
+              {
+                id: "Request Feature",
+                label: "Request Feature",
+                link: "/request-feature",
+                icon: "ph ph-list-plus",
+                parentId: "Help",
+              },
+              {
+                id: "ReportError",
+                label: "Report an Error",
+                link: "/report-error",
+                icon: "ph ph-bug",
+                parentId: "Help",
+              },
             ],
-        },
-        {
-            id: "CorporateTransport",
-            label: "Corporates Transport",
-            icon: "mdi mdi-calendar-clock",
-            link: "/#",
-            click: function (e: any) {
-                e.preventDefault();
-                setIsCorporateTransport(!isCorporateTransport);
-                setIscurrentState('CorporateTransport');
-                updateIconSidebar(e);
-            },
-            stateVariables: isCorporateTransport,
-            subItems: [
-                { id: "level1.1", label: "Listing & Management", link: "/list-corporate-transport", parentId: "CorporateTransport" },
-                {
-                    id: "level1.2",
-                    label: "Programming",
-                    link: "/#",
-                    isChildItem: true,
-                    click: function (e: any) {
-                        e.preventDefault();
-                        setIsLevel1(!isLevel1);
-                    },
-                    stateVariables: isLevel1,
-                    childItems: [
-                        { id: 1, label: "Scheduling", link: "/scheduling" },
-                        { id: 2, label: "Offers", link: "/offers" },
-                        { id: 3, label: "Stations", link: "/stations" },
-                        { id: 4, label: "Trip Models", link: "/trip-models" }
-                    ]
-                },
-                { id: "level1.3", label: "New Contract", link: "/new-contract", parentId: "CorporateTransport" },
-            ],
-        },
-        {
-            id: "Corporate",
-            label: "Corporate",
-            icon: "mdi mdi-handshake-outline",
-            link: "/#",
-            click: function (e: any) {
-                e.preventDefault();
-                setIsCorporate(!isCorporate);
-                setIscurrentState('Corporate');
-                updateIconSidebar(e);
-            },
-            stateVariables: isCorporate,
-            subItems: [
-                {
-                    id: "level1.2",
-                    label: "Sub-contractors",
-                    link: "/#",
-                    isChildItem: true,
-                    click: function (e: any) {
-                        e.preventDefault();
-                        setIsLevel1(!isLevel1);
-                    },
-                    stateVariables: isLevel1,
-                    childItems: [
-                        { id: 1, label: "New Applications", link: "/new-applications" },
-                        { id: 2, label: "All Sub-contractors", link: "/all-sub-contractors" },
-                    ]
-                },
-                                { id: "level1.1", label: "Schools", link: "/schools", parentId: "Corporate" },
-                { id: "level1.3", label: "Companies", link: "/companies", parentId: "Corporate" },
-            ],
-        },
-        {
-            id: "Feedback&Claims",
-            label: "Feedback & Claims",
-            icon: "mdi mdi-thumbs-up-down-outline",
-            link: "/feedback&claims",
-        },
-        {
-            id: "ReportingManagement",
-            label: "Reporting Management",
-            icon: "mdi mdi-chart-box-outline",
-            link: "/reporting-management",
-        },
-        {
-            id: "EmailTemplates",
-            label: "Email Templates",
-            icon: "mdi mdi-email-sync-outline",
-            link: "/email-templates",
-        },
-        {
-            id: "Administration",
-            label: "Administration",
-            icon: "mdi mdi-account-tie",
-            link: "/#",
-            click: function (e: any) {
-                e.preventDefault();
-                setIsAdministration(!isAdministration);
-                setIscurrentState('Administration');
-                updateIconSidebar(e);
-            },
-            stateVariables: isAdministration,
-            subItems: [
-                {
-                    id: "Team",
-                    label: "Team",
-                    link: "/team",
-                    parentId: "Administration",
-                },
-                {
-                    id: "Driver",
-                    label: "Driver",
-                    link: "/driver",
-                    parentId: "Administration",
-                },
-                {
-                    id: "Vehicles",
-                    label: "Vehicles",
-                    link: "/vehicles",
-                    parentId: "Administration",
-                }
-            ],
-        },
+          },
+            
+        
+        
+       
+       
     ];
     return <React.Fragment>{menuItems}</React.Fragment>;
 };

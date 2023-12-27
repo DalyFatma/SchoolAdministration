@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 const SellersGridView = () => {
 
-     document.title = "Trip Models | Bouden Coach Travel";
+     document.title = "Trip Models | School Administration";
 
     
 
@@ -15,7 +15,7 @@ const SellersGridView = () => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumb title="Trip Models" pageTitle="Programming" />
-                    <h1>Trip Models</h1>
+                 
                 </Container>
             </div>
         </React.Fragment>
