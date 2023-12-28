@@ -4,9 +4,9 @@ import Layout from '../Layout';
 import NonAuthLayout from 'Layout/NonAuthLayout';
 
 //routes
-import { authProtectedRoutes } from "./allRoutes";
+// import { authProtectedRoutes } from "./allRoutes";
 import { publicRoutes } from "./allRoutes";
-import { AuthProtected } from './AuthProtected';
+// import { AuthProtected } from './AuthProtected';
 
 const Index = () => {
     return (
@@ -17,13 +17,13 @@ const Index = () => {
                         <Route
                             key={idx}
                             path={route.path}
-                            element={<NonAuthLayout> {route.component} </NonAuthLayout>}
+                            element={<Layout> {route.component} </Layout>}
                         // exact={true}
                         />
                     ))}
                 </Route>
 
-                <Route>
+                {/* <Route>
                     {authProtectedRoutes.map((route: any, idx: number) => (
                         <Route
                             key={idx}
@@ -32,7 +32,7 @@ const Index = () => {
                         // exact={true}
                         />
                     ))}
-                </Route>
+                </Route> */}
             </Routes>
         </React.Fragment>
     );

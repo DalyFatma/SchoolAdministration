@@ -207,6 +207,72 @@ const OperationsManagement = () => {
       type_trip: "Extra Trip",
       status: "Changing Route",
     },
+    {
+      srNo: "03",
+      modalId: "VLZ-455",
+      purchaseId: "Group Four",
+      dropdown_station: "Allison St (Stop DS2)",
+      pickup_station: "Adderley St",
+      dropdown_time: "Feb 01 10:00",
+      pickup_time: "Feb 03 10:00",
+      type_trip: "Regular Trip",
+      status: "Finished",
+    },
+    {
+      srNo: "03",
+      modalId: "VLZ-455",
+      purchaseId: "Group Four",
+      dropdown_station: "Allison St (Stop DS2)",
+      pickup_station: "Adderley St",
+      dropdown_time: "Feb 01 10:00",
+      pickup_time: "Feb 03 10:00",
+      type_trip: "Regular Trip",
+      status: "Finished",
+    },
+    {
+      srNo: "03",
+      modalId: "VLZ-455",
+      purchaseId: "Group Four",
+      dropdown_station: "Allison St (Stop DS2)",
+      pickup_station: "Adderley St",
+      dropdown_time: "Feb 01 10:00",
+      pickup_time: "Feb 03 10:00",
+      type_trip: "Offer Trip",
+      status: "OnSite",
+    },
+    {
+      srNo: "03",
+      modalId: "VLZ-455",
+      purchaseId: "Group Four",
+      dropdown_station: "Allison St (Stop DS2)",
+      pickup_station: "Adderley St",
+      dropdown_time: "Feb 01 10:00",
+      pickup_time: "Feb 03 10:00",
+      type_trip: "Regular Trip",
+      status: "Changing Route",
+    },
+    {
+      srNo: "03",
+      modalId: "VLZ-455",
+      purchaseId: "Group Four",
+      dropdown_station: "Allison St (Stop DS2)",
+      pickup_station: "Adderley St",
+      dropdown_time: "Feb 01 10:00",
+      pickup_time: "Feb 03 10:00",
+      type_trip: "Extra Trip",
+      status: "Delayed",
+    },
+    {
+      srNo: "03",
+      modalId: "VLZ-455",
+      purchaseId: "Group Four",
+      dropdown_station: "Allison St (Stop DS2)",
+      pickup_station: "Adderley St",
+      dropdown_time: "Feb 01 10:00",
+      pickup_time: "Feb 03 10:00",
+      type_trip: "Extra Trip",
+      status: "Delayed",
+    },
   ];
 
   const filteredTrips = data.filter((product) => {
@@ -346,9 +412,8 @@ const OperationsManagement = () => {
                       <option value="all">All</option>
                       <option value="delayed">Delayed</option>
                       <option value="changing Route">Changing Route</option>
-                      <option value="on site">On site</option>
+                      <option value="onsite">OnSite</option>
                       <option value="finished">Finished</option>
-                      <option value="normal">Normal</option>
                     </select>
                   </Col>
 

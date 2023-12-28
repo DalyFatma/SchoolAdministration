@@ -92,7 +92,27 @@ import UserManual from "pages/Help/UserManuel";
 
 
 
-const authProtectedRoutes = [
+// const authProtectedRoutes = [
+  
+  
+
+
+
+  
+  
+// ];
+
+const publicRoutes = [
+  // AuthenticationInner
+  // { path: "/auth-signin-basic", component: <SignIn /> },
+  // { path: "/auth-pass-reset-basic", component: <PasswordReset /> },
+  // { path: "/auth-pass-change-basic", component: <PasswordCreate /> },
+  // { path: "/auth-success-msg-basic", component: <SuccessMessage /> },
+  // { path: "/auth-twostep-basic", component: <TwoStepVerify /> },
+  // { path: "/auth-logout-basic", component: <BasicLogout /> },
+  // { path: "/auth-404", component: <Error404 /> },
+  // { path: "/auth-500", component: <Error500 /> },
+  // { path: "/coming-soon", component: <ComingSoon /> },
   { path: "/dashboard", component: <Dashboard /> },
 
   //? Tracking
@@ -119,6 +139,7 @@ const authProtectedRoutes = [
   { path: "/parents/parent-details", component: <ParentDetails /> },
   //?  add students path
   { path: "/students/add-student", component: <AddNewStudent /> },
+
    //?  add students path
    { path: "/students/edit-student", component: <EditStudent /> },
    //?  add parents path
@@ -135,51 +156,36 @@ const authProtectedRoutes = [
    // user manual 
  { path: "/user-manual", component: < UserManual/> },
 
-
-
-  
-  //? Programming
-  { path: "/trips-management", component: <TripsManagement /> },
-  { path: "/scheduling", component: <Programming /> },
-  { path: "/offers", component: <Offers /> },
-  { path: "/stations", component: <Station /> },
-  { path: "/trip-models", component: <SellersGridView /> },
-  // add station
-  { path: "/add-station/stations", component: <AddNewStation /> },
+ //? Programming
+ { path: "/trips-management", component: <TripsManagement /> },
+ { path: "/scheduling", component: <Programming /> },
+ { path: "/offers", component: <Offers /> },
+ { path: "/stations", component: <Station /> },
+ { path: "/trip-models", component: <SellersGridView /> },
+ // add station
+ { path: "/add-station/stations", component: <AddNewStation /> },
 
 // View Profile student
 { path: "/student/view-profile", component: <SingleProfile /> },
-  //? Claims Management
-  {path:"/claims-management", component: <Claims/>},
+ //? Claims Management
+ {path:"/claims-management", component: <Claims/>},
 
-  //? Payment Management
-  { path: "/payement-management", component: <PayementManagement /> },
-  //? Reporting Management
- { path: "/reporting-management", component: <ReportingManagement /> },
+ //? Payment Management
+ { path: "/payement-management", component: <PayementManagement /> },
+ //? Reporting Management
+{ path: "/reporting-management", component: <ReportingManagement /> },
 
-  //? Notes
-  { path: "/notes", component: <Notes /> },
+ //? Notes
+ { path: "/notes", component: <Notes /> },
 
-  { path: "/invoices", component: <InvoiceListTable /> },
+ { path: "/invoices", component: <InvoiceListTable /> },
 
-  // this route should be at the end of all other routes
-  // eslint-disable-next-line react/display-name
-  { path: "/", exact: true, component: <Navigate to="/map-tracking" /> },
-  { path: "*", component: <Navigate to="/map-tracking" /> },
-  { path: "/user-profile", component: <UserProfile /> },
+ // this route should be at the end of all other routes
+ // eslint-disable-next-line react/display-name
+ { path: "/", exact: true, component: <Navigate to="/map-tracking" /> },
+ { path: "*", component: <Navigate to="/map-tracking" /> },
+ { path: "/user-profile", component: <UserProfile /> },
 ];
 
-const publicRoutes = [
-  // AuthenticationInner
-  { path: "/auth-signin-basic", component: <SignIn /> },
-  { path: "/auth-pass-reset-basic", component: <PasswordReset /> },
-  { path: "/auth-pass-change-basic", component: <PasswordCreate /> },
-  { path: "/auth-success-msg-basic", component: <SuccessMessage /> },
-  { path: "/auth-twostep-basic", component: <TwoStepVerify /> },
-  { path: "/auth-logout-basic", component: <BasicLogout /> },
-  { path: "/auth-404", component: <Error404 /> },
-  { path: "/auth-500", component: <Error500 /> },
-  { path: "/coming-soon", component: <ComingSoon /> },
-];
-
-export { authProtectedRoutes, publicRoutes };
+// export { authProtectedRoutes, publicRoutes };
+export {  publicRoutes };

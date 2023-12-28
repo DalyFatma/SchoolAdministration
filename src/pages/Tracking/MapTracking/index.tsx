@@ -246,6 +246,7 @@ const Maptracking = (props: any) => {
   // function for handleClick
   const handleClick = () => {
     setChangeColor(!changeColor);
+    setNavWidth(150);
   };
 
   return (
