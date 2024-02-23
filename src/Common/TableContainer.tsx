@@ -143,6 +143,7 @@ const TableContainer = ({
           },
         ],
       },
+      useSortBy
     },
     useGlobalFilter,
     useFilters,

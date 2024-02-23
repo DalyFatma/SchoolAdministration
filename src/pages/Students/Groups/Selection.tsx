@@ -73,8 +73,8 @@ const Selection = () => {
     <React.Fragment>
       <Col lg={12}>
           <div>
-            <h5 className="fs-14 mb-1">Mid Stations</h5>
-            <p className="text-muted">Slide the selected stations to the right </p>
+            <h5 className="fs-14 mb-1">Students</h5>
+            <p className="text-muted">Slide the selected students to the right </p>
             <DualListBox
               options={options}
               selected={selected}

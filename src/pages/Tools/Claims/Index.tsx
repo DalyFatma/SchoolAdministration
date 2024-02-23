@@ -136,7 +136,7 @@ const Claims = () => {
                       <option value="Pending">Pending</option>
                     </select>
                   </Col>
-                
+
                   <Col xxl={3}></Col>
                   <Col>
                     <div
@@ -144,7 +144,10 @@ const Claims = () => {
                       role="group"
                       aria-label="Basic example"
                     >
-                      <Button variant="light" className="add-btn text-dark ms-auto">
+                      <Button
+                        variant="light"
+                        className="add-btn text-dark ms-auto"
+                      >
                         <i className="ph ph-export me-1 align-middle"></i>{" "}
                         Export
                       </Button>
@@ -165,10 +168,27 @@ const Claims = () => {
                         className="link-danger fw-medium float-end"
                         onClick={deleteClaim}
                       >
-                        Archive
+                        <i
+                          className="ph ph-archive-box"
+                          style={{ fontSize: "20px" }}
+                          title="Archive"
+                        ></i>
                       </Link>
+                      <Link
+                        to="#"
+                        className="link-secondary fw-medium float-end"
+                        onClick={() => answerClaims()}
+                        style={{ marginRight: "10px" }}
+                      >
+                        <i
+                          className="ph ph-paper-plane-tilt"
+                          style={{ fontSize: "20px" }}
+                          title="Answer"
+                        ></i>
+                      </Link>
+
                       <h5 className="card-title mb-0">
-                        Ifor Jones {" "}
+                        Ifor Jones{" "}
                         <span className="badge bg-success align-middle fs-10">
                           Answered
                         </span>
@@ -188,20 +208,20 @@ const Claims = () => {
                           <Table className="table-borderless table-sm mb-0">
                             <tbody>
                               <tr>
-                                <td className="fw-bold">Quote</td>
+                                <td className="fw-bold">Trip</td>
                                 <td className="fw-medium">20013</td>
                               </tr>
                               <tr>
-                                <td className="fw-bold">Title</td>
+                                <td className="fw-bold">Subject</td>
                                 <td className="fw-medium">
                                   coach didnt turn up
                                 </td>
                               </tr>
+                              
                               <tr className="fw-bold">
-                                <td>Travel Date:</td>
+                                <td>Message</td>
                                 <td className="fw-medium">31 Mar 2017 10:30</td>
                               </tr>
-                             
                             </tbody>
                           </Table>
                         </div>
@@ -230,15 +250,32 @@ const Claims = () => {
                 <Col xxl={4}>
                   <Card>
                     <Card.Header>
-                      <Link
+                    <Link
                         to="#"
                         className="link-danger fw-medium float-end"
                         onClick={deleteClaim}
                       >
-                        Archive
+                        <i
+                          className="ph ph-archive-box"
+                          style={{ fontSize: "20px" }}
+                          title="Archive"
+                        ></i>
                       </Link>
+                      <Link
+                        to="#"
+                        className="link-secondary fw-medium float-end"
+                        onClick={() => answerClaims()}
+                        style={{ marginRight: "10px" }}
+                      >
+                        <i
+                          className="ph ph-paper-plane-tilt"
+                          style={{ fontSize: "20px" }}
+                          title="Answer"
+                        ></i>
+                      </Link>
+
                       <h5 className="card-title mb-0">
-                        Pam Badham {" "}
+                        Pam Badham{" "}
                         <span className="badge bg-success align-middle fs-10">
                           Answered
                         </span>
@@ -258,20 +295,19 @@ const Claims = () => {
                           <Table className="table-borderless table-sm mb-0">
                             <tbody>
                               <tr>
-                                <td className="fw-bold">Quote</td>
+                                <td className="fw-bold">Trip</td>
                                 <td className="fw-medium">21719</td>
                               </tr>
                               <tr>
-                                <td className="fw-bold">Title</td>
+                                <td className="fw-bold">Subject</td>
                                 <td className="fw-medium">
                                   Driver was late due to traffic
                                 </td>
                               </tr>
                               <tr className="fw-bold">
-                                <td>Travel Date:</td>
+                                <td>Message</td>
                                 <td className="fw-medium">17 May 2017 12:30</td>
                               </tr>
-                              
                             </tbody>
                           </Table>
                         </div>
@@ -300,15 +336,32 @@ const Claims = () => {
                 <Col xxl={4}>
                   <Card>
                     <Card.Header>
-                      <Link
+                    <Link
                         to="#"
                         className="link-danger fw-medium float-end"
                         onClick={deleteClaim}
                       >
-                        Archive
+                        <i
+                          className="ph ph-archive-box"
+                          style={{ fontSize: "20px" }}
+                          title="Archive"
+                        ></i>
                       </Link>
+                      <Link
+                        to="#"
+                        className="link-secondary fw-medium float-end"
+                        onClick={() => answerClaims()}
+                        style={{ marginRight: "10px" }}
+                      >
+                        <i
+                          className="ph ph-paper-plane-tilt"
+                          style={{ fontSize: "20px" }}
+                          title="Answer"
+                        ></i>
+                      </Link>
+
                       <h5 className="card-title mb-0">
-                        Shanice Edwards {" "}
+                        Shanice Edwards{" "}
                         <span className="badge bg-success align-middle fs-10">
                           Answered
                         </span>
@@ -372,15 +425,32 @@ const Claims = () => {
             <Col xxl={4}>
               <Card>
                 <Card.Header>
-                  <Link
-                    to="#"
-                    className="link-secondary fw-medium float-end"
-                    onClick={() => answerClaims()}
-                  >
-                    Answer
-                  </Link>
+                <Link
+                        to="#"
+                        className="link-danger fw-medium float-end"
+                        onClick={deleteClaim}
+                      >
+                        <i
+                          className="ph ph-archive-box"
+                          style={{ fontSize: "20px" }}
+                          title="Archive"
+                        ></i>
+                      </Link>
+                      <Link
+                        to="#"
+                        className="link-secondary fw-medium float-end"
+                        onClick={() => answerClaims()}
+                        style={{ marginRight: "10px" }}
+                      >
+                        <i
+                          className="ph ph-paper-plane-tilt"
+                          style={{ fontSize: "20px" }}
+                          title="Answer"
+                        ></i>
+                      </Link>
+
                   <h5 className="card-title mb-0">
-                    Zach Mclean {" "}
+                    Zach Mclean{" "}
                     <span className="badge bg-warning align-middle fs-10">
                       Pending
                     </span>
@@ -411,7 +481,6 @@ const Claims = () => {
                             <td>Travel Date:</td>
                             <td className="fw-medium">9 Jun 2017 04:00</td>
                           </tr>
-                         
                         </tbody>
                       </Table>
                     </div>
@@ -440,15 +509,32 @@ const Claims = () => {
             <Col xxl={4}>
               <Card>
                 <Card.Header>
-                  <Link
-                    to="#"
-                    className="link-secondary fw-medium float-end"
-                    onClick={() => answerClaims()}
-                  >
-                    Answer
-                  </Link>
+                <Link
+                        to="#"
+                        className="link-danger fw-medium float-end"
+                        onClick={deleteClaim}
+                      >
+                        <i
+                          className="ph ph-archive-box"
+                          style={{ fontSize: "20px" }}
+                          title="Archive"
+                        ></i>
+                      </Link>
+                      <Link
+                        to="#"
+                        className="link-secondary fw-medium float-end"
+                        onClick={() => answerClaims()}
+                        style={{ marginRight: "10px" }}
+                      >
+                        <i
+                          className="ph ph-paper-plane-tilt"
+                          style={{ fontSize: "20px" }}
+                          title="Answer"
+                        ></i>
+                      </Link>
+
                   <h5 className="card-title mb-0">
-                    Kieron {" "}
+                    Kieron{" "}
                     <span className="badge bg-warning align-middle fs-10">
                       Pending
                     </span>
@@ -479,7 +565,6 @@ const Claims = () => {
                             <td>Travel Date:</td>
                             <td className="fw-medium">12 Aug 2017 09:00</td>
                           </tr>
-                        
                         </tbody>
                       </Table>
                     </div>
@@ -508,15 +593,32 @@ const Claims = () => {
             <Col xxl={4}>
               <Card>
                 <Card.Header>
-                  <Link
-                    to="#"
-                    className="link-danger fw-medium float-end"
-                    onClick={deleteClaim}
-                  >
-                    Archive
-                  </Link>
+                <Link
+                        to="#"
+                        className="link-danger fw-medium float-end"
+                        onClick={deleteClaim}
+                      >
+                        <i
+                          className="ph ph-archive-box"
+                          style={{ fontSize: "20px" }}
+                          title="Archive"
+                        ></i>
+                      </Link>
+                      <Link
+                        to="#"
+                        className="link-secondary fw-medium float-end"
+                        onClick={() => answerClaims()}
+                        style={{ marginRight: "10px" }}
+                      >
+                        <i
+                          className="ph ph-paper-plane-tilt"
+                          style={{ fontSize: "20px" }}
+                          title="Answer"
+                        ></i>
+                      </Link>
+
                   <h5 className="card-title mb-0">
-                    Lesley Harding {" "}
+                    Lesley Harding{" "}
                     <span className="badge bg-success align-middle fs-10">
                       Answered
                     </span>

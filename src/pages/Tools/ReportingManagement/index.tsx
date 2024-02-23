@@ -28,24 +28,7 @@ import { Link } from "react-router-dom";
 
 const ReportingManagement = () => {
   const columns = [
-    // {
-    //   name: (
-    //     <Form.Check
-    //       className="fs-15"
-    //       type="checkbox"
-    //       name="checkAll"
-    //       value="option1"
-    //     />
-    //   ),
-    //   cell: () => (
-    //     <Form.Check
-    //       className="fs-15"
-    //       type="checkbox"
-    //       name="checkAll"
-    //       value="option1"
-    //     />
-    //   ),
-    // },
+ 
     {
       name: <span className="font-weight-bold fs-13">Invoice Number</span>,
       selector: (row: any) => row.srNo,
@@ -346,11 +329,22 @@ const ReportingManagement = () => {
         <Container fluid>
           <Breadcrumb title="Reporting Management" pageTitle="Reporting" />
           <Col lg={12}>
-            <Card>
-              <Card.Body>
-                <Row className="g-lg-2 g-4">
-                  <Col sm={9} className="col-lg-auto">
-                    <select
+           
+            <Card id="shipmentsList">
+              <Card.Header className="border-bottom-dashed">
+                <Row className="g-3">
+                  <Col xxl={3} lg={6}>
+                    <div className="search-box">
+                      <input
+                        type="text"
+                        className="form-control search"
+                        placeholder="Search for something..."
+                      />
+                      <i className="ri-search-line search-icon"></i>
+                    </div>
+                  </Col>
+                  <Col lg={3}>
+                  <select
                       className="form-select"
                       data-choices
                       data-choices-search-false
@@ -366,24 +360,7 @@ const ReportingManagement = () => {
                       <option value="Last Month">Last Month</option>
                     </select>
                   </Col>
-                </Row>
-              </Card.Body>
-            </Card>
-            <Card id="shipmentsList">
-              <Card.Header className="border-bottom-dashed">
-                <Row className="g-3">
-                  <Col xxl={3} lg={6}>
-                    <div className="search-box">
-                      <input
-                        type="text"
-                        className="form-control search"
-                        placeholder="Search for something..."
-                      />
-                      <i className="ri-search-line search-icon"></i>
-                    </div>
-                  </Col>
-                  <Col lg={7}></Col>
-                  <Col>
+                  <Col className="d-flex justify-content-end">
                     <div
                       className="btn-group btn-group-sm mt-2"
                       role="group"

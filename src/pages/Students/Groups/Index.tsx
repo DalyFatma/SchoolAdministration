@@ -6,6 +6,7 @@ import {
   Container,
   Form,
   Modal,
+  ModalBody,
   Offcanvas,
   Row,
 } from "react-bootstrap";
@@ -13,38 +14,36 @@ import Breadcrumb from "Common/BreadCrumb";
 import TableContainer from "Common/TableContainer";
 
 import { group } from "Common/data/group";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 import Selection from "./Selection";
-
-const Groups = () => {
-  document.title = "Students | Administartion";
+import { Map } from "google-maps-react";
+import { GoogleApiWrapper } from "google-maps-react";
+const LoadingContainer = () => <div>Loading...</div>;
+const Groups = (props:any) => {
+  document.title = " Groups | School Administartion";
   const [showCoupons, setShowCoupons] = useState<boolean>(false);
   const [showCouponDetails, setShowCouponsDetails] = useState<any>({});
-
+const navigate=useNavigate()
   const [modal_AddShippingModals, setmodal_AddShippingModals] =
     useState<boolean>(false);
+  // function tog_AddShippingModals() {
+  //   navigate("/groups/add-group")
+  // }
   function tog_AddShippingModals() {
     setmodal_AddShippingModals(!modal_AddShippingModals);
   }
-  
 
   const columns = useMemo(
     () => [
       {
-        Header: "Groupe Name",
+        Header: "Name",
         disableFilters: true,
         filterable: true,
         accessor: (cellProps: any) => {
           return (
             <div className="d-flex align-items-center gap-2 ">
-              {/* <div className="flex-shrink-0">
-                <img
-                  src={cellProps.user_img}
-                  alt=""
-                  className="avatar-xs rounded-circle user-profile-img "
-                />
-              </div> */}
+           
               <div className="flex-grow-1 ms-2 user_name">
                 {cellProps.groupId}
               </div>
@@ -60,7 +59,7 @@ const Groups = () => {
         filterable: true,
       },
       {
-        Header: "Starting Point Date",
+        Header: "Date/Time",
         accessor: "pickup_time",
         disableFilters: true,
         filterable: true,
@@ -73,7 +72,7 @@ const Groups = () => {
         filterable: true,
       },
       {
-        Header: "Destination Date",
+        Header: " Date/Time",
         accessor: "dropdown_time",
         disableFilters: true,
         filterable: true,
@@ -111,34 +110,7 @@ const Groups = () => {
                   {cellProps.status}
                 </span>
               );
-            case "On Hold":
-              return (
-                <span className="badge bg-dark-subtle text-dark">
-                  {" "}
-                  {cellProps.status}
-                </span>
-              );
-            case "Approved":
-              return (
-                <span className="badge bg-info-subtle text-info">
-                  {" "}
-                  {cellProps.status}
-                </span>
-              );
-            case "Suspended":
-              return (
-                <span className="badge bg-dark-subtle text-danger">
-                  {" "}
-                  {cellProps.status}
-                </span>
-              );
-            case "Pending Approval":
-              return (
-                <span className="badge bg-secondary-subtle text-secondary">
-                  {" "}
-                  {cellProps.status}
-                </span>
-              );
+        
             default:
               return (
                 <span className="badge bg-success-subtle text-success">
@@ -160,16 +132,26 @@ const Groups = () => {
                 <Link
                   to="#couponDetails"
                   data-bs-toggle="offcanvas"
-                  className="badge bg-dark-subtle text-body view-item-btn"
+                  className="badge bg-secondary-subtle text-secondary view-item-btn"
                   onClick={() => {
                     setShowCouponsDetails(cellProps);
                     setShowCoupons(!showCoupons);
                   }}
                 >
-                  <i className="ph ph-eye"
-                  style={{ transition: 'transform 0.3s ease-in-out', cursor: 'pointer' ,fontSize: '1.5em',}}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}></i>
+                  <i
+                    className="ph ph-eye"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
                 </Link>
               </li>
               <li>
@@ -177,9 +159,20 @@ const Groups = () => {
                   to="#"
                   className="badge bg-primary-subtle text-primary edit-item-btn"
                 >
-                  <i className="ph ph-pencil-line" style={{ transition: 'transform 0.3s ease-in-out', cursor: 'pointer' ,fontSize: '1.5em',}}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}></i>
+                  <i
+                    className="ph ph-pencil-line"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
                 </Link>
               </li>
               <li>
@@ -187,9 +180,20 @@ const Groups = () => {
                   to="#"
                   className="badge bg-danger-subtle text-danger remove-item-btn"
                 >
-                  <i className="ph ph-trash" style={{ transition: 'transform 0.3s ease-in-out', cursor: 'pointer' ,fontSize: '1.5em',}}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}></i>
+                  <i
+                    className="ph ph-trash"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
                 </Link>
               </li>
             </ul>
@@ -204,7 +208,7 @@ const Groups = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title=" Accounts" pageTitle="Groups" />
+          <Breadcrumb title="Groups" pageTitle="Accounts" />
           <Card id="shipmentsList">
             <Card.Header className="border-bottom-dashed">
               <Row className="g-3">
@@ -256,20 +260,16 @@ const Groups = () => {
                     <option value="">Account Status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
-                    <option value="pending approval">Pending Approval</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="on hold">On Hold</option>
-                    <option value="approved">Approved</option>
                   </select>
                 </Col>
-                <Col xxl={2} lg={2}>
+                <Col xxl={2} lg={2} className="d-flex justify-content-end">
                   <Button
-                    variant="success"
+                    variant="secondary"
                     onClick={() => tog_AddShippingModals()}
                     className="add-btn"
-                    style={{marginLeft:"40px"}}
+                  
                   >
-                    <i className="bi bi-plus-circle me-1 align-middle "></i> 
+                    <i className="bi bi-plus-circle me-1 align-middle "></i>
                     Add Group
                   </Button>
                 </Col>
@@ -307,7 +307,7 @@ const Groups = () => {
 
           <Modal
             className="fade zoomIn"
-            size="lg"
+            size="xl"
             show={modal_AddShippingModals}
             onHide={() => {
               tog_AddShippingModals();
@@ -417,6 +417,7 @@ const Groups = () => {
                 </Row>
               </Form>
             </Modal.Body>
+         
           </Modal>
         </Container>
       </div>
@@ -547,4 +548,8 @@ const Groups = () => {
   );
 };
 
-export default Groups;
+export default GoogleApiWrapper({
+  apiKey: "AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE",
+  LoadingContainer: LoadingContainer,
+  v: "3",
+})(Groups);

@@ -98,45 +98,45 @@ const Navdata = () => {
             id: "programming",
             label: "Programming",
             icon: "ph ph-gear-six",
-            link: "/#",
-            click: function (e: any) {
-                e.preventDefault();
-                setIsSchedle(!isSchedle);
-                setIscurrentState('Programming');
-                updateIconSidebar(e);
-            },
-            stateVariables: isSchedle,
-            subItems: [
+            link: "/programming",
+            // click: function (e: any) {
+            //     e.preventDefault();
+            //     setIsSchedle(!isSchedle);
+            //     setIscurrentState('Programming');
+            //     updateIconSidebar(e);
+            // },
+            // stateVariables: isSchedle,
+            // subItems: [
                
-                {
-                    id: "scheduling",
-                    label: "Scheduling",
-                    link: "/scheduling",
-                    parentId: "scheduling",
-                    icon: "ph ph-calendar",
-                },
-                {
-                    id: "stations",
-                    icon:"ph ph-map-pin",
-                    label: "Stations",
-                    link: "/stations",
-                    parentId: "stations",
-                },
-                {
-                    id: "tripModels",
-                    label: "Trip Models",
-                    link: "/trip-models",
-                    parentId: "tripModels",
-                    icon:"ph ph-file-plus",
-                },
-                {
-                    id: "Contracts", 
-                    label: "Contracts",
-                    parentId: "contract",
-                    icon: "ph ph-note-pencil",
-                    link: "/Contracts",
-                },
-            ],
+            //     {
+            //         id: "scheduling",
+            //         label: "Scheduling",
+            //         link: "/scheduling",
+            //         parentId: "scheduling",
+            //         icon: "ph ph-calendar",
+            //     },
+            //     {
+            //         id: "stations",
+            //         icon:"ph ph-map-pin",
+            //         label: "Stations",
+            //         link: "/stations",
+            //         parentId: "stations",
+            //     },
+            //     {
+            //         id: "tripModels",
+            //         label: "Trip Models",
+            //         link: "/trip-models",
+            //         parentId: "tripModels",
+            //         icon:"ph ph-file-plus",
+            //     },
+            //     {
+            //         id: "Contracts", 
+            //         label: "Contracts",
+            //         parentId: "contract",
+            //         icon: "ph ph-note-pencil",
+            //         link: "/Contracts",
+            //     },
+            // ],
         },
        
         {
@@ -175,6 +175,13 @@ const Navdata = () => {
                     parentId: "students",
                     icon: "ph ph-student",
                 },
+                // {
+                //     id: "accounts",
+                //     label: "Create Accounts",
+                //     link: "/create-accounts",
+                //     parentId: "accounts",
+                //     icon: "ph ph-user-plus",
+                // },
                 
                 
             ],
@@ -202,8 +209,8 @@ const Navdata = () => {
             stateVariables: isTools,
             subItems: [
                 {
-                    id: "claim",
-                    label: "Claims",
+                    id: "Complains",
+                    label: "Complains",
                     icon: "ph ph-quotes",
                     link: "/claims-management",
                     parentId: "groups",
@@ -231,6 +238,7 @@ const Navdata = () => {
                     parentId: "students",
                     icon: "ph ph-bus",
                 },
+              
                 {
                     id: "offer",
                     label: "Offer",
@@ -238,13 +246,13 @@ const Navdata = () => {
                     parentId: "students",
                     icon: "ph ph-megaphone",
                 },
-                {
-                    id: "delays&changes",
-                    label: "Delays and changes",
-                    link: "/delays&changes",
-                    parentId: "tracking",
-                    icon: "ph ph-timer",
-                },
+                // {
+                //     id: "delays&changes",
+                //     label: "Delays and changes",
+                //     link: "/delays&changes",
+                //     parentId: "tracking",
+                //     icon: "ph ph-timer",
+                // },
 
 
                 

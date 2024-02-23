@@ -22,6 +22,7 @@
   //      "@shared/*": ["app/_shared/*"],
   //      "@helpers/*": ["helpers/*"]
   //  },
+    "checkJs": false,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,

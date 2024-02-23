@@ -1,116 +1,66 @@
-const tripsinglestudent = [
+const complainstudent = [
     {
         id: 1,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Regular Trip",
-        status: "OnRaod",
-        group:"Group One"
+        response_time:"Jan 28 08:15",
+        submission_time:"Jan 28 07:15",
+        status:"Answered",
+        priority:"Medium",
+        assignedTo:"School Administartion",
+        subject:"Insurance"
      
     },
     {
         id: 2,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Offer Trip",
-        status: "Cancelled",
-        group:"Group One"
+        response_time:"Jan 28 08:15",
+        submission_time:"Jan 28 07:15",
+        status:"Pending",
+        priority:"High",
+        assignedTo:"Bouden Coach Travel",
+        subject:"Driver Behavior"
+     
      
     },
     {
         id: 3,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Regular Trip",
-        status: "Done",
-        group:"Group One"
+        response_time:"Jan 28 08:15",
+        submission_time:"Jan 28 07:15",
+        status:"Answered",
+        priority:"Low",
+        assignedTo:"School Administartion",
+        subject:"Insurance"
      
     },
     {
         id: 4,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Offer Trip",
-        status: "Done",
-        group:"Group One"
+        response_time:"Jan 28 08:15",
+        submission_time:"Jan 28 07:15",
+        status:"Answered",
+        priority:"Medium",
+        assignedTo:"School Administartion",
+        subject:"Vehicle Usage"
      
     },
     {
         id: 5,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Regular Trip",
-        status: "Done",
-        group:"Group One"
+        response_time:"Jan 28 08:15",
+        submission_time:"Jan 28 07:15",
+        status:"Answered",
+        priority:"High",
+        assignedTo:"Bouden Coach Travel",
+        subject:"Safety Concerns"
      
     },
     {
         id: 6,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Extra Trip",
-        status: "Done",
-        group:"Group One"
+        response_time:"Jan 28 08:15",
+        submission_time:"Jan 28 07:15",
+        status:"Pending",
+        priority:"High",
+        assignedTo:"School Administartion",
+        subject:"Accidents"
      
     },
-    {
-        id: 7,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Regular Trip",
-        status: "Done",
-        group:"Group One"
-     
-    },
-    {
-        id: 8,
-        trip_ref:"#YTT654",
-        scheduale_id: "#YT776",
-        dropdown_station: "Adderley St",
-        pickup_station: "Birmingham Coach Station",
-        dropdown_time: "Jan 28 08:15",
-        pickup_time: "Jan 28 07:15",
-        middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
-        type_trip: "Extra Trip",
-        status: "Cancelled",
-        group:"Group One"
-     
-    },
+  
 ]
 
-export { tripsinglestudent }
+export { complainstudent }

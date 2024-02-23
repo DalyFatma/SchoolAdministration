@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GoogleApiWrapper, Map } from "google-maps-react";
 import { Marker } from "google-maps-react";
 
@@ -22,6 +22,7 @@ const Station = (props: any) => {
 
   const [showCoupons, setShowCoupons] = useState<boolean>(false);
   const [showCouponDetails, setShowCouponsDetails] = useState<any>({});
+  const navigate = useNavigate();
 
   const [selectedLocation, setSelectedLocation] = useState({ lat: 0, lng: 0 });
 
@@ -35,7 +36,7 @@ const Station = (props: any) => {
   const [modal_AddShippingModals, setmodal_AddShippingModals] =
     useState<boolean>(false);
   function tog_AddShippingModals() {
-    setmodal_AddShippingModals(!modal_AddShippingModals);
+    navigate("/stations/add-station");
   }
   const columns = [
     {

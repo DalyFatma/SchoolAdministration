@@ -89,30 +89,19 @@ import ParentDetails from "pages/Accounts/Parents/ParentDetails";
 import ReportError from "pages/Help/RepportError";
 import RequestFeature from "pages/Help/RequestFeature";
 import UserManual from "pages/Help/UserManuel";
+import ProgramRoutes from "pages/ProgramRoutes";
+import Profile from "pages/Accounts/Students/Profil";
+import Settings from "pages/Settings";
+import EditParent from "pages/Accounts/Parents/EditParent";
+import ProgramClone from "pages/ProgramRoutes/ProgramClone";
+import ProgramDetails from "pages/ProgramRoutes/ProgramDetails";
+import Program from "pages/Program";
+import AddProgramm from "pages/ProgramRoutes/AddProgramm";
 
 
 
-// const authProtectedRoutes = [
+const authProtectedRoutes = [
   
-  
-
-
-
-  
-  
-// ];
-
-const publicRoutes = [
-  // AuthenticationInner
-  // { path: "/auth-signin-basic", component: <SignIn /> },
-  // { path: "/auth-pass-reset-basic", component: <PasswordReset /> },
-  // { path: "/auth-pass-change-basic", component: <PasswordCreate /> },
-  // { path: "/auth-success-msg-basic", component: <SuccessMessage /> },
-  // { path: "/auth-twostep-basic", component: <TwoStepVerify /> },
-  // { path: "/auth-logout-basic", component: <BasicLogout /> },
-  // { path: "/auth-404", component: <Error404 /> },
-  // { path: "/auth-500", component: <Error500 /> },
-  // { path: "/coming-soon", component: <ComingSoon /> },
   { path: "/dashboard", component: <Dashboard /> },
 
   //? Tracking
@@ -131,6 +120,7 @@ const publicRoutes = [
   // contract details
 
  { path: "/contract/contract-details", component: <ContractDetails /> },
+
   // ? Students
   { path: "/groups", component: <Groups /> },
   { path: "/attendances", component: <Attendances /> },
@@ -139,9 +129,11 @@ const publicRoutes = [
   { path: "/parents/parent-details", component: <ParentDetails /> },
   //?  add students path
   { path: "/students/add-student", component: <AddNewStudent /> },
+   //?  edit parents path
+   { path: "/parents/edit-parent", component: <EditParent /> },
 
    //?  add students path
-   { path: "/students/edit-student", component: <EditStudent /> },
+   { path: "/students/edit-student/:id", component: <EditStudent /> },
    //?  add parents path
    { path: "/parents/add-parent", component: <AddNewParent /> },
  //?  add groups path
@@ -166,9 +158,20 @@ const publicRoutes = [
  { path: "/add-station/stations", component: <AddNewStation /> },
 
 // View Profile student
-{ path: "/student/view-profile", component: <SingleProfile /> },
+{ path: "/student/view-profile", component: <Profile /> },
  //? Claims Management
  {path:"/claims-management", component: <Claims/>},
+
+  //settings
+  {path:"/settings", component: <Settings/>},
+
+  //? Add station
+  {path:"/stations/add-station", component: <AddNewStation/>},
+
+    //? Add programm
+    {path:"/programming/add-program", component: <AddProgramm/>},
+    // program routes
+    {path:"/programming", component: <ProgramRoutes/>},
 
  //? Payment Management
  { path: "/payement-management", component: <PayementManagement /> },
@@ -180,12 +183,37 @@ const publicRoutes = [
 
  { path: "/invoices", component: <InvoiceListTable /> },
 
+ { path: "/list-of-program", component: < ProgramRoutes/> },
+ { path: "/program/:name", component: < ProgramClone/> },
+ { path: "/program-details/:name", component: < ProgramDetails/> },
+ { path: "/program", component: < Program/> },
+
+
+
+
+  
+  
+];
+
+const publicRoutes = [
+  // AuthenticationInner
+  { path: "/authSchool/loginSchool", component: <SignIn /> },
+  { path: "/auth-pass-reset-basic", component: <PasswordReset /> },
+  { path: "/auth-pass-change-basic", component: <PasswordCreate /> },
+  { path: "/auth-success-msg-basic", component: <SuccessMessage /> },
+  { path: "/auth-twostep-basic", component: <TwoStepVerify /> },
+  { path: "/auth-logout-basic", component: <BasicLogout /> },
+  { path: "/auth-404", component: <Error404 /> },
+  { path: "/auth-500", component: <Error500 /> },
+  { path: "/coming-soon", component: <ComingSoon /> },
+  
+
  // this route should be at the end of all other routes
  // eslint-disable-next-line react/display-name
- { path: "/", exact: true, component: <Navigate to="/map-tracking" /> },
+ { path: "/", exact: true, component: <Navigate to="/authSchool/loginSchool" /> },
  { path: "*", component: <Navigate to="/map-tracking" /> },
  { path: "/user-profile", component: <UserProfile /> },
 ];
 
-// export { authProtectedRoutes, publicRoutes };
-export {  publicRoutes };
+export { authProtectedRoutes, publicRoutes };
+

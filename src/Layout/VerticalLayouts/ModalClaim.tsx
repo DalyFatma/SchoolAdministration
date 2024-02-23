@@ -67,7 +67,7 @@ const ModalClaim = () => {
         <Form className="tablelist-form">
           <input type="hidden" id="id-field" />
           <Row>
-            <Col lg={12}>
+            <Col lg={16}>
               <div className="mb-3">
                 <Form.Label htmlFor="customerName-field">Subject</Form.Label>
                 <Form.Select
@@ -107,7 +107,7 @@ const ModalClaim = () => {
             <Col lg={12}>
               <div className="hstack gap-2 justify-content-end">
                 <Button variant="primary" id="add-btn">
-                  Add Claim
+                  Add Complain
                 </Button>
               </div>
             </Col>

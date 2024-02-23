@@ -401,7 +401,7 @@ const VerticalLayout = (props: any) => {
           <Col>
             <div className="p-3">
               <button
-                title="Send Claim"
+                title="Send Complain"
                 type="button"
                 className="btn btn-soft-danger btn-icon d-grid"
                 onClick={() => tog_ModalClaim()}
@@ -410,7 +410,7 @@ const VerticalLayout = (props: any) => {
                   className="bi bi-chat-left-quote"
                   style={{ fontSize: "24px" }}
                 ></i>
-                <span className="text-danger mt-1 fs-12">Claim</span>
+                <span className="text-danger mt-1 fs-12">Complain</span>
               </button>
             </div>
           </Col>
@@ -496,7 +496,7 @@ const VerticalLayout = (props: any) => {
       {/*Modal Claim*/}
       <Modal
         className="fade zoomIn"
-        size="sm"
+        size="lg"
         show={modal_Claim}
         onHide={() => {
           tog_ModalClaim();
@@ -505,7 +505,7 @@ const VerticalLayout = (props: any) => {
       >
         <Modal.Header className="px-4 pt-4" closeButton>
           <h5 className="modal-title fs-18" id="exampleModalLabel">
-            Add New Claim
+            Add New Complain
             
           </h5>
         </Modal.Header>

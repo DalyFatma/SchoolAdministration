@@ -92,7 +92,7 @@ const Attendances = () => {
         filterable: true,
       },
       {
-        Header: "PickUp Time",
+        Header: "Time/Date",
         accessor: "pickup_time",
         disableFilters: true,
         filterable: true,
@@ -104,7 +104,7 @@ const Attendances = () => {
         filterable: true,
       },
       {
-        Header: "DropDown Time",
+        Header: "Time/Date",
         accessor: "dropdown_time",
         disableFilters: true,
         filterable: true,

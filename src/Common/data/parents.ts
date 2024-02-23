@@ -21,7 +21,8 @@ const parent = [
         bank_name:"Example Bank",
         sort_code:"12-34-56",
         post_code :"A11 B12",
-        house_number:"Gunnersbury House , 1 Chapel Hill"
+        house_number:"Gunnersbury House , 1 Chapel Hill",
+        relationship:"Mother",
 
    }, {
        id: 4,
@@ -49,6 +50,8 @@ const parent = [
        last_name:"Kyle",
        user_img: avatar7,
        cardId:"0101 7745 5667",
+       social_number:"0101 7745 5667",
+       photo_cardId:"",
        location :"Birmingham",
        birth_date:"8 November 1978",
        gender:"Male",
@@ -77,7 +80,7 @@ const parent = [
     Nationality:"United Kingdom",
     mobile:"+44 655 664 465",
     email:"charliekylie@gmail.com",
-    number_student:"5",
+    number_student:"1",
      status: "Inactive",
      account_name:"John Smith",
     account_number:"12345678",
@@ -333,8 +336,8 @@ const parent = [
     mobile:"+44 655 664 465",
     email:"charliekylie@gmail.com",
     number_student:"5",
-     status: "Active",
-     account_name:"John Smith",
+    status: "Active",
+    account_name:"John Smith",
     account_number:"12345678",
     bank_name:"Example Bank",
     sort_code:"12-34-56",

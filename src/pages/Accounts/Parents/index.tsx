@@ -5,14 +5,17 @@ import {
   Col,
   Container,
   Form,
+  Image,
   Modal,
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import TableContainer from "Common/TableContainer";
 import { parent } from "Common/data/parents";
+import { student } from "Common/data/students";
 import { Link, useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
+
 
 const Parents = () => {
   
@@ -37,12 +40,12 @@ const Parents = () => {
         filterable: true,
         accessor: (cellProps: any) => {
           return (
-            <div className="d-flex align-items-center gap-2 ">
-              <div className="flex-shrink-0">
+            <div className="d-flex align-items-center ">
+              <div className="flex-shrink-2">
                 <img
                   src={cellProps.user_img}
                   alt=""
-                  className="avatar-xs rounded-circle user-profile-img "
+                  className="avatar-xs rounded-circle user-profile-img"
                 />
               </div>
               <div className="flex-grow-1 ms-2 user_name">
@@ -51,12 +54,6 @@ const Parents = () => {
             </div>
           );
         },
-      },
-      {
-        Header: "Card ID",
-        accessor: "cardId",
-        disableFilters: true,
-        filterable: true,
       },
       {
         Header: "Phone Contact",
@@ -73,48 +70,70 @@ const Parents = () => {
       },
 
       {
-        Header: "Number Student",
-        accessor: "number_student",
+        Header: "Students",
+        accessor: (cellProps: any) => {
+          const numStudents = parseInt(cellProps.number_student);
+        
+          if (numStudents > 0) {
+            const avatarGroupItems = student
+              .filter((std: any) => std.id === cellProps.id)
+              .slice(0, Math.min(numStudents, 3)) 
+              .map((std: any, index: number) => (
+                <Link
+                  to="#"
+                  className="avatar-group-item"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title={`${std.first_name} ${std.last_name}`}
+                  key={std.id}
+                >
+                  <Image src={std.user_img} alt="" className="rounded-circle avatar-xs" />
+                </Link>
+              ));
+        
+            if (numStudents > 3) {
+              avatarGroupItems.push(
+                <Link
+                  to="#"
+                  className="avatar-group-item"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title={`More students (${numStudents - 3} more)`}
+                  key="more"
+                >
+                  <div className="avatar-xs">
+                    <div className="avatar-title rounded-circle">{numStudents - 3}+</div>
+                  </div>
+                </Link>
+              );
+            }
+        
+            return (
+              <div>
+                <div className="avatar-group">
+                  {avatarGroupItems}
+                </div>
+              </div>
+            );
+          }
+        
+          return null;
+        },
         disableFilters: true,
         filterable: true,
       },
+      
+      
+      
       {
-        Header: "Locality",
+        Header: "Address",
         accessor: "location",
         disableFilters: true,
         filterable: true,
       },
     
-      {
-        Header: "Account Status",
-        disableFilters: true,
-        filterable: true,
-        accessor: (cellProps: any) => {
-          switch (cellProps.status) {
-            case "Active":
-              return (
-                <span className="badge bg-success-subtle text-success">
-                  {" "}
-                  {cellProps.status}
-                </span>
-              );
-            case "Inactive":
-              return (
-                <span className="badge bg-danger-subtle text-danger">
-                  {" "}
-                  {cellProps.status}
-                </span>
-              );
-            default:
-              return (
-                <span className="badge bg-success-subtle text-success">
-                  {" "}
-                  {cellProps.status}
-                </span>
-              );
-          }
-        },
-      },
+      
+      
       {
         Header: "Action",
         disableFilters: true,
@@ -125,7 +144,7 @@ const Parents = () => {
               <li>
                 <Link
                   to="/parents/parent-details"
-                  className="badge bg-dark-subtle text-dark view-item-btn"
+                  className="badge bg-info-subtle text-info view-item-btn"
                   state={cellProps}
                 >
                   <i className="ph ph-eye" style={{ transition: 'transform 0.3s ease-in-out', cursor: 'pointer' ,fontSize: '1.5em',}}
@@ -134,9 +153,10 @@ const Parents = () => {
                 </Link>
               </li>
               <li>
-                <Link
-                  to="#"
+              <Link
+                  to="/parents/edit-parent"
                   className="badge bg-primary-subtle text-primary edit-item-btn"
+                  state={cellProps}
                 >
                   <i className="ph ph-pencil-line" style={{ transition: 'transform 0.3s ease-in-out', cursor: 'pointer' ,fontSize: '1.5em',}}
                 onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
@@ -165,7 +185,7 @@ const Parents = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Accounts" pageTitle="Parents" />
+          <Breadcrumb title="Parents" pageTitle="Accounts" />
 
           <Row id="usersList">
             <Col lg={12}>
@@ -199,7 +219,7 @@ const Parents = () => {
                         data-choices-search-false
                         name="choices-single-default"
                       >
-                        <option value="">Status</option>
+                        <option value="">This Month</option>
                         <option defaultValue="all">All</option>
                         <option value="Today">Today</option>
                         <option value="Yesterday">Yesterday</option>
@@ -223,12 +243,12 @@ const Parents = () => {
                         <option value="Inactive">Inactive</option>
                       </select>
                     </Col>
-                    <Col xxl={2} lg={4}>
+                    <Col xxl={2} lg={4} className="d-flex justify-content-end">
                       <Button
-                        variant="success"
+                        variant="secondary"
                         onClick={() => tog_AddShippingModals()}
                         className="add-btn"
-                         style={{marginLeft:"40px"}}
+                         style={{marginLeft:""}}
                       >
                         <i className="bi bi-plus-circle me-1 align-middle "></i>{" "}
                         Add Parent

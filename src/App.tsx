@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 //import Scss
 import "./assets/scss/themes.scss";
@@ -7,6 +7,8 @@ import "./assets/scss/themes.scss";
 import Route from './Routes/Index';
 
 import fakeBackend from "./helpers/AuthType/fakeBackend";
+// import { useAppDispatch } from 'slices/hook';
+// import { getAllStudentsAsync } from 'slices/thunk';
 
 // Activating fake backend
 fakeBackend();
@@ -29,6 +31,7 @@ fakeBackend();
 // initFirebaseBackend(firebaseConfig);
 
 const App = () => {
+
   return (
     <React.Fragment>
       <Route />

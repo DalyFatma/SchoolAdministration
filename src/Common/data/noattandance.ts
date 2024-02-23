@@ -10,7 +10,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Regular Trip",
         status: "OnRaod",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Abscent"
      
     },
     {
@@ -24,7 +25,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Offer Trip",
         status: "Cancelled",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Present"
      
     },
     {
@@ -38,7 +40,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Regular Trip",
         status: "Done",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Abscent"
      
     },
     {
@@ -52,7 +55,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Offer Trip",
         status: "Done",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Abscent"
      
     },
     {
@@ -66,7 +70,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Regular Trip",
         status: "Done",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Present"
      
     },
     {
@@ -80,7 +85,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Extra Trip",
         status: "Done",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Present"
      
     },
     {
@@ -94,7 +100,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Regular Trip",
         status: "Done",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Present"
      
     },
     {
@@ -108,7 +115,8 @@ const noattandance = [
         middle_station:"Mill Ln, Birmingham B5 6DD, Royaume-Uni",
         type_trip: "Extra Trip",
         status: "Cancelled",
-        group:"Group One"
+        group:"Group One",
+        attandancy:"Abscent"
      
     },
 ]

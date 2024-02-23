@@ -10,7 +10,7 @@ import {
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 import Dropzone from "react-dropzone";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -21,26 +21,10 @@ import country from "Common/country";
 
 const EditStudent = () => {
   document.title = "Edit Account Student | School Administration";
-
-  // Country Change States
-  const [seletedCountry, setseletedCountry] = useState<any>({});
-  const [seletedCountry1, setseletedCountry1] = useState<any>({});
-  const [parents, setParents] = useState([{ id: 1 }]);
-  const [showCloseButtonIndex, setShowCloseButtonIndex] = useState(-1);
-
-  const handleRemoveItemClick = (idToRemove: any) => {
-    setParents((prevParents) =>
-      prevParents.filter((parent) => parent.id !== idToRemove)
-    );
-    setShowCloseButtonIndex(-1); 
-  };
-
-  const handleAddItemClick = () => {
-    const newIndex = parents.length;
-    setShowCloseButtonIndex(newIndex);
-    setParents((prevParents) => [...prevParents, { id: newIndex + 1 }]);
-  };
-
+  const navigate = useNavigate();
+  const setactiveTab =()=>{
+    navigate(-1)
+  }
   const studentDetails = useLocation();
 
   return (
@@ -54,656 +38,423 @@ const EditStudent = () => {
             className="needs-validation"
             noValidate
           >
-            <Row>
+            <Row className="d-flex justify-content-center">
+             
               <Col lg={12}>
                 <Card>
-                  <Card.Header>
-                    <div className="d-flex">
-                      <div className="flex-shrink-0 me-3">
-                        <div className="avatar-sm">
-                          <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                            <i className="ph ph-student"></i>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex-grow-1">
-                        <h5 className="card-title mb-1">Students Groups</h5>
-                      </div>
-                    </div>
-                  </Card.Header>
                   <Card.Body>
-                    <Card.Header>
-                      <div className="d-flex">
-                        <div className="flex-shrink-0 me-3">
-                          <div className="avatar-sm">
-                            <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                              <i className="ph ph-user"></i>
-                            </div>
+                    <Row className="g-3">
+                      <Row style={{ marginTop: "30px" }}>
+                        <Col lg={1}>
+                          <img
+                            className="rounded"
+                            alt="200x200"
+                            width="100"
+                            src={studentDetails.state.user_img}
+                            style={{
+                              marginLeft: "20px",
+                              marginBottom: "10px",
+                              marginRight: "0",
+                              marginTop: "10px",
+                            }}
+                          />
+                        </Col>
+
+                        <Col lg={2} style={{ marginLeft: "20px",marginTop:"20px"}}>
+                          <div >
+                            <Form.Label htmlFor="firstName">
+                              First Name
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              id="firstName"
+                              placeholder="Enter your first name"
+                              defaultValue={studentDetails.state.first_name}
+                            />
                           </div>
+                        </Col>
+                        <Col lg={4}>
+                          <div style={{ marginLeft: "0",marginTop:"20px"}}>
+                            <Form.Label htmlFor="lastName">
+                              Last Name
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              id="lastName"
+                              placeholder="Enter your last name"
+                              defaultValue={studentDetails.state.last_name}
+                            />
+                          </div>
+                        </Col>
+                        <Col lg={2}>
+                        <div>
+                          <Form.Label htmlFor="birdthdatInput" style={{marginTop:"20px"}}>
+                            Date Of Birth
+                          </Form.Label>
+                          <Flatpickr
+                            className="form-control flatpickr-input"
+                            placeholder="Select Date"
+                            options={{
+                              mode: "range",
+                              dateFormat: "d M, Y",
+                            }}
+                            defaultValue={studentDetails.state.date_birth}
+                          
+                          />
                         </div>
-                        <div className="flex-grow-1">
-                          <h5 className="card-title">Personal Information</h5>
+                      </Col>
+                        <Col lg={1}>
+                          <div style={{ marginLeft: "0",marginTop:"20px"}}>
+                            <Form.Label htmlFor="lastName">Status</Form.Label>
+                            <Form.Control
+                              type="text"
+                              id="lastName"
+                              placeholder="Enter your last name"
+                              defaultValue={studentDetails.state.status}
+                            />
+                          </div>
+                        </Col>
+                      </Row >
+
+                      
+                    <Row className="mb-2">
+                      <Col lg={3} style={{marginLeft:"20px"}}>
+                        <div>
+                          <Form.Label htmlFor="emailInput">
+                            Email Address
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="emailInput"
+                            placeholder="name@toner.com"
+                            defaultValue={studentDetails.state.adressMail}
+                          />
                         </div>
-                      </div>
-                    </Card.Header>
-                    <Card.Body></Card.Body>
-                    <div className="mb-3">
-                      <Form className="tablelist-form">
-                        <input type="hidden" id="id-field" />
-                        <Row>
-                          <Row>
-                            {/* First Name  == Done */}
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="customerName-field">
-                                  First Name
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="customerName-field"
-                                  placeholder="Enter first name"
-                                  required
-                                  defaultValue={studentDetails.state.first_name}
-                                />
-                              </div>
-                            </Col>
-                            {/* Last Name == Done */}
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Last Name
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter last name"
-                                  required
-                                  defaultValue={studentDetails.state.last_name}
-                                />
-                              </div>
-                            </Col>
-                            {/* Birth_Date  == Done */}
-                            <Col lg={2}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Date of Birth
-                                </Form.Label>
-                                <Flatpickr
-                                  className="form-control flatpickr-input"
-                                  placeholder="Select Date"
-                                  options={{
-                                    dateFormat: "d M, Y",
-                                  }}
-                                  defaultValue={studentDetails.state.date_birth}
-                                />
-                              </div>
-                            </Col>
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <label
-                                  htmlFor="statusSelect"
-                                  className="form-label"
-                                 
-                                >
-                                  Gender
-                                </label>
-                                <select
-                                  className="form-select text-muted"
-                                  name="choices-single-default"
-                                  id="statusSelect"
-                                  required
-                                  defaultValue={studentDetails.state.gender}
-                                >
-                                  <option value="">Gender</option>
-                                  <option value="Male">Male</option>
-                                  <option value="Female">Female</option>
-                                  <option value="Other">Other</option>
-                                </select>
-                              </div>
-                            </Col>
-                          </Row>
-                          {/*  Nationaity == Not Yet */}
-                          <Col lg={3}>
-                            <div className="mb-3">
-                              <Form.Label>Nationality</Form.Label>
-                              <Dropdown>
-                                <Dropdown.Toggle
-                                  as="input"
-                                  style={{
-                                    backgroundImage: `url(${
-                                      seletedCountry1.flagImg &&
-                                      seletedCountry1.flagImg
-                                    })`,
-                                  }}
-                                  className="form-control rounded-end flag-input form-select"
-                                  placeholder="Select country"
-                                  readOnly
-                                  defaultValue={seletedCountry1.countryName}
-                                ></Dropdown.Toggle>
-                                <Dropdown.Menu
-                                  as="ul"
-                                  className="list-unstyled w-100 dropdown-menu-list mb-0"
-                                >
-                                  <SimpleBar
-                                    style={{ maxHeight: "220px" }}
-                                    className="px-3"
-                                  >
-                                    {(country || []).map(
-                                      (item: any, key: number) => (
-                                        <Dropdown.Item
-                                          as="li"
-                                          onClick={() =>
-                                            setseletedCountry1(item)
-                                          }
-                                          key={key}
-                                          className="dropdown-item d-flex"
-                                        >
-                                          <div className="flex-shrink-0 me-2">
-                                            <Image
-                                              src={item.flagImg}
-                                              alt="country flag"
-                                              className="options-flagimg"
-                                              height="20"
-                                            />
-                                          </div>
-                                          <div className="flex-grow-1">
-                                            <div className="d-flex">
-                                              <div className="country-name me-1">
-                                                {item.countryName}
-                                              </div>
-                                              <span className="countrylist-codeno text-muted">
-                                                {item.countryCode}
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </Dropdown.Item>
-                                      )
-                                    )}
-                                  </SimpleBar>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </div>
-                          </Col>
-                          {/* Original_Nationality  == Not Yet */}
-                          {/*  Nationaity == Not Yet */}
-                          <Col lg={3}>
-                            <div className="mb-3">
-                              <Form.Label>Original Nationality</Form.Label>
-                              <Dropdown>
-                                <Dropdown.Toggle
-                                  as="input"
-                                  style={{
-                                    backgroundImage: `url(${
-                                      seletedCountry.flagImg &&
-                                      seletedCountry.flagImg
-                                    })`,
-                                  }}
-                                  className="form-control rounded-end flag-input form-select"
-                                  placeholder="Select country"
-                                  readOnly
-                                  defaultValue={seletedCountry.countryName}
-                                ></Dropdown.Toggle>
-                                <Dropdown.Menu
-                                  as="ul"
-                                  className="list-unstyled w-100 dropdown-menu-list mb-0"
-                                >
-                                  <SimpleBar
-                                    style={{ maxHeight: "220px" }}
-                                    className="px-3"
-                                  >
-                                    {(country || []).map(
-                                      (item: any, key: number) => (
-                                        <Dropdown.Item
-                                          as="li"
-                                          onClick={() =>
-                                            setseletedCountry(item)
-                                          }
-                                          key={key}
-                                          className="dropdown-item d-flex"
-                                        >
-                                          <div className="flex-shrink-0 me-2">
-                                            <Image
-                                              src={item.flagImg}
-                                              alt="country flag"
-                                              className="options-flagimg"
-                                              height="20"
-                                            />
-                                          </div>
-                                          <div className="flex-grow-1">
-                                            <div className="d-flex">
-                                              <div className="country-name me-1">
-                                                {item.countryName}
-                                              </div>
-                                              <span className="countrylist-codeno text-muted">
-                                                {item.countryCode}
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </Dropdown.Item>
-                                      )
-                                    )}
-                                  </SimpleBar>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </div>
-                          </Col>
-                          <Row>
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Phone Number 1
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter phone"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Phone Number 2
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter phone"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            <Col lg={4}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Email
-                                </Form.Label>
-                                <Form.Control
-                                  type="email"
-                                  id="supplierName-field"
-                                  placeholder="Enter email"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            <Col lg={4}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  House Number and Street
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter House Number and Street"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            <Col lg={4}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Locality
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter Locality"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            <Col lg={4}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Post Code
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter Post Code"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            <Row>
-                              <Col lg={3}>
-                                <div className="mb-3">
-                                  <label
-                                    htmlFor="statusSelect"
-                                    className="form-label"
-                                  >
-                                    Profile Picture
-                                  </label>
-                                  <Form.Control
-                                    type="file"
-                                    id="supplierName-field"
-                                    placeholder="Enter number"
-                                    className="text-muted"
-                                    required
-                                    
-                                  />
-                                </div>
-                              </Col>
-                            </Row>
-                          </Row>
-
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-identification-card"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">
-                                    Identification and Authentication
-                                  </h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Student ID
-                                    </label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter number"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="orderDate-field">
-                                      Social Security Number
-                                    </Form.Label>
-                                    <Flatpickr
-                                      className="form-control flatpickr-input"
-                                      placeholder="Select Date"
-                                    />
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Photo
-                                    </label>
-                                    <Form.Control
-                                      type="file"
-                                      id="supplierName-field"
-                                      placeholder="Enter number"
-                                      className="text-muted"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-bus"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">
-                                    Transportation-Specific Information
-                                  </h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Station
-                                    </label>
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Station 1</option>
-                                      <option value="Male">Station 2</option>
-                                      <option value="Female">Station 3</option>
-                                      <option value="Other">Station 4</option>
-                                    </select>
-                                  </div>
-                                </Col>
-                                <Col lg={2}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Group
-                                    </label>
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Group</option>
-                                      <option value="Active">Group 1</option>
-                                      <option value="Inactive">Group 2</option>
-                                    </select>
-                                  </div>
-                                </Col>
-                                <Col lg={2}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Category
-                                    </label>
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Category</option>
-                                      <option value="Only Car">Only Car</option>
-                                      <option value="Only Bus">Only Bus</option>
-                                      <option value="Both">Both</option>
-                                    </select>
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-users-three"></i>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">
-                                    Parent/Guardian Information
-                                  </h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-
-                            <Card.Body>
-                              {parents.map((parent, index) => (
-                                <div key={parent.id}>
-                                  <Row>
-                                    {/* Full Name == Done */}
-                                    <Col lg={3}>
-                                      <div className="mb-3">
-                                        <Form.Label htmlFor="supplierName-field">
-                                          Full Name
-                                        </Form.Label>
-                                        <Form.Control
-                                          type="text"
-                                          id="supplierName-field"
-                                          placeholder="Enter full name"
-                                          required
-                                        />
-                                      </div>
-                                    </Col>
-                                    {/*  Relationship == Done */}
-                                    <Col lg={3}>
-                                      <div className="mb-3">
-                                        <Form.Label htmlFor="supplierName-field">
-                                          Relationship
-                                        </Form.Label>
-                                        <select
-                                          className="form-select text-muted"
-                                          name="choices-single-default"
-                                          id="statusSelect"
-                                          required
-                                        >
-                                          <option value="">Relationship</option>
-                                          <option value="Mother">Mother</option>
-                                          <option value="Father">Father</option>
-                                          <option value="Guardian">
-                                            Guardian
-                                          </option>
-                                          <option value="Other">Other</option>
-                                        </select>
-                                      </div>
-                                    </Col>
-                                  </Row>
-                                  <Row>
-                                    {/* Address  == Done */}
-                                    <Col lg={3}>
-                                      <div className="mb-3">
-                                        <Form.Label htmlFor="supplierName-field">
-                                          Address
-                                        </Form.Label>
-                                        <Form.Control
-                                          type="text"
-                                          id="supplierName-field"
-                                          placeholder="Enter address"
-                                          required
-                                        />
-                                      </div>
-                                    </Col>
-
-                                    {/* Email  == Done */}
-                                    <Col lg={3}>
-                                      <div className="mb-3">
-                                        <Form.Label htmlFor="supplierName-field">
-                                          Email
-                                        </Form.Label>
-                                        <Form.Control
-                                          type="email"
-                                          id="supplierName-field"
-                                          placeholder="Enter email"
-                                          required
-                                        />
-                                      </div>
-                                    </Col>
-                                    {/* Phone  == Done */}
-                                    <Col lg={3}>
-                                      <div className="mb-3">
-                                        <Form.Label htmlFor="supplierName-field">
-                                          Phone
-                                        </Form.Label>
-                                        <Form.Control
-                                          type="text"
-                                          id="supplierName-field"
-                                          placeholder="Enter phone"
-                                          required
-                                        />
-                                      </div>
-                                    </Col>
-                                    <Row>
-                                      <Col lg={3}>
-                                        <div className="mb-3">
-                                          <Form.Label htmlFor="emergencyContactToggle">
-                                            Emergency Contact
-                                          </Form.Label>
-                                          <Form.Check
-                                            type="switch"
-                                            id="emergencyContactToggle"
-                                            label=""
-                                          />
-                                        </div>
-                                      </Col>
-                                      {showCloseButtonIndex === index && (
-                                        <Col lg={3}>
-                                          <Button
-                                            variant="danger"
-                                            onClick={() =>
-                                              handleRemoveItemClick(parent.id)
-                                            }
-                                          >
-                                            x
-                                          </Button>
-                                        </Col>
-                                      )}
-                                    </Row>
-                                  </Row>
-                                </div>
-                              ))}
-                              <Row>
-                                <tr>
-                                  <td>
-                                    <Link
-                                      to="#"
-                                      id="add-item"
-                                      className="btn btn-soft-secondary fw-medium"
-                                      onClick={handleAddItemClick}
-                                    >
-                                      <i className="ri-add-fill me-1 align-bottom"></i>
-                                    </Link>
-                                  </td>
-                                </tr>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-
-                          <Col lg={12}>
-                            <div className="hstack gap-2 justify-content-end">
-                              <Button variant="primary" id="add-btn">
-                                Add New Students Account
-                              </Button>
-                            </div>
-                          </Col>
-                        </Row>
-                      </Form>
-                    </div>
+                      </Col>
+                      <Col lg={4} >
+                        <div>
+                          <Form.Label htmlFor="phoneInput">
+                            Phone Number
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="phoneInput"
+                            placeholder="Enter phone number"
+                            defaultValue={studentDetails.state.mobile}
+                          />
+                        </div>
+                      </Col>
+                     
+                      <Col lg={3}>
+                        <div>
+                          <Form.Label htmlFor="designationInput">
+                            Card ID
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="designationInput"
+                            placeholder="Designation"
+                            defaultValue={studentDetails.state.cardId}
+                          />
+                        </div>
+                      </Col>
+                      </Row>
+                      <Row className="mb-2">
+                      <Col lg={3}  style={{marginLeft:"20px"}}>
+                        <div>
+                          <Form.Label htmlFor="designationInput">
+                            Class
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="designationInput"
+                            placeholder="Designation"
+                            defaultValue="Chemistry"
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="websiteInput1">
+                            Trip Group
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="websiteInput1"
+                            placeholder=""
+                            defaultValue={studentDetails.state.group}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={3}>
+                        <div>
+                          <Form.Label htmlFor="websiteInput1">
+                            Joining Date
+                          </Form.Label>
+                          <Flatpickr
+                            className="form-control flatpickr-input"
+                            placeholder="Select Date"
+                            options={{
+                              mode: "range",
+                              dateFormat: "d M, Y",
+                            }}
+                            defaultValue={studentDetails.state.date_birth}
+                          />
+                        </div>
+                      </Col>
+                      </Row>
+                      <Row className="mb-2">
+                      <Col lg={7} style={{marginLeft:"20px"}}>
+                        <div>
+                          <Form.Label htmlFor="cityInput">
+                            PickUp Station
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="cityInput"
+                            placeholder="City"
+                            defaultValue={studentDetails.state.pickup_station}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={3}>
+                        <div>
+                          <Form.Label htmlFor="countryInput">
+                            PickUp Time
+                          </Form.Label>
+                          <Flatpickr
+                            className="form-control"
+                            defaultValue={studentDetails.state.pickup_time}
+                            options={{
+                              enableTime: true,
+                              noCalendar: true,
+                            }}
+                          />
+                        </div>
+                      </Col>
+                      </Row>
+                      <Row>
+                      <Col lg={7} style={{marginLeft:"20px"}}>
+                        <div>
+                          <Form.Label htmlFor="zipcodeInput">
+                            DropOff Station
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="zipcodeInput"
+                            placeholder="Enter zipcode"
+                            defaultValue={studentDetails.state.dropdown_station}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={3}>
+                        <div>
+                          <Form.Label htmlFor="countryInput">
+                            DropOff Time
+                          </Form.Label>
+                          <Flatpickr
+                            className="form-control"
+                            defaultValue={studentDetails.state.dropdown_time}
+                            options={{
+                              enableTime: true,
+                              noCalendar: true,
+                            }}
+                          />
+                        </div>
+                      </Col>
+                      </Row>
+                      <Col lg={12}>
+                        <div className="text-end">
+                          <Button variant="secondary" type="submit">
+                            Update Profile
+                          </Button>
+                        </div>
+                      </Col>
+                    </Row>
                   </Card.Body>
                 </Card>
               </Col>
             </Row>
+
+            <Row className="d-flex justify-content-center">
+            
+              <Col lg={12}  >
+                <Card>
+                  <Card.Body>
+                    <Row className="g-3">
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="firstName">
+                            First Name
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="firstName"
+                            placeholder="Enter your first name"
+                            defaultValue={studentDetails.state.first_name}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="lastName">Last Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="lastName"
+                            placeholder="Enter your last name"
+                            defaultValue={studentDetails.state.last_name}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="lastName">Status</Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="lastName"
+                            placeholder="Enter your last name"
+                            defaultValue={studentDetails.state.status}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="emailInput">
+                            Email Address
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="emailInput"
+                            placeholder="name@toner.com"
+                            defaultValue={studentDetails.state.adressMail}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="phoneInput">
+                            Phone Number
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="phoneInput"
+                            placeholder="Enter phone number"
+                            defaultValue={studentDetails.state.mobile}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="designationInput">
+                            Card ID
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="designationInput"
+                            placeholder="Designation"
+                            defaultValue={studentDetails.state.cardId}
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={12}>
+                        <div className="text-end">
+                          <Button variant="primary" type="submit">
+                            Change Parents Student
+                          </Button>
+                        </div>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+            <Row className="d-flex justify-content-center">
+             
+              <Col lg={12}>
+                <Card>
+                  <Card.Body>
+                    <Row className="g-3">
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="facebook">Facebook</Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="facebook"
+                            placeholder="Username"
+                            defaultValue="Raquel"
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="whatsappInput">
+                            Whatsapp
+                          </Form.Label>
+                          <Form.Control
+                            type="number"
+                            id="whatsappInput"
+                            placeholder="+(235) 01234 5678"
+                            defaultValue="+(253) 98765 4321"
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="twitterInput">
+                            Twitter <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="twitterInput"
+                            placeholder="Username"
+                            defaultValue="@raquel_morillo"
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div>
+                          <Form.Label htmlFor="emailInput2">Email</Form.Label>
+                          <Form.Control
+                            type="text"
+                            id="emailInput2"
+                            placeholder="example@toner.com"
+                            defaultValue="raquelmurillo@toner.com"
+                          />
+                        </div>
+                      </Col>
+                      <Col lg={12}>
+                        <div className="text-end">
+                          <Button variant="primary" type="submit">
+                            Change Social Media
+                          </Button>
+                        </div>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+
+            <Col lg={12}>
+                          <div className="d-flex align-items-start gap-3 mt-0 mb-4">
+                          <button
+                            type="button"
+                            className="btn btn-link text-decoration-none btn-label previestab"
+                            onClick={() => setactiveTab()}
+                          >
+                            <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                            Back
+                          </button>
+                          {/* <button
+                            type="button"
+                            className="btn btn-success  ms-auto"
+                            
+                          >
+                       
+                            Add Account
+                          </button> */}
+                        </div>
+                          </Col>
           </form>
         </Container>
       </div>

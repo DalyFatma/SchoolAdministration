@@ -1,587 +1,283 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Col,
+  Container,
+  Form,
+  Row,
+  Image,
+  Modal,
+} from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 import Dropzone from "react-dropzone";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { GoogleApiWrapper } from "google-maps-react";
+import { Map } from "google-maps-react";
+import { Marker } from "google-maps-react";
+import avatar2 from "assets/images/users/avatar-2.jpg";
+import avatar3 from "assets/images/users/avatar-3.jpg";
+import avatar4 from "assets/images/users/avatar-4.jpg";
+import avatar5 from "assets/images/users/avatar-5.jpg";
+import { InfoWindow } from "google-maps-react";
+import GroupAvatar from "./GroupAvatar";
 
-const AddNewGroup= () => {
-  document.title = "Create Driver | Bouden Coach Travel";
-  const [fullName, setFullName] = useState("");
-  const [selectedFiles, setselectedFiles] = useState([]);
-  const [showAdditionalForm, setShowAdditionalForm] = useState(false);
+import { ArrowFatLinesLeft } from "phosphor-react";
+import Selection from "./Selection";
+import { Polyline } from "google-maps-react";
 
-  const handleAddItemClick = () => {
-    setShowAdditionalForm(!showAdditionalForm);
+const LoadingContainer = () => <div>Loading...</div>;
+
+interface Location {
+  lat: number;
+  lng: number;
+  name: string;
+}
+interface AddNewGroupProps {
+  google: object;
+}
+
+const AddNewGroup: React.FC<AddNewGroupProps> = (props) => {
+  document.title = "Groups | School Administration";
+
+  const [modal_AddShippingModals, setmodal_AddShippingModals] =
+    useState<boolean>(false);
+  const [infoWindow, setInfoWindow] = useState<boolean>(true);
+  const [showInfoWindow, setInfoWindowFlag] = useState(true);
+
+  const [totalStudents, setTotalStudents] = useState<number>(12);
+  const [currentStudents, setCurrentStudents] = useState<number>(8);
+
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null
+  );
+  const [secondLocation, setSecondLocation] = useState<Location | null>(null);
+  
+  const [routeCoordinates, setRouteCoordinates] = useState<
+    google.maps.LatLng[]
+  >([]);
+
+  function tog_AddShippingModals() {
+    setmodal_AddShippingModals(!modal_AddShippingModals);
+  }
+
+  useEffect(() => {
+    if (selectedLocation && secondLocation) {
+      calculateAndDisplayRoute();
+    }
+  }, [selectedLocation, secondLocation]);
+
+  const calculateAndDisplayRoute = () => {
+    const directionsService = new window.google.maps.DirectionsService();
+
+    const request = {
+      origin: new window.google.maps.LatLng(
+        selectedLocation!.lat,
+        selectedLocation!.lng
+      ),
+      destination: new window.google.maps.LatLng(
+        secondLocation!.lat,
+        secondLocation!.lng
+      ),
+      travelMode: window.google.maps.TravelMode.DRIVING,
+    };
+
+    directionsService.route(request, (result: any, status: any) => {
+      if (status === window.google.maps.DirectionsStatus.OK) {
+        const route = result.routes[0].overview_path;
+        setRouteCoordinates(
+          route.map((point: any) => ({ lat: point.lat(), lng: point.lng() }))
+        );
+      }
+    });
   };
 
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
-  }
+  const handleLocationButtonClick = () => {
+    // Set the first location marker
+    setSelectedLocation({
+      lat: 52.5244734,
+      lng: -1.9857876,
+      name: "Birmingham",
+    });
 
-  /* Formats the size */
-  function formatBytes(bytes: any, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    // Set the second location marker
+    setSecondLocation({
+      lat: 52.5344734,
+      lng: -1.9957876,
+      name: "Second Location",
+    });
+  };
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
+  const handleMarkerClick = () => {
+    setInfoWindowFlag(!showInfoWindow);
+  };
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          {/* <Breadcrumb title="Create Vehicle" pageTitle="Vehicles" /> */}
-          <form
-            id="createproduct-form"
-            autoComplete="off"
-            className="needs-validation"
-            noValidate
-          >
-            <Row>
-              <Col lg={12}>
-                <Card>
-                  <Card.Header>
-                    <div className="d-flex">
-                      <div className="flex-shrink-0 me-3">
-                        <div className="avatar-sm">
-                          <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                            <i className="ph ph-student"></i>
+          <Row>
+            <Col lg={12}>
+              <Card>
+                <Card.Body style={{ height: "90vh" }}>
+                  <div>
+                    <Row>
+                      <Col xxl={6} md={10} className="mx-auto">
+                        <form action="#" className="mb-2">
+                          <div className="seller-search-box position-relative">
+                            <i className="ri-search-2-line position-absolute my-auto d-flex align-items-center"></i>
+                            <input
+                              type="text"
+                              className="form-control rounded-pill border-0 shadow"
+                              id="searchInputList"
+                              autoComplete="off"
+                              placeholder="Search for Trips ..."
+                            />
+                            <Button
+                              variant="soft-danger"
+                              className="fw-normal position-absolute rounded-pill"
+                              onClick={() => handleLocationButtonClick()}
+                            >
+                              <i className="ri-map-pin-2-line align-bottom me-1"></i>{" "}
+                              Birmingham
+                            </Button>
                           </div>
+                        </form>
+                      </Col>
+                    </Row>
+                    <Row className="mt-4">
+                      <Col xxl={12} style={{ marginRight: "20px" }}>
+                        <div
+                          id="gmaps-markers"
+                          className="gmaps"
+                          style={{ height: "500px", width: "20%" }}
+                        >
+                          <Map
+                            google={props.google}
+                            zoom={13}
+                            style={{
+                              height: "140%",
+                              width: `98%`,
+                            }}
+                            initialCenter={{
+                              lat: 52.5244734,
+                              lng: -1.9857876,
+                            }}
+                            className="text-center"
+                          >
+                            {selectedLocation && (
+                              <Marker
+                                title={selectedLocation.name}
+                                position={{
+                                  lat: selectedLocation.lat,
+                                  lng: selectedLocation.lng,
+                                }}
+                                onClick={() => tog_AddShippingModals()}
+                              />
+                            )}
+                            {secondLocation && (
+                              <Marker
+                                title={secondLocation.name}
+                                position={{
+                                  lat: secondLocation.lat,
+                                  lng: secondLocation.lng,
+                                }}
+                                onClick={() => tog_AddShippingModals()}
+                              />
+                            )}
+                            {infoWindow && (
+                              <InfoWindow
+                                position={{
+                                  lat: 52.5295185,
+                                  lng: -1.988,
+                                }}
+                                visible={showInfoWindow}
+                              >
+                                <div>
+                                
+                                  <p>
+                                    Students at this position: {currentStudents}
+                                    /{totalStudents}
+                                  </p>
+                                  <GroupAvatar />
+                                </div>
+                              </InfoWindow>
+                            )}
+                            {routeCoordinates.length > 0 && (
+                              <Polyline
+                                path={routeCoordinates}
+                                options={{
+                                  strokeColor: "#FF0000",
+                                  strokeOpacity: 1,
+                                  strokeWeight: 2,
+                                }}
+                              />
+                            )}
+                          </Map>
                         </div>
-                      </div>
-                      <div className="flex-grow-1">
-                        <h5 className="card-title mb-1">Group Information</h5>
-                      </div>
-                    </div>
-                  </Card.Header>
-                  <Card.Body>
-                    <div className="mb-3">
-                      <Form className="tablelist-form">
-                        <input type="hidden" id="id-field" />
-                        <Row>
-                          <Row>
-                          
-                            {/* Birth_Date  == Done */}
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Birth Date
-                                </Form.Label>
-                                <Flatpickr
-                                  className="form-control flatpickr-input"
-                                  placeholder="Select Date"
-                                  options={{
-                                    dateFormat: "d M, Y",
-                                  }}
-                                />
-                              </div>
-                            </Col>
-                            {/* Address  == Done */}
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Address
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter address"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                          </Row>
-                          <Row>
-                            {/* Email  == Done */}
-                            <Col lg={4}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Email
-                                </Form.Label>
-                                <Form.Control
-                                  type="email"
-                                  id="supplierName-field"
-                                  placeholder="Enter email"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            {/* Phone  == Done */}
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Phone
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  id="supplierName-field"
-                                  placeholder="Enter phone"
-                                  required
-                                />
-                              </div>
-                            </Col>
-                            {/*  Nationaity == Not Yet */}
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Nationality
-                                </Form.Label>
-                                <select
-                                  className="form-select text-muted"
-                                  name="choices-single-default"
-                                  id="statusSelect"
-                                  required
-                                >
-                                  <option value="">Capacity</option>
-                                  <option value="2">2</option>
-                                  <option value="3">3</option>
-                                  <option value="4">4</option>
-                                  <option value="5">5</option>
-                                  <option value="6">6</option>
-                                  <option value="7">7</option>
-                                  <option value="8">8</option>
-                                  <option value="9">9</option>
-                                  <option value="10">10</option>
-                                  <option value="11">11</option>
-                                  <option value="12">12</option>
-                                  <option value="13">13</option>
-                                </select>
-                              </div>
-                            </Col>
-                            {/* Original_Nationality  == Not Yet */}
-                            <Col lg={2}>
-                              <div className="mb-3">
-                                <Form.Label htmlFor="supplierName-field">
-                                  Original Nationality
-                                </Form.Label>
-                                <select
-                                  className="form-select text-muted"
-                                  name="choices-single-default"
-                                  id="statusSelect"
-                                  required
-                                >
-                                  <option value="">Capacity</option>
-                                  <option value="2">20kg</option>
-                                  <option value="3">75kg</option>
-                                </select>
-                              </div>
-                            </Col>
-                          </Row>
+                      </Col>
+                    </Row>
+                  </div>
+                </Card.Body>
+              </Card>
 
-                          <Row>
-                            {/* Gender  == Done */}
-                            <Col lg={3}>
-                              <div className="mb-3">
-                                <label
-                                  htmlFor="statusSelect"
-                                  className="form-label"
-                                >
-                                  Gender
-                                </label>
-                                <select
-                                  className="form-select text-muted"
-                                  name="choices-single-default"
-                                  id="statusSelect"
-                                  required
-                                >
-                                  <option value="">Gender</option>
-                                  <option value="Male">Male</option>
-                                  <option value="Female">Female</option>
-                                  <option value="Other">Other</option>
-                                </select>
-                              </div>
-                            </Col>
-                          </Row>
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-cards"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">Legal Card</h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Number
-                                    </label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter number"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="orderDate-field">
-                                      Date
-                                    </Form.Label>
-                                    <Flatpickr
-                                      className="form-control flatpickr-input"
-                                      placeholder="Select Date"
-                                      options={{
-                                        dateFormat: "d M, Y",
-                                      }}
-                                    />
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      File
-                                    </label>
-                                    <Form.Control
-                                      type="file"
-                                      id="supplierName-field"
-                                      placeholder="Enter number"
-                                      className="text-muted"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-users-three"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">
-                                    Parent/Guardian Information
-                                  </h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                {/* Full Name == Done */}
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Full Name
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter full name"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                                {/*  Relationship == Done */}
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Relationship
-                                    </Form.Label>
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Relationship</option>
-                                      <option value="Mother">Mother</option>
-                                      <option value="Father">Father</option>
-                                      <option value="Other">Other</option>
-                                    </select>
-                                  </div>
-                                </Col>
-                              </Row>
-                              <Row>
-                                {/* Address  == Done */}
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Address
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter address"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-
-                                {/* Email  == Done */}
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Email
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="email"
-                                      id="supplierName-field"
-                                      placeholder="Enter email"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                                {/* Phone  == Done */}
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Phone
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter phone"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-
-                              <Row>
-                                {showAdditionalForm && (
-                                  <>
-                                    <Row>
-                                      <Col lg={3}>
-                                        <div className="mb-3">
-                                          <Form.Label htmlFor="emergencyContactToggle">
-                                            Emergency Contact
-                                          </Form.Label>
-                                          <Form.Check
-                                            type="switch"
-                                            id="emergencyContactToggle"
-                                            label=""
-                                          />
-                                        </div>
-                                      </Col>
-                                    </Row>
-                                    <Row>
-                                      <Col lg={3}>
-                                        <div className="mb-3">
-                                          <Form.Label htmlFor="emergencyContactToggle">
-                                           Application Vise-Vise
-                                          </Form.Label>
-                                          <Form.Check
-                                            type="switch"
-                                            id="emergencyContactToggle"
-                                            label=""
-                                          />
-                                        </div>
-                                      </Col>
-                                    </Row>
-                                  </>
-                                )}
-                                <tr>
-                                  <td>
-                                    <Link
-                                      to="#"
-                                      id="add-item"
-                                      className="btn btn-soft-secondary fw-medium"
-                                      onClick={handleAddItemClick}
-                                    >
-                                      <i className="ri-add-fill me-1 align-bottom"></i>
-                                    </Link>
-                                  </td>
-                                </tr>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-bus"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">
-                                    Transportation Details
-                                  </h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Station
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter station"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-coins"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">
-                                    Transportation Fee Information
-                                  </h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Station
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter station"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-
-
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-camera"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">Profile Picture</h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Add Profile Picture
-                                    </label>
-                                    <Form.Control
-                                      type="file"
-                                      id="supplierName-field"
-                                      placeholder="Enter number"
-                                      className="text-muted"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-                          <Col lg={12}>
-                            <Card.Header>
-                              <div className="d-flex">
-                                <div className="flex-shrink-0 me-3">
-                                  <div className="avatar-sm">
-                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                      <i className="ph ph-bus"></i>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <h5 className="card-title">
-                                    Transportation Policy Agreement
-                                  </h5>
-                                </div>
-                              </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Station
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="supplierName-field"
-                                      placeholder="Enter station"
-                                      required
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Col>
-                          <Col lg={12}>
-                            <div className="hstack gap-2 justify-content-end">
-                              <Button variant="primary" id="add-btn">
-                                Add Student
-                              </Button>
-                            </div>
-                          </Col>
-                        </Row>
-                      </Form>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </form>
+              <Modal
+                className="fade zoomIn"
+                size="xl"
+                show={modal_AddShippingModals}
+                onHide={() => {
+                  tog_AddShippingModals();
+                }}
+                centered
+              >
+                <Modal.Header className="px-4 pt-4" closeButton>
+                  <h5 className="modal-title fs-18" id="exampleModalLabel">
+                    Assign Student-Group
+                  </h5>
+                </Modal.Header>
+                <Modal.Body className="p-4">
+                  <div
+                    id="alert-error-msg"
+                    className="d-none alert alert-danger py-2"
+                  ></div>
+                  <Form className="tablelist-form">
+                    <input type="hidden" id="id-field" />
+                    <Row>
+                      <Selection />
+                      <Col lg={12} className="mt-2">
+                        <div className="hstack gap-2 justify-content-end">
+                          <Button
+                            className="btn-ghost-danger"
+                            onClick={() => {
+                              tog_AddShippingModals();
+                            }}
+                            data-bs-dismiss="modal"
+                          >
+                            <i className="ri-close-line align-bottom me-1"></i>{" "}
+                            Close
+                          </Button>
+                          <Button variant="primary" id="add-btn">
+                            Add Student
+                          </Button>
+                        </div>
+                      </Col>
+                    </Row>
+                  </Form>
+                </Modal.Body>
+              </Modal>
+            </Col>
+          </Row>
         </Container>
       </div>
     </React.Fragment>
   );
 };
 
-export default AddNewGroup;
+export default GoogleApiWrapper({
+  apiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
+  LoadingContainer: LoadingContainer,
+  v: "3",
+})(AddNewGroup);

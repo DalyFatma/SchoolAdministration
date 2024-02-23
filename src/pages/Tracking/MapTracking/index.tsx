@@ -284,6 +284,7 @@ const Maptracking = (props: any) => {
                       className="card-body"
                       onMouseOver={() => setHover(true)}
                       onMouseLeave={() => setHover(false)}
+                      style={{ height: "90vh" }}
                     >
                       <div
                         id="gmaps-types"
@@ -293,7 +294,7 @@ const Maptracking = (props: any) => {
                         <Map
                           google={props.google}
                           zoom={13}
-                          style={{ height: "200%", width: `${navWidth}%` }}
+                          style={{  width: `${navWidth}%`, height: "85vh" }}
                           initialCenter={{ lat: 52.5244734, lng: -1.9857876 }}
                         >
                           <Marker
@@ -548,7 +549,7 @@ const Maptracking = (props: any) => {
 };
 
 export default GoogleApiWrapper({
-  apiKey: "AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE",
+  apiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
   LoadingContainer: LoadingContainer,
   v: "3",
 })(Maptracking);

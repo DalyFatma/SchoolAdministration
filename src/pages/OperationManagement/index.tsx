@@ -112,7 +112,7 @@ const OperationsManagement = () => {
             <Link
                   to="#tripDetails"
                   data-bs-toggle="offcanvas"
-                  className="badge bg-dark-subtle text-body view-item-btn"
+                  className="badge bg-info-subtle text-info view-item-btn"
                   onClick={() => {
                     setShowCouponsDetails(cellProps);
                     setShowCoupons(!showCoupons);

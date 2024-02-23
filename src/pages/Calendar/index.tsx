@@ -17,14 +17,7 @@ import UpcommingEvents from './UpcommingEvents';
 //redux
 import { useSelector, useDispatch } from "react-redux";
 
-import {
-    getEvents as onGetEvents,
-    getCategories as onGetCategories,
-    addNewEvent as onAddNewEvent,
-    deleteEvent as onDeleteEvent,
-    updateEvent as onUpdateEvent,
-    resetCalendar,
-} from "../../slices/thunk";
+
 import { Link } from 'react-router-dom';
 
 const Calendar = () => {

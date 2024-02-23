@@ -10,7 +10,7 @@ import img1 from 'assets/images/auth/img-1.png'
 import * as Yup from "yup";
 import { useFormik } from "formik";
 
-import { registerUser, apiError, resetRegisterFlag } from "slices/thunk";
+
 
 //redux
 import { useSelector, useDispatch } from "react-redux";
@@ -43,7 +43,7 @@ const Register = () => {
             password: Yup.string().required("Please Enter Your Password").matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/, "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"),
         }),
         onSubmit: (values) => {
-            dispatch(registerUser(values));
+            // dispatch(registerUser(values));
             setLoader(true)
         }
     });
@@ -54,7 +54,7 @@ const Register = () => {
     }));
 
     useEffect(() => {
-        dispatch(apiError());
+        // dispatch(apiError());
     }, [dispatch]);
 
     useEffect(() => {
@@ -64,7 +64,7 @@ const Register = () => {
         }
 
         setTimeout(() => {
-            dispatch(resetRegisterFlag());
+            // dispatch(resetRegisterFlag());
         }, 3000);
         
         setLoader(false)

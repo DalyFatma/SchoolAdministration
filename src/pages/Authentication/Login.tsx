@@ -26,7 +26,7 @@ import { facebook, google } from "../../config";
 
 const Login = (props: any) => {
 
-    document.title = "Login | Toner eCommerce + Admin React Template";
+    document.title = "Login | School Administration";
 
     const dispatch = useDispatch<any>();
     const { user, error } = useSelector((state: any) => ({
