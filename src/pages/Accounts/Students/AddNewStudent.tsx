@@ -700,7 +700,7 @@ const AddNewStudent = () => {
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <label
-                                    htmlFor="statusSelect"
+                                    htmlFor="card_id"
                                     className="form-label"
                                   >
                                     Student ID

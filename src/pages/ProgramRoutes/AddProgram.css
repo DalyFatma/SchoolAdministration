@@ -1,0 +1,7 @@
+.fullscreen-swal {
+    z-index: 10000 !important; 
+  }
+  
+  .fullscreen-swal-popup {
+    z-index: 10001 !important; 
+  }

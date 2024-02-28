@@ -355,6 +355,7 @@ const handleClick = () => {
                                         marginRight: "3px",
                                         marginTop: "4px",
                                       }}
+                                      
                                     ></i>
                                     <td>DropOff Station</td>
                                   </div>

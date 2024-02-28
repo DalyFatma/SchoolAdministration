@@ -26,25 +26,40 @@ import {
   LoadScript,
 } from "@react-google-maps/api";
 
+import Swal from "sweetalert2";
+import "./AddProgram.css";
+
 const options = [
   { value: "ForHandicap", label: "For Handicap" },
   { value: "Wifi", label: "Wifi" },
   { value: "WC", label: "WC" },
   { value: "AC", label: "AC" },
 ];
+
+const options1 = [
+  { value: "Monday", label: "Monday" },
+  { value: "Tuesday", label: "Tuesday" },
+  { value: "Wednesday", label: "Wednesday" },
+  { value: "Thursday", label: "Thursday" },
+  { value: "Friday", label: "Friday" },
+  { value: "Saturday", label: "Saturday" },
+  { value: "Sunday", label: "Sunday" },
+];
 const center = { lat: 52.4862, lng: -1.8904 };
+
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
   const [showAddStations, setShowAddStations] = useState<boolean>(false);
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
   const [selected, setSelected] = useState(["Wifi", "AC"]);
-  const [stops, setStops] = useState([{ id: 1 }]);
+  const [selected1, setSelected1] = useState(["Sunday", "Saturday", "Friday"]);
+  // const [stops, setStops] = useState([{ id: 1 }]);
   const [searchResult, setSearchResult] = useState("");
   const [searchDestination, setSearchDestination] = useState("");
   const [fatma, setFatma] = useState<any>();
   const [nom, setNom] = useState<any>();
   const cloneLocation = useLocation();
-  console.log(cloneLocation?.state);
+
   const [map, setMap] = useState<google.maps.Map<Element> | null>(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
@@ -56,11 +71,26 @@ const AddProgramm = (props: any) => {
 
   const [routeCoordinates, setRouteCoordinates] = useState(null);
   const [activeTab, setActiveTab] = useState(1);
+  const [routeDirections, setRouteDirections] =
+    useState<google.maps.DirectionsResult | null>(null);
+  const [stops, setStops] = useState<google.maps.LatLng[]>([]);
+  const [forceRender, setForceRender] = useState(false);
+
+  const [pathCoordinates, setPathCoordinates] = useState<google.maps.LatLng[]>(
+    []
+  );
+
+  const [clickedMarkers, setClickedMarkers] = useState<number[]>([]);
+  const [clickedMarker, setClickedMarker] = useState<number | null>(null);
+
+  const [isMapFullScreen, setIsMapFullScreen] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
     libraries: ["places"],
   });
+
+  const labels = "CDEFGHIJKLMNOPQRSTUVWXYZ";
 
   const originRef = useRef<any>(null);
   const destinationRef = useRef<any>(null);
@@ -143,14 +173,32 @@ const AddProgramm = (props: any) => {
 
         if (status === google.maps.DirectionsStatus.OK) {
           setDirectionsResponse(result);
+          setRouteDirections(result);
+          const pointToCheck = new google.maps.LatLng(49.95, -128.1);
+          const route = result.routes[0];
+          const path = route.overview_path;
+          const tolerance = 0.0001;
+          const isPointOnRoute = path.some((path: any) => {
+            return google.maps.geometry.poly.isLocationOnEdge(
+              pointToCheck,
+              path,
+              tolerance
+            );
+          });
+
+          if (isPointOnRoute) {
+            console.log("The point is on the route.");
+          } else {
+            console.log("The point is not on the route.");
+          }
 
           const selectedRoute = result.routes.find(
             (route) =>
               route.legs[0].start_address === originRef.current.value &&
               route.legs[0].end_address === destinationRef.current.value
           );
-
-          if (!selectedRoute) {
+          console.log("selectedRoute", selectedRoute!);
+          if (!selectedRoute!) {
             console.error("Route not found");
             return;
           }
@@ -163,6 +211,7 @@ const AddProgramm = (props: any) => {
       }
     );
   }
+
   function clearRoute() {
     setDirectionsResponse(null);
     setLoading(false);
@@ -171,6 +220,74 @@ const AddProgramm = (props: any) => {
     originRef.current.value = "";
     destinationRef.current.value = "";
   }
+
+  const isPositionCloseToRoute = (
+    position: google.maps.LatLng,
+    tolerance: number
+  ): boolean => {
+    if (!routeDirections) return false;
+
+    const route = routeDirections.routes[0];
+    const path = route.overview_path;
+    for (const pathPoint of path) {
+      const distance = google.maps.geometry.spherical.computeDistanceBetween(
+        position,
+        pathPoint
+      );
+      if (distance <= tolerance) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const handleMapClick = (event: google.maps.MapMouseEvent) => {
+    const clickedPosition = new google.maps.LatLng(
+      event.latLng.lat(),
+      event.latLng.lng()
+    );
+    const tolerance = 30;
+    const isCloseToRoute = isPositionCloseToRoute(clickedPosition, tolerance);
+
+    if (isCloseToRoute) {
+      console.log("Marker added at position:", clickedPosition);
+      setStops((prevStops: google.maps.LatLng[]) => [
+        ...prevStops,
+        clickedPosition,
+      ]);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...! Something went wrong!",
+        text: "Marker not added. Position too far from the route.",
+        customClass: {
+          container: isMapFullScreen ? "fullscreen-swal" : "",
+          popup: "fullscreen-swal-popup",
+        },
+      });
+    }
+  };
+
+  const handleMarkerClick = (index: number) => {
+    if (clickedMarkers.includes(index)) {
+      setClickedMarkers((prevClickedMarkers) =>
+        prevClickedMarkers.filter((clickedIndex) => clickedIndex !== index)
+      );
+    } else {
+      setClickedMarkers((prevClickedMarkers) => [...prevClickedMarkers, index]);
+    }
+  };
+
+  const handleMarkerDoubleClick = (index: number) => {
+    setStops((prevStops) => prevStops.filter((_, i) => i !== index));
+    setClickedMarkers((prevClickedMarkers) =>
+      prevClickedMarkers.filter((clickedIndex) => clickedIndex !== index)
+    );
+  };
+
+  const handleToggleFullScreen = () => {
+    setIsMapFullScreen(!isMapFullScreen);
+  };
 
   return (
     <React.Fragment>
@@ -190,7 +307,7 @@ const AddProgramm = (props: any) => {
             </Card.Header>
             <Card.Body className="form-steps">
               <Card>
-                <Card.Body className="form-steps" style={{ height: "70vh" }}>
+                <Card.Body className="form-steps" style={{ height: "80vh" }}>
                   <Form className="vertical-navs-step">
                     <Tab.Container activeKey={activeVerticalTab}>
                       <Row className="gy-5">
@@ -256,7 +373,7 @@ const AddProgramm = (props: any) => {
                               <span className="step-title me-2">
                                 <i className="ri-close-circle-fill step-icon me-2"></i>
                               </span>
-                              Passengers
+                              Options
                             </Nav.Link>
                           </Nav>
                         </Col>
@@ -267,23 +384,24 @@ const AddProgramm = (props: any) => {
                                 <div>
                                   <Row>
                                     <Col lg={4}>
-                                      <Form.Label htmlFor="customerName-field">
+                                      <Form.Label htmlFor="Name">
                                         Name
                                       </Form.Label>
                                       <Form.Control
                                         type="text"
-                                        id="customerName-field"
+                                        id="Name"
                                         required
                                         className="mb-2"
                                         placeholder="Add Program Name"
                                         name="Name"
+
                                         //   defaultValue={`Copy_${cloneLocation.state?.Name}`}
                                       />
                                     </Col>
 
                                     <Col lg={8}>
                                       <Form.Label htmlFor="customerName-field">
-                                        Corrdinations
+                                        coordinations
                                       </Form.Label>
                                       <InputGroup className="mb-3">
                                         <Autocomplete
@@ -355,7 +473,7 @@ const AddProgramm = (props: any) => {
                                       position: "relative",
                                       flexDirection: "column",
                                       alignItems: "center",
-                                      height: "250vh",
+                                      height: "50vh",
                                       width: "150vw",
                                     }}
                                   >
@@ -365,6 +483,7 @@ const AddProgramm = (props: any) => {
                                         left: "0",
                                         height: "100%",
                                         width: "100%",
+                                      
                                       }}
                                     >
                                       <GoogleMap
@@ -372,7 +491,7 @@ const AddProgramm = (props: any) => {
                                         zoom={15}
                                         mapContainerStyle={{
                                           width: "43%",
-                                          height: "23%",
+                                          height: "120%",
                                         }}
                                         options={{
                                           zoomControl: false,
@@ -408,7 +527,6 @@ const AddProgramm = (props: any) => {
                                           marginLeft: "15px",
                                         }}
                                       >
-                                        {/* Phosphor "Eraser" icon */}
                                         <svg
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 20 20"
@@ -425,23 +543,20 @@ const AddProgramm = (props: any) => {
                                       </Button>
                                     </div>
                                   </Row>
-                                  <Row>
-                                    <Col lg={12} style={{ zIndex: 10000 }}>
-                                      <div className="d-flex align-items-start gap-3 mt-4">
-                                        <Button
-                                          type="button"
-                                          className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                          onClick={() =>
-                                            setactiveVerticalTab(2)
-                                          }
-                                        >
-                                          <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                          Go to Stops
-                                        </Button>
-                                      </div>
-                                    </Col>
-                                  </Row>
                                 </div>
+
+                               
+                                  <div className="d-flex align-items-start" style={{marginTop:"120px"}}>
+                                  <Button
+                                    type="button"
+                                    className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                                    onClick={() => setactiveVerticalTab(2)}
+                                  >
+                                    <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                                    Stops
+                                  </Button>
+                                </div>
+                                
                               </Tab.Pane>
                               <Tab.Pane eventKey="2">
                                 <div>
@@ -453,7 +568,7 @@ const AddProgramm = (props: any) => {
                                       position: "relative",
                                       flexDirection: "column",
                                       alignItems: "center",
-                                      height: "250vh",
+                                      height: "50vh",
                                       width: "150vw",
                                     }}
                                   >
@@ -469,26 +584,66 @@ const AddProgramm = (props: any) => {
                                         center={center}
                                         zoom={15}
                                         mapContainerStyle={{
-                                          width: "43%",
-                                          height: "25%",
+                                          width: isMapFullScreen
+                                            ? "100vw"
+                                            : "43%",
+                                          height: isMapFullScreen
+                                            ? "100vh"
+                                            : "120%",
                                         }}
                                         options={{
                                           zoomControl: false,
                                           streetViewControl: false,
                                           mapTypeControl: false,
-                                          fullscreenControl: false,
+                                          fullscreenControl: true,
+
+                                          fullscreenControlOptions: {
+                                            position:
+                                              google.maps.ControlPosition
+                                                .TOP_RIGHT,
+                                          },
                                         }}
-                                      ></GoogleMap>
+                                        onClick={handleMapClick}
+                                      >
+                                        {routeDirections && (
+                                          <DirectionsRenderer
+                                            directions={routeDirections}
+                                          />
+                                        )}
+                                        {stops.map((stop, index) => (
+                                          <Marker
+                                            key={index}
+                                            position={stop}
+                                            label={
+                                              labels[index % labels.length]
+                                            }
+                                            onClick={() =>
+                                              handleMarkerClick(index)
+                                            }
+                                            onDblClick={() =>
+                                              handleMarkerDoubleClick(index)
+                                            }
+                                            icon={{
+                                              url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                                              scaledSize:
+                                                new window.google.maps.Size(
+                                                  50,
+                                                  50
+                                                ),
+                                            }}
+                                          />
+                                        ))}
+                                      </GoogleMap>
                                     </div>
                                   </Row>
                                 </div>
-                                <div className="d-flex align-items-start gap-3 mt-4">
+                                <div className="d-flex align-items-start gap-3" style={{marginTop:"120px"}}>
                                   <Button
                                     type="button"
                                     className="btn btn-light btn-label previestab"
                                     onClick={() => setactiveVerticalTab(1)}
                                   >
-                                    <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                                    <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>
                                     Back to Journey
                                   </Button>
                                   <Button
@@ -499,12 +654,23 @@ const AddProgramm = (props: any) => {
                                     <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
                                     Go to Run Dates
                                   </Button>
+
+                                  {/* Button to toggle full screen mode */}
+                                  {/* <Button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleToggleFullScreen}
+                                  >
+                                    {isMapFullScreen
+                                      ? "Exit Full Screen"
+                                      : "Full Screen"}
+                                  </Button> */}
                                 </div>
                               </Tab.Pane>
 
                               <Tab.Pane eventKey="3">
                                 <Row>
-                                  <div>
+                                  <div className="mt-2">
                                     <h5>Trip Times</h5>
                                   </div>
                                   <Col lg={5}>
@@ -520,6 +686,8 @@ const AddProgramm = (props: any) => {
                                       defaultValue={cloneLocation.state?.Time}
                                     />
                                   </Col>
+
+                                  <Col className="d-flex justify-content-center align-items-center"></Col>
                                   <Col lg={5}>
                                     <InputGroup>DropOff Time</InputGroup>
                                     <Flatpickr
@@ -535,10 +703,11 @@ const AddProgramm = (props: any) => {
                                   </Col>
                                 </Row>
                                 <Row>
-                                  <div>
+                                  <div className="mt-2">
                                     <h5>Run Dates</h5>
                                   </div>
                                   <Col lg={5}>
+                                    <InputGroup>Start Date</InputGroup>
                                     <div className="mb-3">
                                       <Flatpickr
                                         className="form-control flatpickr-input"
@@ -554,56 +723,104 @@ const AddProgramm = (props: any) => {
                                     <h5>to</h5>
                                   </Col>
                                   <Col lg={5}>
-                                    <div className="mb-3">
-                                      <Flatpickr
-                                        className="form-control flatpickr-input"
-                                        placeholder="Select Date"
-                                        options={{
-                                          dateFormat: "d M, Y",
+                                    <InputGroup>End Date</InputGroup>
+
+                                    <Flatpickr
+                                      className="form-control flatpickr-input"
+                                      placeholder="Select Date"
+                                      options={{
+                                        dateFormat: "d M, Y",
+                                      }}
+                                      defaultValue={cloneLocation.state?.Date}
+                                    />
+                                  </Col>
+                                </Row>
+
+                                <Row>
+                                  <Col lg={12}>
+                                    <div className="mt-2">
+                                      <h5 className="fs-14 mb-1">
+                                        Days of week not running
+                                      </h5>
+                                      <p className="text-muted">
+                                        Slide the selected excepted days to the
+                                        right
+                                      </p>
+                                      <DualListBox
+                                        options={options1}
+                                        selected={selected1}
+                                        onChange={(e: any) => setSelected1(e)}
+                                        icons={{
+                                          moveLeft: (
+                                            <span
+                                              className="mdi mdi-chevron-left"
+                                              key="key"
+                                            />
+                                          ),
+                                          moveAllLeft: [
+                                            <span
+                                              className="mdi mdi-chevron-double-left"
+                                              key="key"
+                                            />,
+                                          ],
+                                          moveRight: (
+                                            <span
+                                              className="mdi mdi-chevron-right"
+                                              key="key"
+                                            />
+                                          ),
+                                          moveAllRight: [
+                                            <span
+                                              className="mdi mdi-chevron-double-right"
+                                              key="key"
+                                            />,
+                                          ],
+                                          moveDown: (
+                                            <span
+                                              className="mdi mdi-chevron-down"
+                                              key="key"
+                                            />
+                                          ),
+                                          moveUp: (
+                                            <span
+                                              className="mdi mdi-chevron-up"
+                                              key="key"
+                                            />
+                                          ),
+                                          moveTop: (
+                                            <span
+                                              className="mdi mdi-chevron-double-up"
+                                              key="key"
+                                            />
+                                          ),
+                                          moveBottom: (
+                                            <span
+                                              className="mdi mdi-chevron-double-down"
+                                              key="key"
+                                            />
+                                          ),
                                         }}
-                                        defaultValue={cloneLocation.state?.Date}
                                       />
                                     </div>
                                   </Col>
                                 </Row>
-                                <Col lg={2}></Col>
-                                <Col lg={5}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="supplierName-field">
-                                      Days of week not running
-                                    </Form.Label>
-                                    <select
-                                      className="form-select"
-                                      multiple
-                                      aria-label="multiple select example"
-                                    >
-                                      <option value="No Except">
-                                        No Except
-                                      </option>
-                                      <option value="1">Monday</option>
-                                      <option value="2">Tuesday</option>
-                                      <option value="3">Wednesday</option>
-                                      <option value="4">Thursday</option>
-                                      <option value="5">Friday</option>
-                                      <option value="6">Saturday</option>
-                                      <option value="7">Sunday</option>
-                                    </select>
+                                <Row>
+                                  <div className="mt-2">
+                                    <h5>Free Days</h5>
                                   </div>
-                                </Col>
-
-                                <Col lg={5}>
-                                  <InputGroup>Free Days</InputGroup>
-                                  <Flatpickr
-                                    className="form-control flatpickr-input"
-                                    placeholder="Select Date"
-                                    options={{
-                                      dateFormat: "d M, Y",
-                                    }}
-                                    defaultValue={cloneLocation.state?.Date}
-                                  />
-                                </Col>
-
-                                <div className="d-flex align-items-start gap-3 mt-4">
+                                  <Col lg={5}>
+                                    <Flatpickr
+                                      className="form-control flatpickr-input"
+                                      placeholder="Select Date"
+                                      options={{
+                                        dateFormat: "d M, Y",
+                                        mode: "multiple",
+                                      }}
+                                      defaultValue={cloneLocation.state?.Date}
+                                    />
+                                  </Col>
+                                </Row>
+                                <div className="d-flex align-items-start gap-3" style={{marginTop:"100px"}}>
                                   <Button
                                     type="button"
                                     className="btn btn-light btn-label previestab"
@@ -626,12 +843,12 @@ const AddProgramm = (props: any) => {
                                 <Row>
                                   <Col lg={4}>
                                     <div className="mb-3">
-                                      <Form.Label htmlFor="customerName-field">
-                                        Number of passengers
+                                      <Form.Label htmlFor="Pax">
+                                        Recommanded Capacity
                                       </Form.Label>
                                       <Form.Control
                                         type="text"
-                                        id="customerName-field"
+                                        id="Pax"
                                         required
                                         className="mb-2"
                                         name="Pax"
@@ -641,11 +858,13 @@ const AddProgramm = (props: any) => {
                                       />
                                     </div>
                                   </Col>
-                                  <Col lg={8}>
+                                </Row>
+                                <Row>
+                                  <Col lg={12}>
                                     <div>
                                       <h5 className="fs-14 mb-1">Extra</h5>
                                       <p className="text-muted">
-                                        Slide the selected option to the right{" "}
+                                        Slide the selected option to the right
                                       </p>
                                       <DualListBox
                                         options={options}
@@ -705,6 +924,33 @@ const AddProgramm = (props: any) => {
                                     </div>
                                   </Col>
                                 </Row>
+                                <Row>
+                                  <Col lg={12}>
+                                    <div className="mb-3">
+                                      <Form.Label htmlFor="VertimeassageInput">
+                                        Notes
+                                      </Form.Label>
+                                      <textarea
+                                        className="form-control"
+                                        id="VertimeassageInput"
+                                        rows={5}
+                                        placeholder="Enter your notes"
+                                      ></textarea>
+                                    </div>
+                                  </Col>
+                                </Row>
+
+                                <div className="d-flex align-items-start gap-3" style={{marginTop:"100px"}}>
+                                  <Button
+                                    type="button"
+                                    className="btn btn-light btn-label previestab"
+                                    onClick={() => setactiveVerticalTab(3)}
+                                  >
+                                    <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                                    Back to Run Dates
+                                  </Button>
+                                 
+                                </div>
                               </Tab.Pane>
                             </Tab.Content>
                           </div>

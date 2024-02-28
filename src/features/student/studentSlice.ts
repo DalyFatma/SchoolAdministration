@@ -35,7 +35,7 @@ export interface Student {
 export const studentSlice = createApi({
   reducerPath: "student",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://bouden.uk.oxa.cloud/api/student/",
+    baseUrl: "http://localhost:3000/api/student/",
   }),
   tagTypes: ["Student"],
   endpoints(builder) {
