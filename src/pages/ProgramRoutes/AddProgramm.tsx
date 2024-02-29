@@ -50,7 +50,10 @@ const center = { lat: 52.4862, lng: -1.8904 };
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
   const [showAddStations, setShowAddStations] = useState<boolean>(false);
+
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
+  const [journeyName, setJourneyName] = useState("");
+
   const [selected, setSelected] = useState(["Wifi", "AC"]);
   const [selected1, setSelected1] = useState(["Sunday", "Saturday", "Friday"]);
   // const [stops, setStops] = useState([{ id: 1 }]);
@@ -95,6 +98,74 @@ const AddProgramm = (props: any) => {
   const originRef = useRef<any>(null);
   const destinationRef = useRef<any>(null);
 
+  const isJourneyStepValid = () => {
+    return (
+      journeyName.trim() !== "" &&
+      originRef.current?.value.trim() !== "" &&
+      destinationRef.current?.value.trim() !== ""
+    );
+  };
+
+  const isStopsStepValid = () => {
+    return stops.length > 0;
+  };
+
+  const isTripTimesStepValid = () => {
+    const pickupTimeInput = document.getElementById(
+      "pickup-time"
+    ) as HTMLInputElement | null;
+    const dropoffTimeInput = document.getElementById(
+      "dropoff-time"
+    ) as HTMLInputElement | null;
+    const pickupTime = pickupTimeInput?.value ?? "";
+    const dropoffTime = dropoffTimeInput?.value ?? "";
+
+    return pickupTime.trim() !== "" && dropoffTime.trim() !== "";
+  };
+
+  const isRunDatesStepValid = () => {
+    const startDateInput = document.getElementById(
+      "start-date"
+    ) as HTMLInputElement | null;
+    const endDateInput = document.getElementById(
+      "end-date"
+    ) as HTMLInputElement | null;
+
+    const startDate = startDateInput?.value ?? "";
+    const endDate = endDateInput?.value ?? "";
+    return startDate.trim() !== "" && endDate.trim() !== "";
+  };
+  const isOptionsStepValid = () => {
+    return selected1.length > 0; 
+  };
+
+  const isFreeDaysStepValid=()=>{
+    const freeDateInput = document.getElementById(
+      "free-date"
+    ) as HTMLInputElement | null;
+    const freeDate = freeDateInput?.value ?? "";
+    return freeDate.trim() !== "" 
+  }
+  
+  const isNextButtonDisabled = () => {
+    switch (activeVerticalTab) {
+      case 1:
+        return !isJourneyStepValid();
+      case 2:
+        return !isStopsStepValid();
+      case 3:
+        return !isTripTimesStepValid() || !isRunDatesStepValid() || !isOptionsStepValid() || !isFreeDaysStepValid();
+      default:
+        return false;
+    }
+  };
+  const handleNextStep = () => {
+    if (!isNextButtonDisabled()) {
+      setactiveVerticalTab(activeVerticalTab + 1);
+    } else {
+      alert("Please fill all required fields before proceeding.");
+    }
+  };
   if (!isLoaded) {
     return <p>Loading!!!!!</p>;
   }
@@ -174,23 +245,23 @@ const AddProgramm = (props: any) => {
         if (status === google.maps.DirectionsStatus.OK) {
           setDirectionsResponse(result);
           setRouteDirections(result);
-          const pointToCheck = new google.maps.LatLng(49.95, -128.1);
-          const route = result.routes[0];
-          const path = route.overview_path;
-          const tolerance = 0.0001;
-          const isPointOnRoute = path.some((path: any) => {
-            return google.maps.geometry.poly.isLocationOnEdge(
-              pointToCheck,
-              path,
-              tolerance
-            );
-          });
+          // const pointToCheck = new google.maps.LatLng(49.95, -128.1);
+          // const route = result.routes[0];
+          // const path = route.overview_path;
+          // const tolerance = 0.0001;
+          // const isPointOnRoute = path.some((path: any) => {
+          //   return google.maps.geometry.poly.isLocationOnEdge(
+          //     pointToCheck,
+          //     path,
+          //     tolerance
+          //   );
+          // });
 
-          if (isPointOnRoute) {
-            console.log("The point is on the route.");
-          } else {
-            console.log("The point is not on the route.");
-          }
+          // if (isPointOnRoute) {
+          //   console.log("The point is on the route.");
+          // } else {
+          //   console.log("The point is not on the route.");
+          // }
 
           const selectedRoute = result.routes.find(
             (route) =>
@@ -246,7 +317,7 @@ const AddProgramm = (props: any) => {
       event.latLng.lat(),
       event.latLng.lng()
     );
-    const tolerance = 30;
+    const tolerance = 50;
     const isCloseToRoute = isPositionCloseToRoute(clickedPosition, tolerance);
 
     if (isCloseToRoute) {
@@ -338,7 +409,14 @@ const AddProgramm = (props: any) => {
                                   : "nav-link"
                               }
                               eventKey="2"
-                              onClick={() => setactiveVerticalTab(2)}
+                              // onClick={() => setactiveVerticalTab(2)}
+                              onClick={() => {
+                                if (isJourneyStepValid()) {
+                                  setactiveVerticalTab(2);
+                                } else {
+                                  alert('Please fill all required fields before proceeding.');
+                                }
+                              }}
                             >
                               <span className="step-title me-2">
                                 <i className="ri-close-circle-fill step-icon me-2"></i>
@@ -353,7 +431,14 @@ const AddProgramm = (props: any) => {
                                   : "nav-link"
                               }
                               eventKey="3"
-                              onClick={() => setactiveVerticalTab(3)}
+                              // onClick={() => setactiveVerticalTab(3)}
+                              onClick={() => {
+                                if (isStopsStepValid()) {
+                                  setactiveVerticalTab(3);
+                                } else {
+                                  alert('Please fill all required fields before proceeding.');
+                                }
+                              }}
                             >
                               <span className="step-title me-2">
                                 <i className="ri-close-circle-fill step-icon me-2"></i>
@@ -368,13 +453,38 @@ const AddProgramm = (props: any) => {
                                   : "nav-link"
                               }
                               eventKey="4"
-                              onClick={() => setactiveVerticalTab(4)}
+                              // onClick={() => setactiveVerticalTab(4)}
+
+                              onClick={() => {
+                                if (isTripTimesStepValid() && isRunDatesStepValid() && isOptionsStepValid() && isFreeDaysStepValid()) {
+                                  setactiveVerticalTab(4);
+                                } else {
+                                  alert('Please fill all required fields before proceeding.');
+                                }
+                              }}
                             >
                               <span className="step-title me-2">
                                 <i className="ri-close-circle-fill step-icon me-2"></i>
                               </span>
                               Options
                             </Nav.Link>
+
+                            <Nav.Link
+                              as="button"
+                              className={
+                                activeVerticalTab > 5
+                                  ? "nav-link done"
+                                  : "nav-link"
+                              }
+                              eventKey="5"
+                              onClick={() => setactiveVerticalTab(5)}
+                            >
+                              <span className="step-title me-2">
+                                <i className="ri-close-circle-fill step-icon me-2"></i>
+                              </span>
+                              Resume
+                            </Nav.Link>
+                            
                           </Nav>
                         </Col>
                         <Col lg={10}>
@@ -394,8 +504,10 @@ const AddProgramm = (props: any) => {
                                         className="mb-2"
                                         placeholder="Add Program Name"
                                         name="Name"
-
-                                        //   defaultValue={`Copy_${cloneLocation.state?.Name}`}
+                                        value={journeyName}
+                                        onChange={(e) =>
+                                          setJourneyName(e.target.value)
+                                        }
                                       />
                                     </Col>
 
@@ -483,21 +595,30 @@ const AddProgramm = (props: any) => {
                                         left: "0",
                                         height: "100%",
                                         width: "100%",
-                                      
                                       }}
                                     >
                                       <GoogleMap
                                         center={center}
                                         zoom={15}
                                         mapContainerStyle={{
-                                          width: "43%",
-                                          height: "120%",
+                                          width: isMapFullScreen
+                                            ? "100vw"
+                                            : "43%",
+                                          height: isMapFullScreen
+                                            ? "100vh"
+                                            : "120%",
                                         }}
                                         options={{
                                           zoomControl: false,
                                           streetViewControl: false,
                                           mapTypeControl: false,
-                                          fullscreenControl: false,
+                                          fullscreenControl: true,
+
+                                          fullscreenControlOptions: {
+                                            position:
+                                              google.maps.ControlPosition
+                                                .TOP_RIGHT,
+                                          },
                                         }}
                                         onLoad={(map) => setMap(map)}
                                       >
@@ -545,18 +666,22 @@ const AddProgramm = (props: any) => {
                                   </Row>
                                 </div>
 
-                               
-                                  <div className="d-flex align-items-start" style={{marginTop:"120px"}}>
+                                <div
+                                  className="d-flex align-items-start"
+                                  style={{ marginTop: "110px" }}
+                                >
                                   <Button
                                     type="button"
                                     className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    onClick={() => setactiveVerticalTab(2)}
+                                    // onClick={() => setactiveVerticalTab(2)}
+
+                                    onClick={handleNextStep}
+                                    disabled={isNextButtonDisabled()}
                                   >
                                     <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Stops
+                                    Add Stops
                                   </Button>
                                 </div>
-                                
                               </Tab.Pane>
                               <Tab.Pane eventKey="2">
                                 <div>
@@ -637,7 +762,10 @@ const AddProgramm = (props: any) => {
                                     </div>
                                   </Row>
                                 </div>
-                                <div className="d-flex align-items-start gap-3" style={{marginTop:"120px"}}>
+                                <div
+                                  className="d-flex align-items-start gap-3"
+                                  style={{ marginTop: "120px" }}
+                                >
                                   <Button
                                     type="button"
                                     className="btn btn-light btn-label previestab"
@@ -649,10 +777,13 @@ const AddProgramm = (props: any) => {
                                   <Button
                                     type="button"
                                     className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    onClick={() => setactiveVerticalTab(3)}
+                                    // onClick={() => setactiveVerticalTab(3)}
+
+                                    onClick={handleNextStep}
+                                    disabled={isNextButtonDisabled()}
                                   >
                                     <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Go to Run Dates
+                                    Set Run Dates
                                   </Button>
 
                                   {/* Button to toggle full screen mode */}
@@ -677,13 +808,14 @@ const AddProgramm = (props: any) => {
                                     <InputGroup>PickUp Time</InputGroup>
                                     <Flatpickr
                                       className="form-control"
+                                      id="pickup-time"
                                       options={{
                                         enableTime: true,
                                         noCalendar: true,
                                         dateFormat: "H:i",
                                         time_24hr: true,
                                       }}
-                                      defaultValue={cloneLocation.state?.Time}
+                                    
                                     />
                                   </Col>
 
@@ -692,13 +824,14 @@ const AddProgramm = (props: any) => {
                                     <InputGroup>DropOff Time</InputGroup>
                                     <Flatpickr
                                       className="form-control"
+                                      id="dropoff-time"
                                       options={{
                                         enableTime: true,
                                         noCalendar: true,
                                         dateFormat: "H:i",
                                         time_24hr: true,
                                       }}
-                                      defaultValue={cloneLocation.state?.Time}
+                                   
                                     />
                                   </Col>
                                 </Row>
@@ -711,11 +844,12 @@ const AddProgramm = (props: any) => {
                                     <div className="mb-3">
                                       <Flatpickr
                                         className="form-control flatpickr-input"
+                                        id="start-date"
                                         placeholder="Select Date"
                                         options={{
                                           dateFormat: "d M, Y",
                                         }}
-                                        defaultValue={cloneLocation.state?.From}
+                                     
                                       />
                                     </div>
                                   </Col>
@@ -727,11 +861,12 @@ const AddProgramm = (props: any) => {
 
                                     <Flatpickr
                                       className="form-control flatpickr-input"
+                                      id="end-date"
                                       placeholder="Select Date"
                                       options={{
                                         dateFormat: "d M, Y",
                                       }}
-                                      defaultValue={cloneLocation.state?.Date}
+                                    
                                     />
                                   </Col>
                                 </Row>
@@ -749,6 +884,7 @@ const AddProgramm = (props: any) => {
                                       <DualListBox
                                         options={options1}
                                         selected={selected1}
+                                        
                                         onChange={(e: any) => setSelected1(e)}
                                         icons={{
                                           moveLeft: (
@@ -811,16 +947,20 @@ const AddProgramm = (props: any) => {
                                   <Col lg={5}>
                                     <Flatpickr
                                       className="form-control flatpickr-input"
+                                      id="free-date"
                                       placeholder="Select Date"
                                       options={{
                                         dateFormat: "d M, Y",
                                         mode: "multiple",
                                       }}
-                                      defaultValue={cloneLocation.state?.Date}
+                                   
                                     />
                                   </Col>
                                 </Row>
-                                <div className="d-flex align-items-start gap-3" style={{marginTop:"100px"}}>
+                                <div
+                                  className="d-flex align-items-start gap-3"
+                                  style={{ marginTop: "100px" }}
+                                >
                                   <Button
                                     type="button"
                                     className="btn btn-light btn-label previestab"
@@ -832,10 +972,13 @@ const AddProgramm = (props: any) => {
                                   <Button
                                     type="button"
                                     className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    onClick={() => setactiveVerticalTab(4)}
+                                    // onClick={() => setactiveVerticalTab(4)}
+
+                                    onClick={handleNextStep}
+                                    disabled={isNextButtonDisabled()}
                                   >
                                     <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Passengers
+                                    Add Options
                                   </Button>
                                 </div>
                               </Tab.Pane>
@@ -940,7 +1083,10 @@ const AddProgramm = (props: any) => {
                                   </Col>
                                 </Row>
 
-                                <div className="d-flex align-items-start gap-3" style={{marginTop:"100px"}}>
+                                <div
+                                  className="d-flex align-items-start gap-3"
+                                  style={{ marginTop: "100px" }}
+                                >
                                   <Button
                                     type="button"
                                     className="btn btn-light btn-label previestab"
@@ -949,8 +1095,10 @@ const AddProgramm = (props: any) => {
                                     <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
                                     Back to Run Dates
                                   </Button>
-                                 
                                 </div>
+                              </Tab.Pane>
+                              <Tab.Pane eventKey="5">
+                                
                               </Tab.Pane>
                             </Tab.Content>
                           </div>
