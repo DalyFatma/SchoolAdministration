@@ -24,7 +24,7 @@ const AuthProtected = (props: any) => {
 
   if (!userProfile && loading && !token) {
     return (
-      <Navigate to={{ pathname: "/authSchool/loginSchool" }} />
+      <Navigate to={{ pathname: "/map-tracking" }} />
     );
   }
 

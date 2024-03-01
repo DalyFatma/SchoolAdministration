@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Container,
   Card,
@@ -47,15 +47,26 @@ const options1 = [
 ];
 const center = { lat: 52.4862, lng: -1.8904 };
 
+interface Recap {
+  journeyName: string;
+  capacityRecommanded: string;
+  selected: string[];
+  selected1: string[];
+  stops: google.maps.LatLng[];
+  // dropoffTime:Date,
+  // pickupTime:Date
+}
+
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
   const [showAddStations, setShowAddStations] = useState<boolean>(false);
 
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
   const [journeyName, setJourneyName] = useState("");
+  const [capacityRecommanded, setCapacityRecommanded] = useState("");
 
-  const [selected, setSelected] = useState(["Wifi", "AC"]);
-  const [selected1, setSelected1] = useState(["Sunday", "Saturday", "Friday"]);
+  const [selected, setSelected] = useState([""]);
+  const [selected1, setSelected1] = useState([""]);
   // const [stops, setStops] = useState([{ id: 1 }]);
   const [searchResult, setSearchResult] = useState("");
   const [searchDestination, setSearchDestination] = useState("");
@@ -77,6 +88,11 @@ const AddProgramm = (props: any) => {
   const [routeDirections, setRouteDirections] =
     useState<google.maps.DirectionsResult | null>(null);
   const [stops, setStops] = useState<google.maps.LatLng[]>([]);
+  const [pickupTime, setPickupTime] = useState<Date | null>(null);
+  const [dropoffTime, setDropoffTime] =useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] =useState<Date | null>(null);
+
   const [forceRender, setForceRender] = useState(false);
 
   const [pathCoordinates, setPathCoordinates] = useState<google.maps.LatLng[]>(
@@ -86,7 +102,19 @@ const AddProgramm = (props: any) => {
   const [clickedMarkers, setClickedMarkers] = useState<number[]>([]);
   const [clickedMarker, setClickedMarker] = useState<number | null>(null);
 
+  const [stopNames, setStopNames] = useState<string[]>([]);
+
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
+
+  const [recap, setRecap] = useState<Recap>({
+    journeyName: "",
+    capacityRecommanded: "",
+    selected: [],
+    selected1: [],
+    stops: [],
+    // pickupTime:"",
+    // dropoffTime:""
+  });
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
@@ -98,6 +126,75 @@ const AddProgramm = (props: any) => {
   const originRef = useRef<any>(null);
   const destinationRef = useRef<any>(null);
 
+  useEffect(() => {
+    setRecap({
+      journeyName,
+      capacityRecommanded,
+      selected,
+      selected1,
+      stops,
+      // dropoffTime,
+      // pickupTime
+    });
+  }, [journeyName, capacityRecommanded, selected, selected1, stops]);
+
+  useEffect(() => {
+    const fetchLocationNames = async () => {
+      const names: string[] = [];
+      const geocoder = new google.maps.Geocoder();
+
+      for (const stop of recap.stops) {
+        await new Promise<void>((resolve) => {
+          geocoder.geocode(
+            { location: stop },
+            (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
+              if (status === google.maps.GeocoderStatus.OK) {
+                if (results[0]) {
+                  names.push(results[0].formatted_address);
+                }
+              }
+              resolve();
+            }
+          );
+        });
+      }
+      setStopNames(names);
+    };
+
+    if (recap.stops.length > 0) {
+      fetchLocationNames();
+    }
+  }, [recap.stops]);
+
+  
+  const renderRecapPage = () => {
+    return (
+      <div>
+        <h2>Resume</h2>
+        <b> Journey Name: </b>
+        <p> {recap.journeyName}</p>
+        <b> Origin Location Name: </b>
+        <p> {recap.journeyName}</p>
+        <b> Desrtination Location Name: </b>
+        <p> {recap.journeyName}</p>
+        <b>List of stops Locations Name:</b>
+        <ul>
+        {stopNames.map((name, index) => (
+          <li key={index}>{name}</li>
+        ))}
+      </ul>
+        <b>Capacity Recommended: </b> <p> {recap.capacityRecommanded}</p>
+        <b> Selected Options: </b> <p>{recap.selected.join(", ")}</p>
+        <b> Selected Days: </b> <p> {recap.selected1.join(", ")}</p>  
+        {/* <b>PickUp Time: </b> <p> {recap.pickupTime}</p>
+        <b>DropOff Time: </b> <p> {recap.dropoffTime}</p> */}
+      </div>
+    );
+  };
+  const handlePickupTimeChange = (selectedDates:any) => {
+    setPickupTime(selectedDates[0]);
+  };
+
   const isJourneyStepValid = () => {
     return (
       journeyName.trim() !== "" &&
@@ -105,7 +202,6 @@ const AddProgramm = (props: any) => {
       destinationRef.current?.value.trim() !== ""
     );
   };
-
   const isStopsStepValid = () => {
     return stops.length > 0;
   };
@@ -136,17 +232,21 @@ const AddProgramm = (props: any) => {
     return startDate.trim() !== "" && endDate.trim() !== "";
   };
   const isOptionsStepValid = () => {
-    return selected1.length > 0; 
+    return selected1.length > 0;
   };
 
-  const isFreeDaysStepValid=()=>{
+  const isFreeDaysStepValid = () => {
     const freeDateInput = document.getElementById(
       "free-date"
     ) as HTMLInputElement | null;
     const freeDate = freeDateInput?.value ?? "";
-    return freeDate.trim() !== "" 
-  }
-  
+    return freeDate.trim() !== "";
+  };
+
+  const isRecommandedCapacityStepValid = () => {
+    return capacityRecommanded.trim() !== "";
+  };
+
   const isNextButtonDisabled = () => {
     switch (activeVerticalTab) {
       case 1:
@@ -154,7 +254,14 @@ const AddProgramm = (props: any) => {
       case 2:
         return !isStopsStepValid();
       case 3:
-        return !isTripTimesStepValid() || !isRunDatesStepValid() || !isOptionsStepValid() || !isFreeDaysStepValid();
+        return (
+          !isTripTimesStepValid() ||
+          !isRunDatesStepValid() ||
+          !isOptionsStepValid() ||
+          !isFreeDaysStepValid()
+        );
+      case 4:
+        return !isRecommandedCapacityStepValid();
       default:
         return false;
     }
@@ -268,7 +375,7 @@ const AddProgramm = (props: any) => {
               route.legs[0].start_address === originRef.current.value &&
               route.legs[0].end_address === destinationRef.current.value
           );
-          console.log("selectedRoute", selectedRoute!);
+        
           if (!selectedRoute!) {
             console.error("Route not found");
             return;
@@ -317,7 +424,7 @@ const AddProgramm = (props: any) => {
       event.latLng.lat(),
       event.latLng.lng()
     );
-    const tolerance = 50;
+    const tolerance = 30;
     const isCloseToRoute = isPositionCloseToRoute(clickedPosition, tolerance);
 
     if (isCloseToRoute) {
@@ -414,7 +521,9 @@ const AddProgramm = (props: any) => {
                                 if (isJourneyStepValid()) {
                                   setactiveVerticalTab(2);
                                 } else {
-                                  alert('Please fill all required fields before proceeding.');
+                                  alert(
+                                    "Please fill all required fields before proceeding."
+                                  );
                                 }
                               }}
                             >
@@ -436,7 +545,9 @@ const AddProgramm = (props: any) => {
                                 if (isStopsStepValid()) {
                                   setactiveVerticalTab(3);
                                 } else {
-                                  alert('Please fill all required fields before proceeding.');
+                                  alert(
+                                    "Please fill all required fields before proceeding."
+                                  );
                                 }
                               }}
                             >
@@ -456,10 +567,17 @@ const AddProgramm = (props: any) => {
                               // onClick={() => setactiveVerticalTab(4)}
 
                               onClick={() => {
-                                if (isTripTimesStepValid() && isRunDatesStepValid() && isOptionsStepValid() && isFreeDaysStepValid()) {
+                                if (
+                                  isTripTimesStepValid() &&
+                                  isRunDatesStepValid() &&
+                                  isOptionsStepValid() &&
+                                  isFreeDaysStepValid()
+                                ) {
                                   setactiveVerticalTab(4);
                                 } else {
-                                  alert('Please fill all required fields before proceeding.');
+                                  alert(
+                                    "Please fill all required fields before proceeding."
+                                  );
                                 }
                               }}
                             >
@@ -477,14 +595,22 @@ const AddProgramm = (props: any) => {
                                   : "nav-link"
                               }
                               eventKey="5"
-                              onClick={() => setactiveVerticalTab(5)}
+                              // onClick={() => setactiveVerticalTab(5)}
+                              onClick={() => {
+                                if (isRecommandedCapacityStepValid()) {
+                                  setactiveVerticalTab(5);
+                                } else {
+                                  alert(
+                                    "Please fill all required fields before proceeding."
+                                  );
+                                }
+                              }}
                             >
                               <span className="step-title me-2">
                                 <i className="ri-close-circle-fill step-icon me-2"></i>
                               </span>
                               Resume
                             </Nav.Link>
-                            
                           </Nav>
                         </Col>
                         <Col lg={10}>
@@ -814,8 +940,9 @@ const AddProgramm = (props: any) => {
                                         noCalendar: true,
                                         dateFormat: "H:i",
                                         time_24hr: true,
+                                        onChange: handlePickupTimeChange
                                       }}
-                                    
+                                     
                                     />
                                   </Col>
 
@@ -831,7 +958,6 @@ const AddProgramm = (props: any) => {
                                         dateFormat: "H:i",
                                         time_24hr: true,
                                       }}
-                                   
                                     />
                                   </Col>
                                 </Row>
@@ -849,7 +975,6 @@ const AddProgramm = (props: any) => {
                                         options={{
                                           dateFormat: "d M, Y",
                                         }}
-                                     
                                       />
                                     </div>
                                   </Col>
@@ -866,11 +991,25 @@ const AddProgramm = (props: any) => {
                                       options={{
                                         dateFormat: "d M, Y",
                                       }}
-                                    
                                     />
                                   </Col>
                                 </Row>
-
+                                <Row>
+                                  <div className="mt-2">
+                                    <h5>Free Days</h5>
+                                  </div>
+                                  <Col lg={5}>
+                                    <Flatpickr
+                                      className="form-control flatpickr-input"
+                                      id="free-date"
+                                      placeholder="Select Date"
+                                      options={{
+                                        dateFormat: "d M, Y",
+                                        mode: "multiple",
+                                      }}
+                                    />
+                                  </Col>
+                                </Row>{" "}
                                 <Row>
                                   <Col lg={12}>
                                     <div className="mt-2">
@@ -884,7 +1023,6 @@ const AddProgramm = (props: any) => {
                                       <DualListBox
                                         options={options1}
                                         selected={selected1}
-                                        
                                         onChange={(e: any) => setSelected1(e)}
                                         icons={{
                                           moveLeft: (
@@ -940,23 +1078,6 @@ const AddProgramm = (props: any) => {
                                     </div>
                                   </Col>
                                 </Row>
-                                <Row>
-                                  <div className="mt-2">
-                                    <h5>Free Days</h5>
-                                  </div>
-                                  <Col lg={5}>
-                                    <Flatpickr
-                                      className="form-control flatpickr-input"
-                                      id="free-date"
-                                      placeholder="Select Date"
-                                      options={{
-                                        dateFormat: "d M, Y",
-                                        mode: "multiple",
-                                      }}
-                                   
-                                    />
-                                  </Col>
-                                </Row>
                                 <div
                                   className="d-flex align-items-start gap-3"
                                   style={{ marginTop: "100px" }}
@@ -995,8 +1116,9 @@ const AddProgramm = (props: any) => {
                                         required
                                         className="mb-2"
                                         name="Pax"
-                                        defaultValue={
-                                          cloneLocation.state?.PassengersNumber
+                                        value={capacityRecommanded}
+                                        onChange={(e) =>
+                                          setCapacityRecommanded(e.target.value)
                                         }
                                       />
                                     </div>
@@ -1095,10 +1217,20 @@ const AddProgramm = (props: any) => {
                                     <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
                                     Back to Run Dates
                                   </Button>
+
+                                  <Button
+                                    type="button"
+                                    className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                                    onClick={handleNextStep}
+                                    disabled={isNextButtonDisabled()}
+                                  >
+                                    <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                                    Go To Resume
+                                  </Button>
                                 </div>
                               </Tab.Pane>
                               <Tab.Pane eventKey="5">
-                                
+                                {renderRecapPage()}
                               </Tab.Pane>
                             </Tab.Content>
                           </div>
