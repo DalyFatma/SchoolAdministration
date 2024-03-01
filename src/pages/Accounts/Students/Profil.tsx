@@ -97,7 +97,7 @@ const handleClick = () => {
                         {studentDetails.state &&
                           studentDetails.state.id_file && (
                             <img
-                              src={`http://localhost:3000/studentFiles/img/${studentDetails.state.id_file}`}
+                              src={`https://bouden.uk.oxa.cloud/studentFiles/img/${studentDetails.state.id_file}`}
                               alt=""
                               className="rounded object-fit-cover"
                               style={{
@@ -488,7 +488,7 @@ const handleClick = () => {
                         <Modal.Body className="p-4">
                             <div id="alert-error-msg" className="d-none alert alert-danger py-2"></div>
                             <div>
-                                <Document file={`http://localhost:3000/studentFiles/pdf/${studentDetails.state.photo_id}`} onLoadSuccess={onDocumentLoadSuccess}>
+                                <Document file={`https://bouden.uk.oxa.cloud/studentFiles/pdf/${studentDetails.state.photo_id}`} onLoadSuccess={onDocumentLoadSuccess}>
                                     <Page pageNumber={1} />
                                 </Document>
                                

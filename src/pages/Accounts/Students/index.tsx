@@ -108,7 +108,7 @@ const Students = (props: any) => {
             <div className="d-flex align-items-center gap-2">
               <div className="flex-shrink-0">
                 <img
-                  src={`http://localhost:3000/studentFiles/img/${students.id_file}`}
+                  src={`https://bouden.uk.oxa.cloud/studentFiles/img/${students.id_file}`}
                   alt="student-img"
                   id="id_file"
                   className="avatar-xs rounded-circle user-profile-img "
