@@ -53,8 +53,13 @@ interface Recap {
   selected: string[];
   selected1: string[];
   stops: google.maps.LatLng[];
-  // dropoffTime:Date,
-  // pickupTime:Date
+  originRef: string;
+  destinationRef: string;
+  dropOff_date: string;
+  dropOff_time: string;
+  free_date: string[];
+  pickUp_date: string;
+  pickUp_time: string;
 }
 
 const AddProgramm = (props: any) => {
@@ -89,9 +94,9 @@ const AddProgramm = (props: any) => {
     useState<google.maps.DirectionsResult | null>(null);
   const [stops, setStops] = useState<google.maps.LatLng[]>([]);
   const [pickupTime, setPickupTime] = useState<Date | null>(null);
-  const [dropoffTime, setDropoffTime] =useState<Date | null>(null);
+  const [dropoffTime, setDropoffTime] = useState<Date | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] =useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   const [forceRender, setForceRender] = useState(false);
 
@@ -106,14 +111,30 @@ const AddProgramm = (props: any) => {
 
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
 
+  const originRef = useRef<any>(null);
+  const destinationRef = useRef<any>(null);
+
+  const [pickUp_time, setPickUp_time] = useState<Date | null>(null);
+  const [dropOff_time, setDropOff_time] = useState<Date | null>(null);
+
+  const [dropOff_date, setDropOff_date] = useState<Date | null>(null);
+  const [free_date, setFree_date] = useState<Date[]>([]);
+
+  const [pickUp_date, setPickUp_date] = useState<Date | null>(null);
+
   const [recap, setRecap] = useState<Recap>({
     journeyName: "",
     capacityRecommanded: "",
     selected: [],
     selected1: [],
     stops: [],
-    // pickupTime:"",
-    // dropoffTime:""
+    originRef: "",
+    destinationRef: "",
+    dropOff_date: "",
+    dropOff_time: "",
+    free_date: [],
+    pickUp_date: "",
+    pickUp_time: "",
   });
 
   const { isLoaded } = useJsApiLoader({
@@ -123,20 +144,39 @@ const AddProgramm = (props: any) => {
 
   const labels = "CDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  const originRef = useRef<any>(null);
-  const destinationRef = useRef<any>(null);
-
   useEffect(() => {
-    setRecap({
-      journeyName,
-      capacityRecommanded,
-      selected,
-      selected1,
-      stops,
-      // dropoffTime,
-      // pickupTime
-    });
-  }, [journeyName, capacityRecommanded, selected, selected1, stops]);
+    if (originRef.current && destinationRef.current) {
+      setRecap((prevRecap) => ({
+        ...prevRecap,
+        journeyName,
+        capacityRecommanded,
+        selected,
+        selected1,
+        stops,
+        originRef: originRef.current.value,
+        destinationRef: destinationRef.current.value,
+        dropOff_date: dropOff_date ? dropOff_date.toString() : "",
+        dropOff_time: dropOff_time ? dropOff_time.toString() : "",
+        free_date:
+          free_date.length > 0 ? free_date.map((date) => date.toString()) : [],
+        pickUp_date: pickUp_date ? pickUp_date.toString() : "",
+        pickUp_time: pickUp_time ? pickUp_time.toString() : "",
+      }));
+    }
+  }, [
+    journeyName,
+    capacityRecommanded,
+    selected,
+    selected1,
+    stops,
+    originRef,
+    destinationRef,
+    dropOff_date,
+    dropOff_time,
+    free_date,
+    pickUp_date,
+    pickUp_time,
+  ]);
 
   useEffect(() => {
     const fetchLocationNames = async () => {
@@ -147,7 +187,10 @@ const AddProgramm = (props: any) => {
         await new Promise<void>((resolve) => {
           geocoder.geocode(
             { location: stop },
-            (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
+            (
+              results: google.maps.GeocoderResult[],
+              status: google.maps.GeocoderStatus
+            ) => {
               if (status === google.maps.GeocoderStatus.OK) {
                 if (results[0]) {
                   names.push(results[0].formatted_address);
@@ -166,33 +209,126 @@ const AddProgramm = (props: any) => {
     }
   }, [recap.stops]);
 
-  
+  useEffect(() => {
+    console.log("Recap state:", recap);
+  }, [recap]);
+
+  const handlePickupTime = (selectedDates: any) => {
+    const formattedTime = selectedDates[0].toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    setPickUp_time(formattedTime);
+  };
+  const handleDroppOffTime = (selectedDates: any) => {
+    const formattedTime = selectedDates[0].toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    setDropOff_time(formattedTime);
+  };
+
+  const handleDateChange1 = (selectedDates: Date[]) => {
+    setPickUp_date(selectedDates[0]);
+  };
+  const handleDateChange2 = (selectedDates: Date[]) => {
+    setDropOff_date(selectedDates[0]);
+  };
+
+  const handleDateChange3 = (selectedDates: Date[]) => {
+    setFree_date(selectedDates);
+  };
+
+
+  const getWorkDates = () => {
+    const startDate = new Date(recap.pickUp_date);
+    const endDate = new Date(recap.dropOff_date);
+    const freeDates = recap.free_date.map(dateString => new Date(dateString));
+    const exceptedDays = recap.selected1;
+
+    const workDates = [];
+    for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+        const currentDay = options1[currentDate.getDay()].value;
+        const previousDay = options1[(currentDate.getDay() + 6) % 7].value; // Get the previous day
+
+        if (!freeDates.some(date => date.getTime() === currentDate.getTime()) &&
+            !exceptedDays.includes(currentDay) &&
+            !recap.selected.includes(previousDay)) {
+            workDates.push(new Date(currentDate));
+        }
+    }
+
+    return workDates;
+};
+
+const [isPopupOpen, setPopupOpen] = useState(false);
+
+const togglePopup = () => {
+  setPopupOpen(!isPopupOpen);
+};
   const renderRecapPage = () => {
     return (
-      <div>
-        <h2>Resume</h2>
+      <Row className="d-flex justify-content-space-between">
+      <Col>
         <b> Journey Name: </b>
         <p> {recap.journeyName}</p>
-        <b> Origin Location Name: </b>
-        <p> {recap.journeyName}</p>
-        <b> Desrtination Location Name: </b>
-        <p> {recap.journeyName}</p>
+        <b>Origin Location Name: </b>
+        <p>{recap.originRef}</p>
+        <b> Destination Location Name: </b>
+        <p> {recap.destinationRef}</p>
         <b>List of stops Locations Name:</b>
         <ul>
-        {stopNames.map((name, index) => (
-          <li key={index}>{name}</li>
+          {stopNames.map((name, index) => (
+            <li key={index}>{name}</li>
+          ))}
+        </ul>
+        <b>PickUp Time: </b> <p> {recap.pickUp_time}</p>
+        <b>DropOff Time: </b> <p> {recap.dropOff_time}</p>
+        <b>Start Date: </b>
+        <p>
+          {new Date(recap.pickUp_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </p>
+        <b>End Date: </b>
+        <p>
+          {new Date(recap.dropOff_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </p>
+       </Col>
+       <Col>
+       <b>Free Dates: </b>
+        <ul>
+          {Array.isArray(recap.free_date) &&
+            recap.free_date.map((dateString, index) => (
+              <li key={index}>
+                {new Date(dateString).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </li>
+            ))}
+        </ul>
+        <b>Work Dates: </b>
+      <ul>
+        {getWorkDates().map((date:any, index:any) => (
+          <li key={index}>
+            {date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+          </li>
         ))}
       </ul>
-        <b>Capacity Recommended: </b> <p> {recap.capacityRecommanded}</p>
-        <b> Selected Options: </b> <p>{recap.selected.join(", ")}</p>
-        <b> Selected Days: </b> <p> {recap.selected1.join(", ")}</p>  
-        {/* <b>PickUp Time: </b> <p> {recap.pickupTime}</p>
-        <b>DropOff Time: </b> <p> {recap.dropoffTime}</p> */}
-      </div>
+      <b>Capacity Recommended: </b> <p> {recap.capacityRecommanded}</p>
+        <b> Selected Options: </b> <p>{recap.selected.join(" ")}</p>
+        <b> Selected Days: </b> <p> {recap.selected1.join(" ")}</p>
+      </Col>
+      </Row>
     );
-  };
-  const handlePickupTimeChange = (selectedDates:any) => {
-    setPickupTime(selectedDates[0]);
   };
 
   const isJourneyStepValid = () => {
@@ -208,10 +344,10 @@ const AddProgramm = (props: any) => {
 
   const isTripTimesStepValid = () => {
     const pickupTimeInput = document.getElementById(
-      "pickup-time"
+      "pickUp_time"
     ) as HTMLInputElement | null;
     const dropoffTimeInput = document.getElementById(
-      "dropoff-time"
+      "dropOff_time"
     ) as HTMLInputElement | null;
     const pickupTime = pickupTimeInput?.value ?? "";
     const dropoffTime = dropoffTimeInput?.value ?? "";
@@ -221,10 +357,10 @@ const AddProgramm = (props: any) => {
 
   const isRunDatesStepValid = () => {
     const startDateInput = document.getElementById(
-      "start-date"
+      "pickUp_date"
     ) as HTMLInputElement | null;
     const endDateInput = document.getElementById(
-      "end-date"
+      "dropOff_date"
     ) as HTMLInputElement | null;
 
     const startDate = startDateInput?.value ?? "";
@@ -237,7 +373,7 @@ const AddProgramm = (props: any) => {
 
   const isFreeDaysStepValid = () => {
     const freeDateInput = document.getElementById(
-      "free-date"
+      "free_date"
     ) as HTMLInputElement | null;
     const freeDate = freeDateInput?.value ?? "";
     return freeDate.trim() !== "";
@@ -290,13 +426,24 @@ const AddProgramm = (props: any) => {
       const place = (
         searchResult as unknown as google.maps.places.Autocomplete
       ).getPlace();
-      const name = place.geometry?.location;
-      setNom(place.geometry?.location);
-      const status = place.business_status;
-      const formattedAddress = place.formatted_address;
-      console.log(`Name: ${name}`);
-      console.log(`Business Status: ${status}`);
-      console.log(`Formatted Address: ${formattedAddress}`);
+      const name = place.name;
+      setRecap((prevRecap) => ({
+        ...prevRecap,
+        originRef: name,
+      }));
+
+      const location = place.geometry?.location;
+      if (location) {
+        const nom = { lat: location.lat(), lng: location.lng() };
+        setNom(nom);
+        const status = place.business_status;
+        const formattedAddress = place.formatted_address;
+        console.log(`Name: ${name}`);
+        console.log(`Business Status: ${status}`);
+        console.log(`Formatted Address: ${formattedAddress}`);
+      } else {
+        console.error("Location not found in place object");
+      }
     } else {
       alert("Please enter text");
     }
@@ -307,8 +454,15 @@ const AddProgramm = (props: any) => {
       const place = (
         searchDestination as unknown as google.maps.places.Autocomplete
       ).getPlace();
-      const name = place.geometry?.location;
-      setFatma(place.geometry?.location);
+      const name = place.name;
+      setRecap((prevRecap) => ({
+        ...prevRecap,
+        destinationRef: name,
+      }));
+
+      const location = place.geometry?.location;
+      setFatma(location);
+
       const status = place.business_status;
       const formattedAddress = place.formatted_address;
       console.log(`Name: ${name}`);
@@ -352,32 +506,14 @@ const AddProgramm = (props: any) => {
         if (status === google.maps.DirectionsStatus.OK) {
           setDirectionsResponse(result);
           setRouteDirections(result);
-          // const pointToCheck = new google.maps.LatLng(49.95, -128.1);
-          // const route = result.routes[0];
-          // const path = route.overview_path;
-          // const tolerance = 0.0001;
-          // const isPointOnRoute = path.some((path: any) => {
-          //   return google.maps.geometry.poly.isLocationOnEdge(
-          //     pointToCheck,
-          //     path,
-          //     tolerance
-          //   );
-          // });
-
-          // if (isPointOnRoute) {
-          //   console.log("The point is on the route.");
-          // } else {
-          //   console.log("The point is not on the route.");
-          // }
 
           const selectedRoute = result.routes.find(
             (route) =>
               route.legs[0].start_address === originRef.current.value &&
               route.legs[0].end_address === destinationRef.current.value
           );
-        
+
           if (!selectedRoute!) {
-            console.error("Route not found");
             return;
           }
 
@@ -424,7 +560,7 @@ const AddProgramm = (props: any) => {
       event.latLng.lat(),
       event.latLng.lng()
     );
-    const tolerance = 30;
+    const tolerance = 20;
     const isCloseToRoute = isPositionCloseToRoute(clickedPosition, tolerance);
 
     if (isCloseToRoute) {
@@ -501,7 +637,10 @@ const AddProgramm = (props: any) => {
                               as="button"
                               className="nav-link done"
                               eventKey="1"
-                              onClick={() => setactiveVerticalTab(1)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setactiveVerticalTab(1);
+                              }}
                             >
                               <span className="step-title me-2">
                                 <i className="ri-close-circle-fill step-icon me-2"></i>
@@ -517,7 +656,8 @@ const AddProgramm = (props: any) => {
                               }
                               eventKey="2"
                               // onClick={() => setactiveVerticalTab(2)}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
                                 if (isJourneyStepValid()) {
                                   setactiveVerticalTab(2);
                                 } else {
@@ -541,7 +681,8 @@ const AddProgramm = (props: any) => {
                               }
                               eventKey="3"
                               // onClick={() => setactiveVerticalTab(3)}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
                                 if (isStopsStepValid()) {
                                   setactiveVerticalTab(3);
                                 } else {
@@ -566,7 +707,8 @@ const AddProgramm = (props: any) => {
                               eventKey="4"
                               // onClick={() => setactiveVerticalTab(4)}
 
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
                                 if (
                                   isTripTimesStepValid() &&
                                   isRunDatesStepValid() &&
@@ -596,7 +738,8 @@ const AddProgramm = (props: any) => {
                               }
                               eventKey="5"
                               // onClick={() => setactiveVerticalTab(5)}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
                                 if (isRecommandedCapacityStepValid()) {
                                   setactiveVerticalTab(5);
                                 } else {
@@ -652,8 +795,10 @@ const AddProgramm = (props: any) => {
                                             ref={originRef}
                                             onClick={() => {
                                               handleLocationButtonClick();
-                                              map?.panTo(nom);
-                                              map?.setZoom(15);
+                                              if (nom) {
+                                                map?.panTo(nom);
+                                                map?.setZoom(15);
+                                              }
                                             }}
                                           />
                                         </Autocomplete>
@@ -668,8 +813,10 @@ const AddProgramm = (props: any) => {
                                             ref={destinationRef}
                                             onClick={() => {
                                               handleLocationButtonClickDest();
-                                              map?.panTo(fatma);
-                                              map?.setZoom(15);
+                                              if (fatma) {
+                                                map?.panTo(fatma);
+                                                map?.setZoom(15);
+                                              }
                                             }}
                                           />
                                         </Autocomplete>
@@ -934,15 +1081,14 @@ const AddProgramm = (props: any) => {
                                     <InputGroup>PickUp Time</InputGroup>
                                     <Flatpickr
                                       className="form-control"
-                                      id="pickup-time"
+                                      id="pickUp_time"
                                       options={{
                                         enableTime: true,
                                         noCalendar: true,
                                         dateFormat: "H:i",
                                         time_24hr: true,
-                                        onChange: handlePickupTimeChange
+                                        onChange: handlePickupTime,
                                       }}
-                                     
                                     />
                                   </Col>
 
@@ -951,12 +1097,13 @@ const AddProgramm = (props: any) => {
                                     <InputGroup>DropOff Time</InputGroup>
                                     <Flatpickr
                                       className="form-control"
-                                      id="dropoff-time"
+                                      id="dropOff_time"
                                       options={{
                                         enableTime: true,
                                         noCalendar: true,
                                         dateFormat: "H:i",
                                         time_24hr: true,
+                                        onChange: handleDroppOffTime,
                                       }}
                                     />
                                   </Col>
@@ -969,11 +1116,16 @@ const AddProgramm = (props: any) => {
                                     <InputGroup>Start Date</InputGroup>
                                     <div className="mb-3">
                                       <Flatpickr
+                                        value={pickUp_date!}
+                                        onChange={handleDateChange1}
                                         className="form-control flatpickr-input"
-                                        id="start-date"
+                                        id="pickUp_date"
                                         placeholder="Select Date"
                                         options={{
                                           dateFormat: "d M, Y",
+                                          onChange: (selectedDates: Date[]) => {
+                                            setPickUp_date(selectedDates[0]);
+                                          },
                                         }}
                                       />
                                     </div>
@@ -985,11 +1137,16 @@ const AddProgramm = (props: any) => {
                                     <InputGroup>End Date</InputGroup>
 
                                     <Flatpickr
+                                      value={dropOff_date!}
+                                      onChange={handleDateChange2}
                                       className="form-control flatpickr-input"
-                                      id="end-date"
+                                      id="dropOff_date"
                                       placeholder="Select Date"
                                       options={{
                                         dateFormat: "d M, Y",
+                                        onChange: (selectedDates: Date[]) => {
+                                          setDropOff_date(selectedDates[0]);
+                                        },
                                       }}
                                     />
                                   </Col>
@@ -1000,16 +1157,21 @@ const AddProgramm = (props: any) => {
                                   </div>
                                   <Col lg={5}>
                                     <Flatpickr
+                                      value={free_date!}
+                                      onChange={handleDateChange3}
                                       className="form-control flatpickr-input"
-                                      id="free-date"
+                                      id="free_date"
                                       placeholder="Select Date"
                                       options={{
                                         dateFormat: "d M, Y",
                                         mode: "multiple",
+                                        onChange: (selectedDates: Date[]) => {
+                                          setFree_date(selectedDates);
+                                        },
                                       }}
                                     />
                                   </Col>
-                                </Row>{" "}
+                                </Row>
                                 <Row>
                                   <Col lg={12}>
                                     <div className="mt-2">
@@ -1231,6 +1393,8 @@ const AddProgramm = (props: any) => {
                               </Tab.Pane>
                               <Tab.Pane eventKey="5">
                                 {renderRecapPage()}
+
+                                
                               </Tab.Pane>
                             </Tab.Content>
                           </div>
