@@ -2,18 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Container,
   Card,
-  Accordion,
   Row,
   Col,
   Form,
   Tab,
-  Nav,
   Button,
   InputGroup,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import { GoogleApiWrapper, Map } from "google-maps-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 import DualListBox from "react-dual-listbox";
 import "react-dual-listbox/lib/react-dual-listbox.css";
@@ -23,7 +20,6 @@ import {
   Marker,
   Autocomplete,
   useJsApiLoader,
-  LoadScript,
 } from "@react-google-maps/api";
 
 import Swal from "sweetalert2";
@@ -65,6 +61,21 @@ interface Recap {
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
   const [showAddStations, setShowAddStations] = useState<boolean>(false);
+  const [pickupTime, setPickupTime] = useState<Date | null>(null);
+  const [dropoffTime, setDropoffTime] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [forceRender, setForceRender] = useState(false);
+  const [pathCoordinates, setPathCoordinates] = useState<google.maps.LatLng[]>(
+    []
+  );
+  const [clickedMarker, setClickedMarker] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState(1);
+  const [routeCoordinates, setRouteCoordinates] = useState(null);
+  const [distance, setDistance] = useState("");
+  const [duration, setDuration] = useState("");
+  const [originLocation, setOriginLocation] = useState("");
+  const [destinationLocation, setDestinationLocation] = useState("");
 
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
   const [journeyName, setJourneyName] = useState("");
@@ -75,37 +86,21 @@ const AddProgramm = (props: any) => {
   // const [stops, setStops] = useState([{ id: 1 }]);
   const [searchResult, setSearchResult] = useState("");
   const [searchDestination, setSearchDestination] = useState("");
+  const [searchStop, setSearchStop] = useState("");
   const [fatma, setFatma] = useState<any>();
+  const [stop, setStop] = useState<any>();
   const [nom, setNom] = useState<any>();
-  const cloneLocation = useLocation();
-
   const [map, setMap] = useState<google.maps.Map<Element> | null>(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedStop, setSelectedStop] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [directionsResponse, setDirectionsResponse] =
     useState<google.maps.DirectionsResult | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [distance, setDistance] = useState("");
-  const [duration, setDuration] = useState("");
+  const [clickedMarkers, setClickedMarkers] = useState<number[]>([]);
 
-  const [routeCoordinates, setRouteCoordinates] = useState(null);
-  const [activeTab, setActiveTab] = useState(1);
   const [routeDirections, setRouteDirections] =
     useState<google.maps.DirectionsResult | null>(null);
-  const [stops, setStops] = useState<google.maps.LatLng[]>([]);
-  const [pickupTime, setPickupTime] = useState<Date | null>(null);
-  const [dropoffTime, setDropoffTime] = useState<Date | null>(null);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-
-  const [forceRender, setForceRender] = useState(false);
-
-  const [pathCoordinates, setPathCoordinates] = useState<google.maps.LatLng[]>(
-    []
-  );
-
-  const [clickedMarkers, setClickedMarkers] = useState<number[]>([]);
-  const [clickedMarker, setClickedMarker] = useState<number | null>(null);
 
   const [stopNames, setStopNames] = useState<string[]>([]);
 
@@ -113,7 +108,12 @@ const AddProgramm = (props: any) => {
 
   const originRef = useRef<any>(null);
   const destinationRef = useRef<any>(null);
+  const stopRef = useRef<any>(null);
 
+  const [destSwitchRef, setDestSwitchRef] = useState<google.maps.LatLng[]>([]);
+  const [originSwitchRef, setOriginSwitchRef] = useState<google.maps.LatLng[]>(
+    []
+  );
   const [pickUp_time, setPickUp_time] = useState<Date | null>(null);
   const [dropOff_time, setDropOff_time] = useState<Date | null>(null);
 
@@ -121,6 +121,12 @@ const AddProgramm = (props: any) => {
   const [free_date, setFree_date] = useState<Date[]>([]);
 
   const [pickUp_date, setPickUp_date] = useState<Date | null>(null);
+
+  const [isOriginFirst, setIsOriginFirst] = useState(true);
+
+  const [switched, setSwitched] = useState(false);
+
+  const [stops2, setStops2] = useState([{ id: 1 }]);
 
   const [recap, setRecap] = useState<Recap>({
     journeyName: "",
@@ -137,10 +143,26 @@ const AddProgramm = (props: any) => {
     pickUp_time: "",
   });
 
+  const [test, setTest] = useState("");
+  const [test2, setTest2] = useState("");
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
     libraries: ["places"],
   });
+
+  const [stops, setStops] = useState<google.maps.LatLng[]>([]);
+
+  const [waypts, setWaypts] = useState<google.maps.DirectionsWaypoint[]>([]);
+
+  const handleAddStopClick = () => {
+    console.log(stop);
+    setStops2((prevStop) => [...prevStop, { id: prevStop.length + 1 }]);
+  };
+
+  const handleRemoveStopClick = (idToRemove: any) => {
+    setStops2((prevStop) => prevStop.filter((stop) => stop.id !== idToRemove));
+  };
 
   const labels = "CDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -178,40 +200,40 @@ const AddProgramm = (props: any) => {
     pickUp_time,
   ]);
 
-  useEffect(() => {
-    const fetchLocationNames = async () => {
-      const names: string[] = [];
-      const geocoder = new google.maps.Geocoder();
+  // useEffect(() => {
+  //   const fetchLocationNames = async () => {
+  //     const names: string[] = [];
+  //     const geocoder = new google.maps.Geocoder();
 
-      for (const stop of recap.stops) {
-        await new Promise<void>((resolve) => {
-          geocoder.geocode(
-            { location: stop },
-            (
-              results: google.maps.GeocoderResult[],
-              status: google.maps.GeocoderStatus
-            ) => {
-              if (status === google.maps.GeocoderStatus.OK) {
-                if (results[0]) {
-                  names.push(results[0].formatted_address);
-                }
-              }
-              resolve();
-            }
-          );
-        });
-      }
-      setStopNames(names);
-    };
+  //     for (const stop of recap.stops) {
+  //       await new Promise<void>((resolve) => {
+  //         geocoder.geocode(
+  //           { location: stop },
+  //           (
+  //             results: google.maps.GeocoderResult[],
+  //             status: google.maps.GeocoderStatus
+  //           ) => {
+  //             if (status === google.maps.GeocoderStatus.OK) {
+  //               if (results[0]) {
+  //                 names.push(results[0].formatted_address);
+  //               }
+  //             }
+  //             resolve();
+  //           }
+  //         );
+  //       });
+  //     }
+  //     setStopNames(names);
+  //   };
 
-    if (recap.stops.length > 0) {
-      fetchLocationNames();
-    }
-  }, [recap.stops]);
+  //   if (recap.stops.length > 0) {
+  //     fetchLocationNames();
+  //   }
+  // }, [recap.stops]);
 
-  useEffect(() => {
-    console.log("Recap state:", recap);
-  }, [recap]);
+  // useEffect(() => {
+  //   console.log("Recap state:", recap);
+  // }, [recap]);
 
   const handlePickupTime = (selectedDates: any) => {
     const formattedTime = selectedDates[0].toLocaleTimeString([], {
@@ -239,94 +261,100 @@ const AddProgramm = (props: any) => {
     setFree_date(selectedDates);
   };
 
-
   const getWorkDates = () => {
-    const startDate = new Date(recap.pickUp_date);
-    const endDate = new Date(recap.dropOff_date);
-    const freeDates = recap.free_date.map(dateString => new Date(dateString));
-    const exceptedDays = recap.selected1;
+    let workDates = [];
 
-    const workDates = [];
-    for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
-        const currentDay = options1[currentDate.getDay()].value;
-        const previousDay = options1[(currentDate.getDay() + 6) % 7].value; // Get the previous day
+    let startDate = pickUp_date;
+    let endDate = dropOff_date;
 
-        if (!freeDates.some(date => date.getTime() === currentDate.getTime()) &&
-            !exceptedDays.includes(currentDay) &&
-            !recap.selected.includes(previousDay)) {
+    if (startDate && endDate && endDate >= startDate) {
+      let currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        if (
+          !free_date.find(
+            (freeDay) => freeDay.toDateString() === currentDate.toDateString()
+          )
+        ) {
+          if (
+            !selected1.includes(
+              currentDate.toLocaleString("en-us", { weekday: "long" })
+            )
+          ) {
             workDates.push(new Date(currentDate));
+          }
         }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
     }
-
+    // console.log("workDates", workDates);
     return workDates;
-};
+  };
 
-const [isPopupOpen, setPopupOpen] = useState(false);
-
-const togglePopup = () => {
-  setPopupOpen(!isPopupOpen);
-};
   const renderRecapPage = () => {
     return (
       <Row className="d-flex justify-content-space-between">
-      <Col>
-        <b> Journey Name: </b>
-        <p> {recap.journeyName}</p>
-        <b>Origin Location Name: </b>
-        <p>{recap.originRef}</p>
-        <b> Destination Location Name: </b>
-        <p> {recap.destinationRef}</p>
-        <b>List of stops Locations Name:</b>
-        <ul>
-          {stopNames.map((name, index) => (
-            <li key={index}>{name}</li>
-          ))}
-        </ul>
-        <b>PickUp Time: </b> <p> {recap.pickUp_time}</p>
-        <b>DropOff Time: </b> <p> {recap.dropOff_time}</p>
-        <b>Start Date: </b>
-        <p>
-          {new Date(recap.pickUp_date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </p>
-        <b>End Date: </b>
-        <p>
-          {new Date(recap.dropOff_date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </p>
-       </Col>
-       <Col>
-       <b>Free Dates: </b>
-        <ul>
-          {Array.isArray(recap.free_date) &&
-            recap.free_date.map((dateString, index) => (
+        <Col>
+          <b> Journey Name: </b>
+          <p> {recap.journeyName}</p>
+          <b>Origin Location Name: </b>
+          <p>{recap.originRef}</p>
+          <b> Destination Location Name: </b>
+          <p> {recap.destinationRef}</p>
+          <b>List of stops Locations Name:</b>
+          <ul>
+            {stopNames.map((name, index) => (
+              <li key={index}>{name}</li>
+            ))}
+          </ul>
+          <b>PickUp Time: </b> <p> {recap.pickUp_time}</p>
+          <b>DropOff Time: </b> <p> {recap.dropOff_time}</p>
+          <b>Start Date: </b>
+          <p>
+            {new Date(recap.pickUp_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </p>
+          <b>End Date: </b>
+          <p>
+            {new Date(recap.dropOff_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </p>
+        </Col>
+        <Col>
+          <b>Free Dates: </b>
+          <ul>
+            {Array.isArray(recap.free_date) &&
+              recap.free_date.map((dateString, index) => (
+                <li key={index}>
+                  {new Date(dateString).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </li>
+              ))}
+          </ul>
+          <b>Work Dates: </b>
+          <ul>
+            {getWorkDates().map((date: any, index: any) => (
               <li key={index}>
-                {new Date(dateString).toLocaleDateString("en-US", {
+                {date.toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "short",
                   day: "numeric",
                 })}
               </li>
             ))}
-        </ul>
-        <b>Work Dates: </b>
-      <ul>
-        {getWorkDates().map((date:any, index:any) => (
-          <li key={index}>
-            {date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-          </li>
-        ))}
-      </ul>
-      <b>Capacity Recommended: </b> <p> {recap.capacityRecommanded}</p>
-        <b> Selected Options: </b> <p>{recap.selected.join(" ")}</p>
-        <b> Selected Days: </b> <p> {recap.selected1.join(" ")}</p>
-      </Col>
+          </ul>
+          <b>Capacity Recommended: </b> <p> {recap.capacityRecommanded}</p>
+          <b> Selected Options: </b> <p>{recap.selected.join(" ")}</p>
+          <b> Except Days: </b> <p> {recap.selected1.join(" ")}</p>
+        </Col>
       </Row>
     );
   };
@@ -337,9 +365,6 @@ const togglePopup = () => {
       originRef.current?.value.trim() !== "" &&
       destinationRef.current?.value.trim() !== ""
     );
-  };
-  const isStopsStepValid = () => {
-    return stops.length > 0;
   };
 
   const isTripTimesStepValid = () => {
@@ -387,16 +412,15 @@ const togglePopup = () => {
     switch (activeVerticalTab) {
       case 1:
         return !isJourneyStepValid();
+
       case 2:
-        return !isStopsStepValid();
-      case 3:
         return (
           !isTripTimesStepValid() ||
           !isRunDatesStepValid() ||
           !isOptionsStepValid() ||
           !isFreeDaysStepValid()
         );
-      case 4:
+      case 3:
         return !isRecommandedCapacityStepValid();
       default:
         return false;
@@ -417,6 +441,10 @@ const togglePopup = () => {
     setSearchResult(autocomplete);
   }
 
+  function onLoadStop(autocomplete: any) {
+    setSearchStop(autocomplete);
+  }
+
   function onLoadDest(autocomplete: any) {
     setSearchDestination(autocomplete);
   }
@@ -426,11 +454,12 @@ const togglePopup = () => {
       const place = (
         searchResult as unknown as google.maps.places.Autocomplete
       ).getPlace();
+      console.log("place", place);
       const name = place.name;
-      setRecap((prevRecap) => ({
-        ...prevRecap,
-        originRef: name,
-      }));
+      // setRecap((prevRecap) => ({
+      //   ...prevRecap,
+      //   originRef: name,
+      // }));
 
       const location = place.geometry?.location;
       if (location) {
@@ -438,6 +467,39 @@ const togglePopup = () => {
         setNom(nom);
         const status = place.business_status;
         const formattedAddress = place.formatted_address;
+        console.log(`Name: ${name}`);
+        console.log(`Business Status: ${status}`);
+        console.log(`Formatted Address: ${formattedAddress}`);
+      } else {
+        console.error("Location not found in place object");
+      }
+    } else {
+      alert("Please enter text");
+    }
+  }
+
+  function onPlaceChangedStop() {
+    if (searchStop != null) {
+      const place = (
+        searchStop as unknown as google.maps.places.Autocomplete
+      ).getPlace();
+      const name = place.name;
+      console.log("place", place);
+      const location = place.geometry?.location;
+      if (location) {
+        const nom = { lat: location.lat(), lng: location.lng() };
+        setStop(nom);
+        // setRecap((prevRecap) => ({
+        //   ...prevRecap,
+        //   stopRef: name,
+        // }));
+        const status = place.business_status;
+        const formattedAddress = place.formatted_address;
+        const wayPoint = {
+          location: formattedAddress,
+          stopover: true,
+        };
+        setWaypts((waypts) => [...waypts, wayPoint]);
         console.log(`Name: ${name}`);
         console.log(`Business Status: ${status}`);
         console.log(`Formatted Address: ${formattedAddress}`);
@@ -473,58 +535,32 @@ const togglePopup = () => {
     }
   }
 
+  // function onPlaceChangedOrigin() {
+  //   if (searchResult != null) {
+  //     const place = searchResult as google.maps.places.PlaceResult;
+  //     const name = place.name;
+  //     setOriginLocation(name);
+  //   }
+  // }
+
+  // function onPlaceChangedDestination() {
+  //   if (searchDestination != null) {
+  //     const place = searchDestination as google.maps.places.PlaceResult;
+  //     const name = place.name;
+  //     setDestinationLocation(name);
+  //   }
+  // }
+
   const handleLocationButtonClick = () => {
     setSelectedLocation(nom);
+  };
+  const handleLocationButtonClickStop = () => {
+    setSelectedStop(stop);
   };
 
   const handleLocationButtonClickDest = () => {
     setSelectedDestination(fatma);
   };
-  async function calculateRoute(): Promise<void> {
-    if (
-      originRef?.current!.value === "" ||
-      destinationRef?.current!.value === "" ||
-      !map
-    ) {
-      console.error("Invalid inputs or map not loaded.");
-      return;
-    }
-
-    setLoading(true);
-
-    const directionsService = new google.maps.DirectionsService();
-
-    directionsService.route(
-      {
-        origin: originRef.current.value,
-        destination: destinationRef.current.value,
-        travelMode: google.maps.TravelMode.DRIVING,
-      },
-      (result, status) => {
-        setLoading(false);
-
-        if (status === google.maps.DirectionsStatus.OK) {
-          setDirectionsResponse(result);
-          setRouteDirections(result);
-
-          const selectedRoute = result.routes.find(
-            (route) =>
-              route.legs[0].start_address === originRef.current.value &&
-              route.legs[0].end_address === destinationRef.current.value
-          );
-
-          if (!selectedRoute!) {
-            return;
-          }
-
-          setDistance(selectedRoute.legs[0].distance.text);
-          setDuration(selectedRoute.legs[0].duration.text);
-        } else {
-          console.error("Error fetching directions:", status);
-        }
-      }
-    );
-  }
 
   function clearRoute() {
     setDirectionsResponse(null);
@@ -602,7 +638,144 @@ const togglePopup = () => {
   const handleToggleFullScreen = () => {
     setIsMapFullScreen(!isMapFullScreen);
   };
+  const switchLocations = () => {
+    setIsOriginFirst(!isOriginFirst);
+  };
 
+  const toggleSwitch = () => {
+    console.log("Switch button clicked");
+    setSwitched(!switched);
+  };
+
+  async function calculateRoute(): Promise<void> {
+    setOriginSwitchRef(originRef?.current!.value);
+    console.log(originSwitchRef);
+    setDestSwitchRef(destinationRef?.current!.value);
+    console.log(destSwitchRef);
+    console.log("waypoints", waypts);
+    if (
+      originRef?.current!.value === "" ||
+      destinationRef?.current!.value === "" ||
+      !map
+    ) {
+      console.error("Invalid inputs or map not loaded.");
+      return;
+    }
+
+    setLoading(true);
+
+    const directionsService = new google.maps.DirectionsService();
+
+    directionsService.route(
+      {
+        origin: originRef.current.value,
+        destination: destinationRef.current.value,
+        travelMode: google.maps.TravelMode.DRIVING,
+        waypoints: waypts,
+      },
+      (result, status) => {
+        setLoading(false);
+
+        if (status === google.maps.DirectionsStatus.OK) {
+          setDirectionsResponse(result);
+          setRouteDirections(result);
+
+          const selectedRoute = result.routes.find((route) => {
+            setTest(route.legs[0].distance.text.toString());
+            setTest2(route.legs[0].duration.text.toString());
+
+            console.log("test", test);
+            console.log("originRef.current.value", originRef.current.value);
+            console.log(
+              "route.legs[0].start_address",
+              route.legs[0].start_address
+            );
+            console.log(
+              "destinationRef.current.value",
+              destinationRef.current.value
+            );
+            console.log("route.legs[0].end_address", route.legs[0].end_address);
+          });
+
+          if (!selectedRoute) {
+            console.log("distanceInMeters");
+            return;
+          }
+
+          const distanceInMeters = selectedRoute.legs[0].distance.value;
+          const durationInSeconds = selectedRoute.legs[0].duration.value;
+
+          console.log("distanceInMeters", distanceInMeters);
+          console.log("durationInSeconds", durationInSeconds);
+        } else {
+          console.error("Error fetching directions:", status);
+        }
+      }
+    );
+  }
+
+  async function switchRoute(): Promise<void> {
+    console.log("waypoints", waypts);
+    // if (
+    //   originSwitchRef?.current!.value === "" ||
+    //   destSwitchRef?.current!.value === "" ||
+    //   !map
+    // ) {
+    //   console.error("Invalid inputs or map not loaded.");
+    //   return;
+    // }
+
+    setLoading(true);
+
+    const directionsService = new google.maps.DirectionsService();
+
+    directionsService.route(
+      {
+        origin: destinationRef.current.value,
+        destination: originRef.current.value,
+        travelMode: google.maps.TravelMode.DRIVING,
+        waypoints: waypts.reverse(),
+      },
+      (result, status) => {
+        setLoading(false);
+
+        if (status === google.maps.DirectionsStatus.OK) {
+          setDirectionsResponse(result);
+          setRouteDirections(result);
+
+          const selectedRoute = result.routes.find((route) => {
+            setTest(route.legs[0].distance.text.toString());
+            setTest2(route.legs[0].duration.text.toString());
+
+            console.log("test", test);
+            console.log("originRef.current.value", originRef.current.value);
+            console.log(
+              "route.legs[0].start_address",
+              route.legs[0].start_address
+            );
+            console.log(
+              "destinationRef.current.value",
+              destinationRef.current.value
+            );
+            console.log("route.legs[0].end_address", route.legs[0].end_address);
+          });
+
+          if (!selectedRoute) {
+            console.log("distanceInMeters");
+            return;
+          }
+
+          const distanceInMeters = selectedRoute.legs[0].distance.value;
+          const durationInSeconds = selectedRoute.legs[0].duration.value;
+
+          console.log("distanceInMeters", distanceInMeters);
+          console.log("durationInSeconds", durationInSeconds);
+        } else {
+          console.error("Error fetching directions:", status);
+        }
+      }
+    );
+  }
   return (
     <React.Fragment>
       <div className="page-content">
@@ -625,142 +798,11 @@ const togglePopup = () => {
                   <Form className="vertical-navs-step">
                     <Tab.Container activeKey={activeVerticalTab}>
                       <Row className="gy-5">
-                        <Col lg={2}>
-                          <Nav
-                            as="div"
-                            variant="pills"
-                            className="nav flex-column custom-nav nav-pills"
-                            role="tablist"
-                            aria-orientation="vertical"
-                          >
-                            <Nav.Link
-                              as="button"
-                              className="nav-link done"
-                              eventKey="1"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setactiveVerticalTab(1);
-                              }}
-                            >
-                              <span className="step-title me-2">
-                                <i className="ri-close-circle-fill step-icon me-2"></i>
-                              </span>
-                              Journey
-                            </Nav.Link>
-                            <Nav.Link
-                              as="button"
-                              className={
-                                activeVerticalTab > 2
-                                  ? "nav-link done"
-                                  : "nav-link"
-                              }
-                              eventKey="2"
-                              // onClick={() => setactiveVerticalTab(2)}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (isJourneyStepValid()) {
-                                  setactiveVerticalTab(2);
-                                } else {
-                                  alert(
-                                    "Please fill all required fields before proceeding."
-                                  );
-                                }
-                              }}
-                            >
-                              <span className="step-title me-2">
-                                <i className="ri-close-circle-fill step-icon me-2"></i>
-                              </span>
-                              Stops
-                            </Nav.Link>
-                            <Nav.Link
-                              as="button"
-                              className={
-                                activeVerticalTab > 3
-                                  ? "nav-link done"
-                                  : "nav-link"
-                              }
-                              eventKey="3"
-                              // onClick={() => setactiveVerticalTab(3)}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (isStopsStepValid()) {
-                                  setactiveVerticalTab(3);
-                                } else {
-                                  alert(
-                                    "Please fill all required fields before proceeding."
-                                  );
-                                }
-                              }}
-                            >
-                              <span className="step-title me-2">
-                                <i className="ri-close-circle-fill step-icon me-2"></i>
-                              </span>
-                              Run Dates
-                            </Nav.Link>
-                            <Nav.Link
-                              as="button"
-                              className={
-                                activeVerticalTab > 4
-                                  ? "nav-link done"
-                                  : "nav-link"
-                              }
-                              eventKey="4"
-                              // onClick={() => setactiveVerticalTab(4)}
-
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (
-                                  isTripTimesStepValid() &&
-                                  isRunDatesStepValid() &&
-                                  isOptionsStepValid() &&
-                                  isFreeDaysStepValid()
-                                ) {
-                                  setactiveVerticalTab(4);
-                                } else {
-                                  alert(
-                                    "Please fill all required fields before proceeding."
-                                  );
-                                }
-                              }}
-                            >
-                              <span className="step-title me-2">
-                                <i className="ri-close-circle-fill step-icon me-2"></i>
-                              </span>
-                              Options
-                            </Nav.Link>
-
-                            <Nav.Link
-                              as="button"
-                              className={
-                                activeVerticalTab > 5
-                                  ? "nav-link done"
-                                  : "nav-link"
-                              }
-                              eventKey="5"
-                              // onClick={() => setactiveVerticalTab(5)}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (isRecommandedCapacityStepValid()) {
-                                  setactiveVerticalTab(5);
-                                } else {
-                                  alert(
-                                    "Please fill all required fields before proceeding."
-                                  );
-                                }
-                              }}
-                            >
-                              <span className="step-title me-2">
-                                <i className="ri-close-circle-fill step-icon me-2"></i>
-                              </span>
-                              Resume
-                            </Nav.Link>
-                          </Nav>
-                        </Col>
                         <Col lg={10}>
                           <div className="px-lg-4">
                             <Tab.Content>
                               <Tab.Pane eventKey="1">
-                                <div>
+                                <Container>
                                   <Row>
                                     <Col lg={4}>
                                       <Form.Label htmlFor="Name">
@@ -778,21 +820,25 @@ const togglePopup = () => {
                                           setJourneyName(e.target.value)
                                         }
                                       />
-                                    </Col>
-
-                                    <Col lg={8}>
                                       <Form.Label htmlFor="customerName-field">
                                         coordinations
                                       </Form.Label>
+
                                       <InputGroup className="mb-3">
+                                        <InputGroup.Text id="basic-addon1">
+                                          From
+                                        </InputGroup.Text>
+
                                         <Autocomplete
                                           onPlaceChanged={onPlaceChanged}
                                           onLoad={onLoad}
                                         >
                                           <Form.Control
                                             type="text"
+                                            style={{ width: "285px" }}
                                             placeholder="Origin"
                                             ref={originRef}
+                                            id="origin"
                                             onClick={() => {
                                               handleLocationButtonClick();
                                               if (nom) {
@@ -802,6 +848,11 @@ const togglePopup = () => {
                                             }}
                                           />
                                         </Autocomplete>
+                                      </InputGroup>
+                                      <InputGroup className="mb-3">
+                                        <InputGroup.Text id="basic-addon1">
+                                          To
+                                        </InputGroup.Text>
 
                                         <Autocomplete
                                           onPlaceChanged={onPlaceChangedDest}
@@ -809,8 +860,10 @@ const togglePopup = () => {
                                         >
                                           <Form.Control
                                             type="text"
+                                            style={{ width: "300px" }}
                                             placeholder="Destination"
                                             ref={destinationRef}
+                                            id="dest"
                                             onClick={() => {
                                               handleLocationButtonClickDest();
                                               if (fatma) {
@@ -820,259 +873,177 @@ const togglePopup = () => {
                                             }}
                                           />
                                         </Autocomplete>
+                                      </InputGroup>
+
+                                      <div className="flex">
+                                        <Button
+                                          onClick={switchRoute}
+                                          className="btn btn-success w-lg custom-button d-grid gap-2"
+                                        >
+                                          Switch
+                                        </Button>
+
                                         {loading ? (
                                           <p>Calculating route...</p>
                                         ) : (
                                           <Button
                                             type="submit"
                                             onClick={calculateRoute}
+                                            className="custom-button"
                                           >
-                                            Calculate Route
+                                            Plan Route
                                           </Button>
                                         )}
-                                      </InputGroup>
-                                    </Col>
-                                    <Col>
-                                      {/* <Form.Label>
-                                          Distance: {distance}{" "}
-                                        </Form.Label>
-                                        <Form.Label>
-                                          Duration: {duration}{" "}
-                                        </Form.Label>  */}
+                                      </div>
 
-                                      {/* <Button
-                                        aria-label="center back"
-                                        onClick={() => {
-                                          map?.panTo(center);
-                                          map?.setZoom(15);
-                                        }}
-                                      >
-                                        Return Center
-                                      </Button> */}
+                                      <div style={{ marginTop: "20px" }}>
+                                        {stops2.map((stop, index) => (
+                                          <Row>
+                                            <Col lg={6} key={index}>
+                                              <div className="mb-3">
+                                                <Form.Label htmlFor="customerName-field">
+                                                  Stop {index + 1}
+                                                </Form.Label>
+                                                <Autocomplete
+                                                  onPlaceChanged={
+                                                    onPlaceChangedStop
+                                                  }
+                                                  onLoad={onLoadStop}
+                                                >
+                                                  <Form.Control
+                                                    type="text"
+                                                    style={{ width: "300px" }}
+                                                    placeholder="Stop"
+                                                    ref={stopRef}
+                                                    id="stop"
+                                                    onClick={() => {
+                                                      handleLocationButtonClickStop();
+                                                    }}
+                                                  />
+                                                </Autocomplete>
+                                              </div>
+                                            </Col>
+                                            {/* <Col lg={3}>
+                                              <button
+                                                type="button"
+                                                className="btn btn-danger btn-icon"
+                                                onClick={() =>
+                                                  handleRemoveStopClick(stop.id)
+                                                }
+                                                style={{ marginTop: "25px" }}
+                                              >
+                                                <i className="ri-delete-bin-5-line"></i>
+                                              </button>
+                                            </Col> */}
+                                          </Row>
+                                        ))}
+                                        <Link
+                                          to="#"
+                                          id="add-item"
+                                          className="btn btn-soft-secondary fw-medium"
+                                          onClick={handleAddStopClick}
+                                        >
+                                          <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
+                                            {" "}
+                                            Via
+                                          </i>
+                                        </Link>
+                                      </div>
                                     </Col>
-                                  </Row>
-                                </div>
-                                <div>
-                                  <Row
-                                    style={{
-                                      position: "relative",
-                                      flexDirection: "column",
-                                      alignItems: "center",
-                                      height: "50vh",
-                                      width: "150vw",
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        position: "absolute",
-                                        left: "0",
-                                        height: "100%",
-                                        width: "100%",
-                                      }}
-                                    >
-                                      <GoogleMap
-                                        center={center}
-                                        zoom={15}
-                                        mapContainerStyle={{
-                                          width: isMapFullScreen
-                                            ? "100vw"
-                                            : "43%",
-                                          height: isMapFullScreen
-                                            ? "100vh"
-                                            : "120%",
-                                        }}
-                                        options={{
-                                          zoomControl: false,
-                                          streetViewControl: false,
-                                          mapTypeControl: false,
-                                          fullscreenControl: true,
 
-                                          fullscreenControlOptions: {
-                                            position:
-                                              google.maps.ControlPosition
-                                                .TOP_RIGHT,
-                                          },
-                                        }}
-                                        onLoad={(map) => setMap(map)}
-                                      >
-                                        {/* Markers for origin, destination, and route */}
-                                        {/* Logic to render markers based on selectedLocation, selectedDestination, and directionsResponse */}
-                                        {selectedLocation && (
-                                          <Marker position={nom} />
-                                        )}
-                                        {selectedDestination && (
-                                          <Marker position={fatma} />
-                                        )}
-                                        {directionsResponse && (
-                                          <DirectionsRenderer
-                                            directions={directionsResponse}
-                                          />
-                                        )}
-                                      </GoogleMap>
-                                      <Button
-                                        aria-label="center back"
-                                        onClick={clearRoute}
-                                        variant="danger"
+                                    <Col lg={8}>
+                                      <div
                                         style={{
                                           position: "absolute",
-                                          top: "10px",
-                                          left: "10px",
-                                          zIndex: 1000,
-                                          marginLeft: "15px",
+                                          left: "0",
+                                          height: "130%",
+                                          width: "330%",
                                         }}
                                       >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          viewBox="0 0 20 20"
-                                          fill="currentColor"
-                                          width="20"
-                                          height="20"
+                                        <GoogleMap
+                                          center={center}
+                                          zoom={15}
+                                          mapContainerStyle={{
+                                            width: isMapFullScreen
+                                              ? "100vw"
+                                              : "43%",
+                                            height: isMapFullScreen
+                                              ? "100vh"
+                                              : "120%",
+                                          }}
+                                          options={{
+                                            zoomControl: false,
+                                            streetViewControl: false,
+                                            mapTypeControl: false,
+                                            fullscreenControl: true,
+
+                                            fullscreenControlOptions: {
+                                              position:
+                                                google.maps.ControlPosition
+                                                  .TOP_RIGHT,
+                                            },
+                                          }}
+                                          onLoad={(map) => setMap(map)}
                                         >
-                                          <path
-                                            fillRule="evenodd"
-                                            d="M16.146 14.146a.5.5 0 0 1-.708 0L8.5 7.207l-3.938 3.937a.5.5 0 0 1-.707-.707l4.146-4.146a1.5 1.5 0 0 1 2.121 0l6 6a.5.5 0 0 1 0 .708zM6.646 9.354a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"
-                                          />
-                                        </svg>
-                                        Clear Route
-                                      </Button>
-                                    </div>
+                                          {selectedLocation && (
+                                            <Marker position={nom} />
+                                          )}
+                                          {selectedDestination && (
+                                            <Marker position={fatma} />
+                                          )}
+                                          {directionsResponse && (
+                                            <DirectionsRenderer
+                                              directions={directionsResponse}
+                                            />
+                                          )}
+                                        </GoogleMap>
+                                        <Button
+                                          aria-label="center back"
+                                          onClick={clearRoute}
+                                          variant="danger"
+                                          style={{
+                                            position: "absolute",
+                                            top: "10px",
+                                            left: "10px",
+                                            zIndex: 1000,
+                                            marginLeft: "15px",
+                                          }}
+                                        >
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                            width="20"
+                                            height="20"
+                                          >
+                                            <path
+                                              fillRule="evenodd"
+                                              d="M16.146 14.146a.5.5 0 0 1-.708 0L8.5 7.207l-3.938 3.937a.5.5 0 0 1-.707-.707l4.146-4.146a1.5 1.5 0 0 1 2.121 0l6 6a.5.5 0 0 1 0 .708zM6.646 9.354a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"
+                                            />
+                                          </svg>
+                                          Clear Route
+                                        </Button>
+                                      </div>
+                                    </Col>
                                   </Row>
-                                </div>
-
+                                </Container>
                                 <div
-                                  className="d-flex align-items-start"
-                                  style={{ marginTop: "110px" }}
+                                  className="d-flex align-items-end"
+                                  style={{ marginTop: "250px" }}
                                 >
                                   <Button
                                     type="button"
-                                    className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    // onClick={() => setactiveVerticalTab(2)}
-
+                                    className="btn btn-success btn-label right ms-auto nexttab "
                                     onClick={handleNextStep}
                                     disabled={isNextButtonDisabled()}
                                   >
                                     <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Add Stops
+                                    Set Run dates
                                   </Button>
                                 </div>
                               </Tab.Pane>
+
                               <Tab.Pane eventKey="2">
-                                <div>
-                                  <h5>Stops</h5>
-                                </div>
-                                <div>
-                                  <Row
-                                    style={{
-                                      position: "relative",
-                                      flexDirection: "column",
-                                      alignItems: "center",
-                                      height: "50vh",
-                                      width: "150vw",
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        position: "absolute",
-                                        left: "0",
-                                        height: "100%",
-                                        width: "100%",
-                                      }}
-                                    >
-                                      <GoogleMap
-                                        center={center}
-                                        zoom={15}
-                                        mapContainerStyle={{
-                                          width: isMapFullScreen
-                                            ? "100vw"
-                                            : "43%",
-                                          height: isMapFullScreen
-                                            ? "100vh"
-                                            : "120%",
-                                        }}
-                                        options={{
-                                          zoomControl: false,
-                                          streetViewControl: false,
-                                          mapTypeControl: false,
-                                          fullscreenControl: true,
-
-                                          fullscreenControlOptions: {
-                                            position:
-                                              google.maps.ControlPosition
-                                                .TOP_RIGHT,
-                                          },
-                                        }}
-                                        onClick={handleMapClick}
-                                      >
-                                        {routeDirections && (
-                                          <DirectionsRenderer
-                                            directions={routeDirections}
-                                          />
-                                        )}
-                                        {stops.map((stop, index) => (
-                                          <Marker
-                                            key={index}
-                                            position={stop}
-                                            label={
-                                              labels[index % labels.length]
-                                            }
-                                            onClick={() =>
-                                              handleMarkerClick(index)
-                                            }
-                                            onDblClick={() =>
-                                              handleMarkerDoubleClick(index)
-                                            }
-                                            icon={{
-                                              url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-                                              scaledSize:
-                                                new window.google.maps.Size(
-                                                  50,
-                                                  50
-                                                ),
-                                            }}
-                                          />
-                                        ))}
-                                      </GoogleMap>
-                                    </div>
-                                  </Row>
-                                </div>
-                                <div
-                                  className="d-flex align-items-start gap-3"
-                                  style={{ marginTop: "120px" }}
-                                >
-                                  <Button
-                                    type="button"
-                                    className="btn btn-light btn-label previestab"
-                                    onClick={() => setactiveVerticalTab(1)}
-                                  >
-                                    <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>
-                                    Back to Journey
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    // onClick={() => setactiveVerticalTab(3)}
-
-                                    onClick={handleNextStep}
-                                    disabled={isNextButtonDisabled()}
-                                  >
-                                    <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Set Run Dates
-                                  </Button>
-
-                                  {/* Button to toggle full screen mode */}
-                                  {/* <Button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    onClick={handleToggleFullScreen}
-                                  >
-                                    {isMapFullScreen
-                                      ? "Exit Full Screen"
-                                      : "Full Screen"}
-                                  </Button> */}
-                                </div>
-                              </Tab.Pane>
-
-                              <Tab.Pane eventKey="3">
                                 <Row>
                                   <div className="mt-2">
                                     <h5>Trip Times</h5>
@@ -1247,16 +1218,14 @@ const togglePopup = () => {
                                   <Button
                                     type="button"
                                     className="btn btn-light btn-label previestab"
-                                    onClick={() => setactiveVerticalTab(2)}
+                                    onClick={() => setactiveVerticalTab(1)}
                                   >
                                     <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                                    Back to Stops
+                                    Back to Journey
                                   </Button>
                                   <Button
                                     type="button"
                                     className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    // onClick={() => setactiveVerticalTab(4)}
-
                                     onClick={handleNextStep}
                                     disabled={isNextButtonDisabled()}
                                   >
@@ -1265,7 +1234,7 @@ const togglePopup = () => {
                                   </Button>
                                 </div>
                               </Tab.Pane>
-                              <Tab.Pane eventKey="4">
+                              <Tab.Pane eventKey="3">
                                 <Row>
                                   <Col lg={4}>
                                     <div className="mb-3">
@@ -1374,7 +1343,7 @@ const togglePopup = () => {
                                   <Button
                                     type="button"
                                     className="btn btn-light btn-label previestab"
-                                    onClick={() => setactiveVerticalTab(3)}
+                                    onClick={() => setactiveVerticalTab(2)}
                                   >
                                     <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
                                     Back to Run Dates
@@ -1391,10 +1360,17 @@ const togglePopup = () => {
                                   </Button>
                                 </div>
                               </Tab.Pane>
-                              <Tab.Pane eventKey="5">
+                              <Tab.Pane eventKey="4">
                                 {renderRecapPage()}
 
-                                
+                                <Button
+                                  type="button"
+                                  className="btn btn-light btn-label previestab"
+                                  onClick={() => setactiveVerticalTab(3)}
+                                >
+                                  <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                                  Back to Options
+                                </Button>
                               </Tab.Pane>
                             </Tab.Content>
                           </div>

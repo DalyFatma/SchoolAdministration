@@ -5,3 +5,18 @@
   .fullscreen-swal-popup {
     z-index: 10001 !important; 
   }
+  .custom-button {
+    color: black;
+    background-color: #d3a724;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.custom-button:hover {
+    background-color: #b69c4c;
+}
+
+.flex{
+  display: flex;
+  justify-content: space-between;
+}
