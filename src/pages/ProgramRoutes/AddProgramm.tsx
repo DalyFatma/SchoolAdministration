@@ -8,9 +8,10 @@ import {
   Tab,
   Button,
   InputGroup,
+  Dropdown,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 import DualListBox from "react-dual-listbox";
 import "react-dual-listbox/lib/react-dual-listbox.css";
@@ -24,6 +25,8 @@ import {
 
 import Swal from "sweetalert2";
 import "./AddProgram.css";
+import { useAddProgrammMutation } from "features/programms/programmSlice";
+import { number } from "yup";
 
 const options = [
   { value: "ForHandicap", label: "For Handicap" },
@@ -44,7 +47,7 @@ const options1 = [
 const center = { lat: 52.4862, lng: -1.8904 };
 
 interface Recap {
-  journeyName: string;
+  programName: string;
   capacityRecommanded: string;
   selected: string[];
   selected1: string[];
@@ -58,8 +61,24 @@ interface Recap {
   pickUp_time: string;
 }
 
+interface Stop {
+  id: number;
+  address: string;
+}
+interface RouteSegment {
+  segment: number;
+  startAddress: string;
+  endAddress: string;
+  distance: string;
+  duration: string;
+}
+interface stopTime {
+  hours: number;
+  minutes: number;
+}
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
+  const navigate = useNavigate();
   const [showAddStations, setShowAddStations] = useState<boolean>(false);
   const [pickupTime, setPickupTime] = useState<Date | null>(null);
   const [dropoffTime, setDropoffTime] = useState<Date | null>(null);
@@ -76,14 +95,15 @@ const AddProgramm = (props: any) => {
   const [duration, setDuration] = useState("");
   const [originLocation, setOriginLocation] = useState("");
   const [destinationLocation, setDestinationLocation] = useState("");
+  const [isOriginFirst, setIsOriginFirst] = useState(true);
+  const [switched, setSwitched] = useState(false);
 
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
-  const [journeyName, setJourneyName] = useState("");
+  const [programName, setProgramName] = useState("");
   const [capacityRecommanded, setCapacityRecommanded] = useState("");
 
-  const [selected, setSelected] = useState([""]);
-  const [selected1, setSelected1] = useState([""]);
-  // const [stops, setStops] = useState([{ id: 1 }]);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [selected1, setSelected1] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState("");
   const [searchDestination, setSearchDestination] = useState("");
   const [searchStop, setSearchStop] = useState("");
@@ -114,7 +134,7 @@ const AddProgramm = (props: any) => {
   const [originSwitchRef, setOriginSwitchRef] = useState<google.maps.LatLng[]>(
     []
   );
-  const [pickUp_time, setPickUp_time] = useState<Date | null>(null);
+  const [pickUp_time, setPickUp_time] = useState<Date>();
   const [dropOff_time, setDropOff_time] = useState<Date | null>(null);
 
   const [dropOff_date, setDropOff_date] = useState<Date | null>(null);
@@ -122,14 +142,9 @@ const AddProgramm = (props: any) => {
 
   const [pickUp_date, setPickUp_date] = useState<Date | null>(null);
 
-  const [isOriginFirst, setIsOriginFirst] = useState(true);
-
-  const [switched, setSwitched] = useState(false);
-
-  const [stops2, setStops2] = useState([{ id: 1 }]);
-
+  const [stops2, setStops2] = useState<Stop[]>([]);
   const [recap, setRecap] = useState<Recap>({
-    journeyName: "",
+    programName: "",
     capacityRecommanded: "",
     selected: [],
     selected1: [],
@@ -146,6 +161,9 @@ const AddProgramm = (props: any) => {
   const [test, setTest] = useState("");
   const [test2, setTest2] = useState("");
 
+  const [dropOff_test, setDropOff_test] = useState("");
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
     libraries: ["places"],
@@ -155,22 +173,152 @@ const AddProgramm = (props: any) => {
 
   const [waypts, setWaypts] = useState<google.maps.DirectionsWaypoint[]>([]);
 
-  const handleAddStopClick = () => {
-    console.log(stop);
-    setStops2((prevStop) => [...prevStop, { id: prevStop.length + 1 }]);
+  const [stopTimes, setStopTimes] = useState<stopTime[]>([]);
+
+  const [routeSegments, setRouteSegments] = useState<RouteSegment[]>([]);
+
+  const [createProgram] = useAddProgrammMutation();
+  const [programmData, setProgrammData] = useState({
+    programName: "",
+    origin_point: {
+      placeName: "",
+      coordinates: {
+        lat: 1,
+        lng: 1,
+      },
+    },
+    stops: [
+      {
+        id: "",
+        address: "",
+        time: "",
+      },
+    ],
+    destination_point: {
+      placeName: "",
+      coordinates: {
+        lat: 1,
+        lng: 1,
+      },
+    },
+    pickUp_date: "",
+    droppOff_date: "",
+    freeDays_date: [""],
+    exceptDays: [""],
+    recommanded_capacity: "",
+    extra: [""],
+    notes: "",
+  });
+  const notify = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Program created successfully",
+      showConfirmButton: false,
+      timer: 2000,
+    });
+  };
+  const onChangeProgramms = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProgrammData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+  const onSubmitProgramm = (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      programmData["extra"] = selected;
+      programmData["exceptDays"] = selected1;
+      programmData["freeDays_date"] = free_date.map((date) =>
+        date.toISOString()
+        // console.log(String(date.getFullYear)+)
+      );
+      programmData["droppOff_date"] = dropOff_date
+        ? dropOff_date.toString()
+        : "";
+      programmData["pickUp_date"] = pickUp_date ? pickUp_date.toString() : "";
+      const destinationPoint = destinationRef.current;
+
+      if (
+        destinationPoint &&
+        destinationPoint.placeName &&
+        destinationPoint.coordinates
+      ) {
+        programmData["destination_point"] = {
+          placeName: destinationPoint.placeName,
+          coordinates: destinationPoint.coordinates,
+        };
+      } else {
+        console.error("destinationRef does not have the expected properties.");
+      }
+
+      const originPoint = originRef.current;
+
+      if (originPoint && originPoint.placeName && originPoint.coordinates) {
+        setProgrammData((prevData) => ({
+          ...prevData,
+          origin_point: {
+            placeName: originPoint.placeName,
+            coordinates: originPoint.coordinates,
+          },
+        }));
+      } else {
+        console.error("originPoint does not have the expected properties.");
+      }
+
+      let stops = [];
+
+      for(let i = 0; i<waypts.length; i++){
+        stops.push({
+          id: "",
+          address: String(waypts[i].location),
+          time: String(stopTimes[i].hours).padStart(2, '0') + ':' + String(stopTimes[i].minutes).padStart(2, "0")
+        });
+      }
+
+      programmData["stops"] = stops;
+
+      // createProgram(programmData)
+      //   .then(() => notify())
+      //   .then(() => navigate(-1));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleAddStopClick = (address: string) => {
+    console.log("stops2", stops2);
+    setStops2((prevStops) => [
+      ...prevStops,
+      { id: prevStops.length + 1, address },
+    ]);
   };
 
   const handleRemoveStopClick = (idToRemove: any) => {
-    setStops2((prevStop) => prevStop.filter((stop) => stop.id !== idToRemove));
+    setStops2((prevStops) => {
+      console.log("handleRemoveStopClick called with ID:", idToRemove);
+      const updatedStops = prevStops.filter((stop) => stop.id !== idToRemove);
+      if(waypts.length !== 0){
+        const tempWaypts = waypts;
+        const newWaypts = tempWaypts.splice(stop.id - 1, 1);
+        setWaypts(newWaypts);
+        calculateRoute();
+      }
+
+      return updatedStops;
+    });
   };
 
+  const handleAddStopClickWrapper = (address: string) => {
+    return () => handleAddStopClick(address);
+  };
   const labels = "CDEFGHIJKLMNOPQRSTUVWXYZ";
 
   useEffect(() => {
     if (originRef.current && destinationRef.current) {
       setRecap((prevRecap) => ({
         ...prevRecap,
-        journeyName,
+        programName,
         capacityRecommanded,
         selected,
         selected1,
@@ -186,7 +334,7 @@ const AddProgramm = (props: any) => {
       }));
     }
   }, [
-    journeyName,
+    programName,
     capacityRecommanded,
     selected,
     selected1,
@@ -199,55 +347,47 @@ const AddProgramm = (props: any) => {
     pickUp_date,
     pickUp_time,
   ]);
+  var hours = String(
+    Math.floor(
+      (Number(test2!) / 60 +
+        pickUp_time?.getMinutes()! +
+        pickUp_time?.getHours()! * 60) /
+        60
+    )
+  ).padStart(2, "0");
 
-  // useEffect(() => {
-  //   const fetchLocationNames = async () => {
-  //     const names: string[] = [];
-  //     const geocoder = new google.maps.Geocoder();
-
-  //     for (const stop of recap.stops) {
-  //       await new Promise<void>((resolve) => {
-  //         geocoder.geocode(
-  //           { location: stop },
-  //           (
-  //             results: google.maps.GeocoderResult[],
-  //             status: google.maps.GeocoderStatus
-  //           ) => {
-  //             if (status === google.maps.GeocoderStatus.OK) {
-  //               if (results[0]) {
-  //                 names.push(results[0].formatted_address);
-  //               }
-  //             }
-  //             resolve();
-  //           }
-  //         );
-  //       });
-  //     }
-  //     setStopNames(names);
-  //   };
-
-  //   if (recap.stops.length > 0) {
-  //     fetchLocationNames();
-  //   }
-  // }, [recap.stops]);
-
-  // useEffect(() => {
-  //   console.log("Recap state:", recap);
-  // }, [recap]);
+  var minutes = String(
+    Math.round(
+      (Number(test2!) / 60 +
+        pickUp_time?.getMinutes()! +
+        pickUp_time?.getHours()! * 60) %
+        60
+    )
+  ).padStart(2, "0");
+  console.log(hours + ":" + minutes);
 
   const handlePickupTime = (selectedDates: any) => {
-    const formattedTime = selectedDates[0].toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const formattedTime = selectedDates[0];
+    // .toLocaleTimeString([], {
+    //   hour: "2-digit",
+    //   minute: "2-digit",
+    // });
     setPickUp_time(formattedTime);
+    console.log("Hello Fatma")
   };
-  const handleDroppOffTime = (selectedDates: any) => {
-    const formattedTime = selectedDates[0].toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    setDropOff_time(formattedTime);
+
+  const handleStopTime = (selectedTime: any, index: number) => {
+    console.log("indexx",index);
+    const formattedTime = selectedTime[0];
+    console.log(formattedTime);
+    let hour = formattedTime?.getHours();
+    let minute = formattedTime?.getMinutes();
+
+    let tempStopTimes = stopTimes;
+    tempStopTimes[index].hours = hour;
+    tempStopTimes[index].minutes = minute;
+
+    setStopTimes(tempStopTimes);
   };
 
   const handleDateChange1 = (selectedDates: Date[]) => {
@@ -295,7 +435,7 @@ const AddProgramm = (props: any) => {
       <Row className="d-flex justify-content-space-between">
         <Col>
           <b> Journey Name: </b>
-          <p> {recap.journeyName}</p>
+          <p> {programmData.programName}</p>
           <b>Origin Location Name: </b>
           <p>{recap.originRef}</p>
           <b> Destination Location Name: </b>
@@ -351,7 +491,8 @@ const AddProgramm = (props: any) => {
               </li>
             ))}
           </ul>
-          <b>Capacity Recommended: </b> <p> {recap.capacityRecommanded}</p>
+          <b>Capacity Recommended: </b>{" "}
+          <p> {programmData.recommanded_capacity}</p>
           <b> Selected Options: </b> <p>{recap.selected.join(" ")}</p>
           <b> Except Days: </b> <p> {recap.selected1.join(" ")}</p>
         </Col>
@@ -359,11 +500,19 @@ const AddProgramm = (props: any) => {
     );
   };
 
+  // const isJourneyStepValid = () => {
+  //   return (
+  //     journeyName.trim() !== "" &&
+  //     originRef.current?.value.trim() !== "" &&
+  //     destinationRef.current?.value.trim() !== ""
+  //   );
+  // };
   const isJourneyStepValid = () => {
     return (
-      journeyName.trim() !== "" &&
-      originRef.current?.value.trim() !== "" &&
-      destinationRef.current?.value.trim() !== ""
+      programmData.programName.trim() !== ""
+
+      // originRef.current?.value.trim() !== "" &&
+      // destinationRef.current?.value.trim() !== ""
     );
   };
 
@@ -405,7 +554,7 @@ const AddProgramm = (props: any) => {
   };
 
   const isRecommandedCapacityStepValid = () => {
-    return capacityRecommanded.trim() !== "";
+    return programmData.recommanded_capacity.trim() !== "";
   };
 
   const isNextButtonDisabled = () => {
@@ -415,7 +564,6 @@ const AddProgramm = (props: any) => {
 
       case 2:
         return (
-          !isTripTimesStepValid() ||
           !isRunDatesStepValid() ||
           !isOptionsStepValid() ||
           !isFreeDaysStepValid()
@@ -449,22 +597,59 @@ const AddProgramm = (props: any) => {
     setSearchDestination(autocomplete);
   }
 
+  // function onPlaceChanged() {
+  //   if (searchResult != null) {
+  //     const place = (
+  //       searchResult as unknown as google.maps.places.Autocomplete
+  //     ).getPlace();
+  //     console.log("place", place);
+  //     const name = place.name;
+  //     // setRecap((prevRecap) => ({
+  //     //   ...prevRecap,
+  //     //   originRef: name,
+  //     // }));
+
+  //     const location = place.geometry?.location;
+  //     if (location) {
+  //       const nom = { lat: location.lat(), lng: location.lng() };
+  //       setNom(nom);
+  //       const status = place.business_status;
+  //       const formattedAddress = place.formatted_address;
+  //       console.log(`Name: ${name}`);
+  //       console.log(`Business Status: ${status}`);
+  //       console.log(`Formatted Address: ${formattedAddress}`);
+  //     } else {
+  //       console.error("Location not found in place object");
+  //     }
+  //   } else {
+  //     alert("Please enter text");
+  //   }
+  // }
+
   function onPlaceChanged() {
     if (searchResult != null) {
       const place = (
         searchResult as unknown as google.maps.places.Autocomplete
       ).getPlace();
-      console.log("place", place);
       const name = place.name;
-      // setRecap((prevRecap) => ({
-      //   ...prevRecap,
-      //   originRef: name,
-      // }));
-
       const location = place.geometry?.location;
+
       if (location) {
-        const nom = { lat: location.lat(), lng: location.lng() };
-        setNom(nom);
+        const coordinates = { lat: location.lat(), lng: location.lng() };
+
+        setRecap((prevRecap) => ({
+          ...prevRecap,
+          originRef: name,
+        }));
+
+        setProgrammData((prevData) => ({
+          ...prevData,
+          origin_point: {
+            placeName: name,
+            coordinates: coordinates,
+          },
+        }));
+
         const status = place.business_status;
         const formattedAddress = place.formatted_address;
         console.log(`Name: ${name}`);
@@ -489,10 +674,7 @@ const AddProgramm = (props: any) => {
       if (location) {
         const nom = { lat: location.lat(), lng: location.lng() };
         setStop(nom);
-        // setRecap((prevRecap) => ({
-        //   ...prevRecap,
-        //   stopRef: name,
-        // }));
+
         const status = place.business_status;
         const formattedAddress = place.formatted_address;
         const wayPoint = {
@@ -500,6 +682,7 @@ const AddProgramm = (props: any) => {
           stopover: true,
         };
         setWaypts((waypts) => [...waypts, wayPoint]);
+
         console.log(`Name: ${name}`);
         console.log(`Business Status: ${status}`);
         console.log(`Formatted Address: ${formattedAddress}`);
@@ -511,45 +694,66 @@ const AddProgramm = (props: any) => {
     }
   }
 
+  // function onPlaceChangedDest() {
+  //   if (searchDestination != null) {
+  //     const place = (
+  //       searchDestination as unknown as google.maps.places.Autocomplete
+  //     ).getPlace();
+  //     const name = place.name;
+  //     setRecap((prevRecap) => ({
+  //       ...prevRecap,
+  //       destinationRef: name,
+  //     }));
+
+  //     const location = place.geometry?.location;
+  //     setFatma(location);
+
+  //     const status = place.business_status;
+  //     const formattedAddress = place.formatted_address;
+  //     console.log(`Name: ${name}`);
+  //     console.log(`Business Status: ${status}`);
+  //     console.log(`Formatted Address: ${formattedAddress}`);
+  //   } else {
+  //     alert("Please enter text");
+  //   }
+  // }
+
   function onPlaceChangedDest() {
     if (searchDestination != null) {
       const place = (
         searchDestination as unknown as google.maps.places.Autocomplete
       ).getPlace();
       const name = place.name;
-      setRecap((prevRecap) => ({
-        ...prevRecap,
-        destinationRef: name,
-      }));
-
       const location = place.geometry?.location;
-      setFatma(location);
 
-      const status = place.business_status;
-      const formattedAddress = place.formatted_address;
-      console.log(`Name: ${name}`);
-      console.log(`Business Status: ${status}`);
-      console.log(`Formatted Address: ${formattedAddress}`);
+      if (location) {
+        const coordinates = { lat: location.lat(), lng: location.lng() };
+
+        setRecap((prevRecap) => ({
+          ...prevRecap,
+          destinationRef: name,
+        }));
+
+        setProgrammData((prevData) => ({
+          ...prevData,
+          destination_point: {
+            placeName: name,
+            coordinates: coordinates,
+          },
+        }));
+
+        const status = place.business_status;
+        const formattedAddress = place.formatted_address;
+        console.log(`Name: ${name}`);
+        console.log(`Business Status: ${status}`);
+        console.log(`Formatted Address: ${formattedAddress}`);
+      } else {
+        console.error("Location not found in place object");
+      }
     } else {
       alert("Please enter text");
     }
   }
-
-  // function onPlaceChangedOrigin() {
-  //   if (searchResult != null) {
-  //     const place = searchResult as google.maps.places.PlaceResult;
-  //     const name = place.name;
-  //     setOriginLocation(name);
-  //   }
-  // }
-
-  // function onPlaceChangedDestination() {
-  //   if (searchDestination != null) {
-  //     const place = searchDestination as google.maps.places.PlaceResult;
-  //     const name = place.name;
-  //     setDestinationLocation(name);
-  //   }
-  // }
 
   const handleLocationButtonClick = () => {
     setSelectedLocation(nom);
@@ -571,88 +775,79 @@ const AddProgramm = (props: any) => {
     destinationRef.current.value = "";
   }
 
-  const isPositionCloseToRoute = (
-    position: google.maps.LatLng,
-    tolerance: number
-  ): boolean => {
-    if (!routeDirections) return false;
+  // async function calculateRoute(): Promise<void> {
+  //   setOriginSwitchRef(originRef?.current!.value);
+  //   // console.log(originSwitchRef);
+  //   setDestSwitchRef(destinationRef?.current!.value);
+  //   // console.log(destSwitchRef);
+  //   // console.log("waypoints", waypts);
 
-    const route = routeDirections.routes[0];
-    const path = route.overview_path;
-    for (const pathPoint of path) {
-      const distance = google.maps.geometry.spherical.computeDistanceBetween(
-        position,
-        pathPoint
-      );
-      if (distance <= tolerance) {
-        return true;
-      }
-    }
-    return false;
-  };
+  //   if (
+  //     originRef?.current!.value === "" ||
+  //     destinationRef?.current!.value === "" ||
+  //     !map
+  //   ) {
+  //     console.error("Invalid inputs or map not loaded.");
+  //     return;
+  //   }
 
-  const handleMapClick = (event: google.maps.MapMouseEvent) => {
-    const clickedPosition = new google.maps.LatLng(
-      event.latLng.lat(),
-      event.latLng.lng()
-    );
-    const tolerance = 20;
-    const isCloseToRoute = isPositionCloseToRoute(clickedPosition, tolerance);
+  //   setLoading(true);
 
-    if (isCloseToRoute) {
-      console.log("Marker added at position:", clickedPosition);
-      setStops((prevStops: google.maps.LatLng[]) => [
-        ...prevStops,
-        clickedPosition,
-      ]);
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...! Something went wrong!",
-        text: "Marker not added. Position too far from the route.",
-        customClass: {
-          container: isMapFullScreen ? "fullscreen-swal" : "",
-          popup: "fullscreen-swal-popup",
-        },
-      });
-    }
-  };
+  //   const directionsService = new google.maps.DirectionsService();
 
-  const handleMarkerClick = (index: number) => {
-    if (clickedMarkers.includes(index)) {
-      setClickedMarkers((prevClickedMarkers) =>
-        prevClickedMarkers.filter((clickedIndex) => clickedIndex !== index)
-      );
-    } else {
-      setClickedMarkers((prevClickedMarkers) => [...prevClickedMarkers, index]);
-    }
-  };
+  //   directionsService.route(
+  //     {
+  //       origin: originRef.current.value,
+  //       destination: destinationRef.current.value,
+  //       travelMode: google.maps.TravelMode.DRIVING,
+  //       waypoints: waypts,
+  //     },
+  //     (result, status) => {
+  //       setLoading(false);
 
-  const handleMarkerDoubleClick = (index: number) => {
-    setStops((prevStops) => prevStops.filter((_, i) => i !== index));
-    setClickedMarkers((prevClickedMarkers) =>
-      prevClickedMarkers.filter((clickedIndex) => clickedIndex !== index)
-    );
-  };
+  //       if (status === google.maps.DirectionsStatus.OK) {
+  //         setDirectionsResponse(result);
+  //         setRouteDirections(result);
 
-  const handleToggleFullScreen = () => {
-    setIsMapFullScreen(!isMapFullScreen);
-  };
-  const switchLocations = () => {
-    setIsOriginFirst(!isOriginFirst);
-  };
+  //         const selectedRoute = result.routes.find((route) => {
+  //           setTest(route.legs[0].distance.text.toString());
+  //           setTest2(route.legs[0].duration.text.toString());
 
-  const toggleSwitch = () => {
-    console.log("Switch button clicked");
-    setSwitched(!switched);
-  };
+  //           // console.log("test", test);
+  //           // console.log("originRef.current.value", originRef.current.value);
+  //           // console.log(
+  //           //   "route.legs[0].start_address",
+  //           //   route.legs[0].start_address
+  //           // );
+  //           // console.log(
+  //           //   "destinationRef.current.value",
+  //           //   destinationRef.current.value
+  //           // );
+  //           // console.log("route.legs[0].end_address", route.legs[0].end_address);
+  //         });
+
+  //         if (!selectedRoute) {
+  //           // console.log("distanceInMeters");
+  //           return;
+  //         }
+
+  //         if (map && directionsResponse) {
+  //           const directionsRenderer = new google.maps.DirectionsRenderer();
+  //           directionsRenderer.setMap(map);
+  //           directionsRenderer.setDirections(directionsResponse);
+  //         }
+  //       } else {
+  //         console.error("Error fetching directions:", status);
+  //       }
+  //     }
+  //   );
+  // }
 
   async function calculateRoute(): Promise<void> {
+    //stopTimes = [];
     setOriginSwitchRef(originRef?.current!.value);
-    console.log(originSwitchRef);
     setDestSwitchRef(destinationRef?.current!.value);
-    console.log(destSwitchRef);
-    console.log("waypoints", waypts);
+
     if (
       originRef?.current!.value === "" ||
       destinationRef?.current!.value === "" ||
@@ -681,32 +876,73 @@ const AddProgramm = (props: any) => {
           setRouteDirections(result);
 
           const selectedRoute = result.routes.find((route) => {
-            setTest(route.legs[0].distance.text.toString());
-            setTest2(route.legs[0].duration.text.toString());
+            const segments = route.legs.map((leg, index) => ({
+              segment: index + 1,
+              startAddress: leg.start_address,
+              endAddress: leg.end_address,
+              distance: leg.distance.text,
+              duration: leg.duration.text,
+            }));
+            setRouteSegments(segments);
 
-            console.log("test", test);
-            console.log("originRef.current.value", originRef.current.value);
-            console.log(
-              "route.legs[0].start_address",
-              route.legs[0].start_address
+            let durations = route.legs.map((leg, index) => ({
+              duration: leg.duration.value,
+            }));
+            console.log("durations", durations);
+            //durations.pop();
+            const hours_first = Math.floor(durations[0].duration / 3600);
+            const minutes_first = Math.floor(
+              (durations[0].duration % 3600) / 60
             );
-            console.log(
-              "destinationRef.current.value",
-              destinationRef.current.value
+
+            let pickUpHour = String(pickUp_time?.getHours()).padStart(2, "0");
+            let pickUpMinute = String(pickUp_time?.getMinutes()).padStart(
+              2,
+              "0"
             );
-            console.log("route.legs[0].end_address", route.legs[0].end_address);
+
+            const time_first = addDurationToTime(
+              pickUpHour + ":" + pickUpMinute,
+              hours_first,
+              minutes_first
+            );
+            let temporarryTimes = [time_first];
+            console.log("temporarryTimes", temporarryTimes);
+            for (let i = 1; i < durations.length; i++) {
+              const hours = Math.floor(durations[i].duration / 3600);
+              const minutes = Math.floor((durations[i].duration % 3600) / 60);
+
+              const time = addDurationToTime(
+                String(temporarryTimes[i - 1]?.hours) +
+                  ":" +
+                  String(temporarryTimes[i - 1]?.minutes),
+                hours,
+                minutes
+              );
+              temporarryTimes.push(time);
+            }
+
+            const totalDurations = accumulateDurations(durations);
+            
+            const time_dest = addDurationToTime(
+              pickUpHour + ":" + pickUpMinute,
+              totalDurations.hours,
+              totalDurations.minutes
+            );
+            temporarryTimes.push(time_dest);
+            console.log(temporarryTimes);
+            setStopTimes(temporarryTimes);
           });
 
           if (!selectedRoute) {
-            console.log("distanceInMeters");
             return;
           }
 
-          const distanceInMeters = selectedRoute.legs[0].distance.value;
-          const durationInSeconds = selectedRoute.legs[0].duration.value;
-
-          console.log("distanceInMeters", distanceInMeters);
-          console.log("durationInSeconds", durationInSeconds);
+          if (map && directionsResponse) {
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+            directionsRenderer.setDirections(directionsResponse);
+          }
         } else {
           console.error("Error fetching directions:", status);
         }
@@ -714,17 +950,12 @@ const AddProgramm = (props: any) => {
     );
   }
 
+  const createDateFromStrings = (YyyyMmDd: string, HhMmSs: string) => {
+    //*var d1 = new Date('2020-03-10, 10:10:10'); //
+    let date = new Date(YyyyMmDd + ", " + HhMmSs);
+    return date;
+  };
   async function switchRoute(): Promise<void> {
-    console.log("waypoints", waypts);
-    // if (
-    //   originSwitchRef?.current!.value === "" ||
-    //   destSwitchRef?.current!.value === "" ||
-    //   !map
-    // ) {
-    //   console.error("Invalid inputs or map not loaded.");
-    //   return;
-    // }
-
     setLoading(true);
 
     const directionsService = new google.maps.DirectionsService();
@@ -745,36 +976,88 @@ const AddProgramm = (props: any) => {
 
           const selectedRoute = result.routes.find((route) => {
             setTest(route.legs[0].distance.text.toString());
-            setTest2(route.legs[0].duration.text.toString());
-
-            console.log("test", test);
-            console.log("originRef.current.value", originRef.current.value);
-            console.log(
-              "route.legs[0].start_address",
-              route.legs[0].start_address
-            );
-            console.log(
-              "destinationRef.current.value",
-              destinationRef.current.value
-            );
-            console.log("route.legs[0].end_address", route.legs[0].end_address);
+            setTest2(route.legs[0].duration.value.toString());
           });
+          console.log(hours);
+          let validHour = String(hours).padStart(2, "0");
+          console.log(validHour);
+
+          console.log(minutes);
+          let validMinutes = String(minutes).padStart(2, "0");
+          console.log(validMinutes);
+
+          const date = new Date();
+          const currentYear = date.getFullYear();
+          console.log(currentYear);
+          const currentMonth = date.getMonth() + 1;
+          console.log(currentMonth);
+          const currentDay = date.getDate().toLocaleString();
+          console.log("currentDay", currentDay);
 
           if (!selectedRoute) {
-            console.log("distanceInMeters");
             return;
           }
-
-          const distanceInMeters = selectedRoute.legs[0].distance.value;
-          const durationInSeconds = selectedRoute.legs[0].duration.value;
-
-          console.log("distanceInMeters", distanceInMeters);
-          console.log("durationInSeconds", durationInSeconds);
         } else {
           console.error("Error fetching directions:", status);
         }
       }
     );
+  }
+
+  const addDurationToTime = (
+    time: string,
+    hoursToAdd: number,
+    minutesToAdd: number
+  ) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    let totalMinutes = hours * 60 + minutes;
+    totalMinutes += hoursToAdd * 60 + minutesToAdd;
+
+    const newHours = Math.floor(totalMinutes / 60) % 24;
+    const newMinutes = totalMinutes % 60;
+
+    // return `${String(newHours).padStart(2, "0")}:${String(newMinutes).padStart(
+    //   2,
+    //   "0"
+    // )}`;
+
+    return {
+      hours: newHours,
+      minutes: newMinutes,
+    };
+  };
+
+  const accumulateDurations = (durations: any) => {
+    console.log("Api durations",durations);
+    let totalDuration = {
+      hours:0,
+      minutes:0,
+    }
+    for(let duration of durations) {
+      const hours = Math.floor(
+        duration.duration / 3600
+      );
+      const minutes = Math.floor(
+        (duration.duration % 3600) / 60
+      );
+      totalDuration.hours += hours;
+      totalDuration.minutes += minutes;
+      console.log("Tempo Total",totalDuration);
+    }
+
+    let totalMinutes = (totalDuration.hours * 60) + totalDuration.minutes;
+
+    let validHours = Math.floor(totalMinutes / 60) % 24;
+    let valdMinutes = totalMinutes % 60;
+
+    let total = {
+      hours: validHours,
+      minutes: valdMinutes
+    }
+
+    console.log("Total",total)
+
+    return total;
   }
   return (
     <React.Fragment>
@@ -795,587 +1078,727 @@ const AddProgramm = (props: any) => {
             <Card.Body className="form-steps">
               <Card>
                 <Card.Body className="form-steps" style={{ height: "80vh" }}>
-                  <Form className="vertical-navs-step">
+                  <Form
+                    className="vertical-navs-step"
+                    onSubmit={onSubmitProgramm}
+                  >
                     <Tab.Container activeKey={activeVerticalTab}>
-                      <Row className="gy-5">
-                        <Col lg={10}>
-                          <div className="px-lg-4">
-                            <Tab.Content>
-                              <Tab.Pane eventKey="1">
-                                <Container>
+                      <Tab.Content>
+                        <Tab.Pane eventKey="1">
+                          <Row>
+                            <Col lg={4} >
+                              <div  style={{ maxHeight: 'calc(80vh - 80px)', overflowX: 'auto' }}>
+                              <Form.Label htmlFor="programName">
+                                Name
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="programName"
+                                style={{ width: "400px" }}
+                                required
+                                className="mb-2"
+                                placeholder="Add Program Name"
+                                name="programName"
+                                value={programmData.programName}
+                                onChange={onChangeProgramms}
+                              />
+                              <Form.Label htmlFor="customerName-field">
+                                coordinations
+                              </Form.Label>
+
+                              <InputGroup className="mb-3">
+                                <InputGroup.Text id="basic-addon1">
+                                  From
+                                </InputGroup.Text>
+                                <div className="d-flex">
+                                  <Autocomplete
+                                    onPlaceChanged={onPlaceChanged}
+                                    onLoad={onLoad}
+                                  >
+                                    <Form.Control
+                                      type="text"
+                                      style={{ width: "250px" }}
+                                      placeholder="Origin"
+                                      ref={originRef}
+                                      id="origin"
+                                      onClick={() => {
+                                        handleLocationButtonClick();
+                                        if (nom) {
+                                          map?.panTo(nom);
+                                          map?.setZoom(15);
+                                        }
+                                      }}
+                                      onChange={onChangeProgramms}
+                                    />
+                                  </Autocomplete>
+                                  <Flatpickr
+                                    className="form-control"
+                                    id="pickUp_time"
+                                    style={{ width: "100px" }}
+                                    options={{
+                                      enableTime: true,
+
+                                      noCalendar: true,
+                                      dateFormat: "H:i",
+                                      time_24hr: true,
+                                      onChange: handlePickupTime,
+                                    }}
+                                  />
+                                </div>
+                                {/* <p>{pickUp_time?.toDateString()}</p> */}
+                              </InputGroup>
+                              <InputGroup className="mb-3">
+                                <InputGroup.Text id="basic-addon1">
+                                  To
+                                </InputGroup.Text>
+
+                                <Autocomplete
+                                  onPlaceChanged={onPlaceChangedDest}
+                                  onLoad={onLoadDest}
+                                >
+                                  <Form.Control
+                                    type="text"
+                                    style={{ width: "300px" }}
+                                    placeholder="Destination"
+                                    ref={destinationRef}
+                                    id="dest"
+                                    onClick={() => {
+                                      handleLocationButtonClickDest();
+                                      if (fatma) {
+                                        map?.panTo(fatma);
+                                        map?.setZoom(15);
+                                      }
+                                    }}
+                                    onChange={onChangeProgramms}
+                                  />
+                                </Autocomplete>
+                                <Flatpickr
+                                  className="form-control"
+                                  id="pickUp_time"
+                                  style={{ width: "100px" }}
+                                  value={createDateFromStrings(
+                                    String(new Date().getFullYear()).padStart(
+                                      2,
+                                      "0"
+                                    ) +
+                                      "-" +
+                                      String(
+                                        new Date().getMonth() + 1
+                                      ).padStart(2, "0") +
+                                      "-" +
+                                      String(
+                                        new Date().getDate().toLocaleString()
+                                      ).padStart(2, "0"),
+                                    stopTimes[stopTimes.length - 1]?.hours +
+                                      ":" +
+                                      stopTimes[stopTimes.length - 1]?.minutes +
+                                      ":00"
+                                  ).getTime()}
+                                  options={{
+                                    enableTime: true,
+                                    noCalendar: true,
+                                    dateFormat: "H:i",
+                                    time_24hr: true,
+                                  }}
+                                />
+                              </InputGroup>
+
+                              <div className="flex">
+                                <Button
+                                  onClick={switchRoute}
+                                  className="btn btn-dark w-lg d-grid gap-2 btn-switch"
+                                >
+                                  Switch
+                                </Button>
+                              </div>
+
+                              {/* <Flatpickr
+                                  className="form-control"
+                                  id="dropOff_time"
+                                  options={{
+                                    enableTime: true,
+                                    noCalendar: true,
+                                    dateFormat: "H:i",
+                                    time_24hr: true,
+                                   
+                                  }}
+                                /> */}
+
+                              <div style={{ marginTop: "20px" }}>
+                                {stops2.map((stop, index) => (
                                   <Row>
-                                    <Col lg={4}>
-                                      <Form.Label htmlFor="Name">
-                                        Name
-                                      </Form.Label>
-                                      <Form.Control
-                                        type="text"
-                                        id="Name"
-                                        required
-                                        className="mb-2"
-                                        placeholder="Add Program Name"
-                                        name="Name"
-                                        value={journeyName}
-                                        onChange={(e) =>
-                                          setJourneyName(e.target.value)
-                                        }
-                                      />
+                                    <Col lg={6} key={index}>
                                       <Form.Label htmlFor="customerName-field">
-                                        coordinations
+                                        Stop {index + 1}
                                       </Form.Label>
-
-                                      <InputGroup className="mb-3">
-                                        <InputGroup.Text id="basic-addon1">
-                                          From
-                                        </InputGroup.Text>
-
+                                      <div className="mb-3 d-flex">
                                         <Autocomplete
-                                          onPlaceChanged={onPlaceChanged}
-                                          onLoad={onLoad}
+                                          onPlaceChanged={onPlaceChangedStop}
+                                          onLoad={onLoadStop}
                                         >
                                           <Form.Control
                                             type="text"
-                                            style={{ width: "285px" }}
-                                            placeholder="Origin"
-                                            ref={originRef}
-                                            id="origin"
+                                            style={{ width: "250px" }}
+                                            placeholder="Stop"
+                                            ref={stopRef}
+                                            id="stop"
                                             onClick={() => {
-                                              handleLocationButtonClick();
-                                              if (nom) {
-                                                map?.panTo(nom);
-                                                map?.setZoom(15);
-                                              }
+                                              handleLocationButtonClickStop();
                                             }}
                                           />
                                         </Autocomplete>
-                                      </InputGroup>
-                                      <InputGroup className="mb-3">
-                                        <InputGroup.Text id="basic-addon1">
-                                          To
-                                        </InputGroup.Text>
-
-                                        <Autocomplete
-                                          onPlaceChanged={onPlaceChangedDest}
-                                          onLoad={onLoadDest}
-                                        >
-                                          <Form.Control
-                                            type="text"
-                                            style={{ width: "300px" }}
-                                            placeholder="Destination"
-                                            ref={destinationRef}
-                                            id="dest"
-                                            onClick={() => {
-                                              handleLocationButtonClickDest();
-                                              if (fatma) {
-                                                map?.panTo(fatma);
-                                                map?.setZoom(15);
-                                              }
+                                        {
+                                          <Flatpickr
+                                            className="form-control"
+                                          
+                                            style={{ width: "100px" }}
+                                            id="pickUp_time"
+                                            value={createDateFromStrings(
+                                              String(
+                                                new Date().getFullYear()
+                                              ).padStart(2, "0") +
+                                                "-" +
+                                                String(
+                                                  new Date().getMonth() + 1
+                                                ).padStart(2, "0") +
+                                                "-" +
+                                                String(
+                                                  new Date()
+                                                    .getDate()
+                                                    .toLocaleString()
+                                                ).padStart(2, "0"),
+                                              stopTimes[index]?.hours +
+                                                ":" +
+                                                stopTimes[index]?.minutes +
+                                                ":00"
+                                            ).getTime()}
+                                            options={{
+                                              enableTime: true,
+                                              noCalendar: true,
+                                              dateFormat: "H:i",
+                                              time_24hr: true,
                                             }}
+                                            onChange={(selectedDates) => handleStopTime(selectedDates, index)}
                                           />
-                                        </Autocomplete>
-                                      </InputGroup>
-
-                                      <div className="flex">
-                                        <Button
-                                          onClick={switchRoute}
-                                          className="btn btn-success w-lg custom-button d-grid gap-2"
-                                        >
-                                          Switch
-                                        </Button>
-
-                                        {loading ? (
-                                          <p>Calculating route...</p>
-                                        ) : (
-                                          <Button
-                                            type="submit"
-                                            onClick={calculateRoute}
-                                            className="custom-button"
-                                          >
-                                            Plan Route
-                                          </Button>
-                                        )}
-                                      </div>
-
-                                      <div style={{ marginTop: "20px" }}>
-                                        {stops2.map((stop, index) => (
-                                          <Row>
-                                            <Col lg={6} key={index}>
-                                              <div className="mb-3">
-                                                <Form.Label htmlFor="customerName-field">
-                                                  Stop {index + 1}
-                                                </Form.Label>
-                                                <Autocomplete
-                                                  onPlaceChanged={
-                                                    onPlaceChangedStop
-                                                  }
-                                                  onLoad={onLoadStop}
-                                                >
-                                                  <Form.Control
-                                                    type="text"
-                                                    style={{ width: "300px" }}
-                                                    placeholder="Stop"
-                                                    ref={stopRef}
-                                                    id="stop"
-                                                    onClick={() => {
-                                                      handleLocationButtonClickStop();
-                                                    }}
-                                                  />
-                                                </Autocomplete>
-                                              </div>
-                                            </Col>
-                                            {/* <Col lg={3}>
-                                              <button
-                                                type="button"
-                                                className="btn btn-danger btn-icon"
-                                                onClick={() =>
-                                                  handleRemoveStopClick(stop.id)
-                                                }
-                                                style={{ marginTop: "25px" }}
-                                              >
-                                                <i className="ri-delete-bin-5-line"></i>
-                                              </button>
-                                            </Col> */}
-                                          </Row>
-                                        ))}
-                                        <Link
-                                          to="#"
-                                          id="add-item"
-                                          className="btn btn-soft-secondary fw-medium"
-                                          onClick={handleAddStopClick}
-                                        >
-                                          <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
-                                            {" "}
-                                            Via
-                                          </i>
-                                        </Link>
-                                      </div>
-                                    </Col>
-
-                                    <Col lg={8}>
-                                      <div
-                                        style={{
-                                          position: "absolute",
-                                          left: "0",
-                                          height: "130%",
-                                          width: "330%",
-                                        }}
-                                      >
-                                        <GoogleMap
-                                          center={center}
-                                          zoom={15}
-                                          mapContainerStyle={{
-                                            width: isMapFullScreen
-                                              ? "100vw"
-                                              : "43%",
-                                            height: isMapFullScreen
-                                              ? "100vh"
-                                              : "120%",
-                                          }}
-                                          options={{
-                                            zoomControl: false,
-                                            streetViewControl: false,
-                                            mapTypeControl: false,
-                                            fullscreenControl: true,
-
-                                            fullscreenControlOptions: {
-                                              position:
-                                                google.maps.ControlPosition
-                                                  .TOP_RIGHT,
-                                            },
-                                          }}
-                                          onLoad={(map) => setMap(map)}
-                                        >
-                                          {selectedLocation && (
-                                            <Marker position={nom} />
-                                          )}
-                                          {selectedDestination && (
-                                            <Marker position={fatma} />
-                                          )}
-                                          {directionsResponse && (
-                                            <DirectionsRenderer
-                                              directions={directionsResponse}
-                                            />
-                                          )}
-                                        </GoogleMap>
-                                        <Button
-                                          aria-label="center back"
-                                          onClick={clearRoute}
-                                          variant="danger"
-                                          style={{
-                                            position: "absolute",
-                                            top: "10px",
-                                            left: "10px",
-                                            zIndex: 1000,
-                                            marginLeft: "15px",
-                                          }}
-                                        >
-                                          <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20"
-                                            fill="currentColor"
-                                            width="20"
-                                            height="20"
-                                          >
-                                            <path
-                                              fillRule="evenodd"
-                                              d="M16.146 14.146a.5.5 0 0 1-.708 0L8.5 7.207l-3.938 3.937a.5.5 0 0 1-.707-.707l4.146-4.146a1.5 1.5 0 0 1 2.121 0l6 6a.5.5 0 0 1 0 .708zM6.646 9.354a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"
-                                            />
-                                          </svg>
-                                          Clear Route
-                                        </Button>
-                                      </div>
-                                    </Col>
-                                  </Row>
-                                </Container>
-                                <div
-                                  className="d-flex align-items-end"
-                                  style={{ marginTop: "250px" }}
-                                >
-                                  <Button
-                                    type="button"
-                                    className="btn btn-success btn-label right ms-auto nexttab "
-                                    onClick={handleNextStep}
-                                    disabled={isNextButtonDisabled()}
-                                  >
-                                    <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Set Run dates
-                                  </Button>
-                                </div>
-                              </Tab.Pane>
-
-                              <Tab.Pane eventKey="2">
-                                <Row>
-                                  <div className="mt-2">
-                                    <h5>Trip Times</h5>
-                                  </div>
-                                  <Col lg={5}>
-                                    <InputGroup>PickUp Time</InputGroup>
-                                    <Flatpickr
-                                      className="form-control"
-                                      id="pickUp_time"
-                                      options={{
-                                        enableTime: true,
-                                        noCalendar: true,
-                                        dateFormat: "H:i",
-                                        time_24hr: true,
-                                        onChange: handlePickupTime,
-                                      }}
-                                    />
-                                  </Col>
-
-                                  <Col className="d-flex justify-content-center align-items-center"></Col>
-                                  <Col lg={5}>
-                                    <InputGroup>DropOff Time</InputGroup>
-                                    <Flatpickr
-                                      className="form-control"
-                                      id="dropOff_time"
-                                      options={{
-                                        enableTime: true,
-                                        noCalendar: true,
-                                        dateFormat: "H:i",
-                                        time_24hr: true,
-                                        onChange: handleDroppOffTime,
-                                      }}
-                                    />
-                                  </Col>
-                                </Row>
-                                <Row>
-                                  <div className="mt-2">
-                                    <h5>Run Dates</h5>
-                                  </div>
-                                  <Col lg={5}>
-                                    <InputGroup>Start Date</InputGroup>
-                                    <div className="mb-3">
-                                      <Flatpickr
-                                        value={pickUp_date!}
-                                        onChange={handleDateChange1}
-                                        className="form-control flatpickr-input"
-                                        id="pickUp_date"
-                                        placeholder="Select Date"
-                                        options={{
-                                          dateFormat: "d M, Y",
-                                          onChange: (selectedDates: Date[]) => {
-                                            setPickUp_date(selectedDates[0]);
-                                          },
-                                        }}
-                                      />
-                                    </div>
-                                  </Col>
-                                  <Col className="d-flex justify-content-center align-items-center">
-                                    <h5>to</h5>
-                                  </Col>
-                                  <Col lg={5}>
-                                    <InputGroup>End Date</InputGroup>
-
-                                    <Flatpickr
-                                      value={dropOff_date!}
-                                      onChange={handleDateChange2}
-                                      className="form-control flatpickr-input"
-                                      id="dropOff_date"
-                                      placeholder="Select Date"
-                                      options={{
-                                        dateFormat: "d M, Y",
-                                        onChange: (selectedDates: Date[]) => {
-                                          setDropOff_date(selectedDates[0]);
-                                        },
-                                      }}
-                                    />
-                                  </Col>
-                                </Row>
-                                <Row>
-                                  <div className="mt-2">
-                                    <h5>Free Days</h5>
-                                  </div>
-                                  <Col lg={5}>
-                                    <Flatpickr
-                                      value={free_date!}
-                                      onChange={handleDateChange3}
-                                      className="form-control flatpickr-input"
-                                      id="free_date"
-                                      placeholder="Select Date"
-                                      options={{
-                                        dateFormat: "d M, Y",
-                                        mode: "multiple",
-                                        onChange: (selectedDates: Date[]) => {
-                                          setFree_date(selectedDates);
-                                        },
-                                      }}
-                                    />
-                                  </Col>
-                                </Row>
-                                <Row>
-                                  <Col lg={12}>
-                                    <div className="mt-2">
-                                      <h5 className="fs-14 mb-1">
-                                        Days of week not running
-                                      </h5>
-                                      <p className="text-muted">
-                                        Slide the selected excepted days to the
-                                        right
-                                      </p>
-                                      <DualListBox
-                                        options={options1}
-                                        selected={selected1}
-                                        onChange={(e: any) => setSelected1(e)}
-                                        icons={{
-                                          moveLeft: (
-                                            <span
-                                              className="mdi mdi-chevron-left"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveAllLeft: [
-                                            <span
-                                              className="mdi mdi-chevron-double-left"
-                                              key="key"
-                                            />,
-                                          ],
-                                          moveRight: (
-                                            <span
-                                              className="mdi mdi-chevron-right"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveAllRight: [
-                                            <span
-                                              className="mdi mdi-chevron-double-right"
-                                              key="key"
-                                            />,
-                                          ],
-                                          moveDown: (
-                                            <span
-                                              className="mdi mdi-chevron-down"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveUp: (
-                                            <span
-                                              className="mdi mdi-chevron-up"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveTop: (
-                                            <span
-                                              className="mdi mdi-chevron-double-up"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveBottom: (
-                                            <span
-                                              className="mdi mdi-chevron-double-down"
-                                              key="key"
-                                            />
-                                          ),
-                                        }}
-                                      />
-                                    </div>
-                                  </Col>
-                                </Row>
-                                <div
-                                  className="d-flex align-items-start gap-3"
-                                  style={{ marginTop: "100px" }}
-                                >
-                                  <Button
-                                    type="button"
-                                    className="btn btn-light btn-label previestab"
-                                    onClick={() => setactiveVerticalTab(1)}
-                                  >
-                                    <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                                    Back to Journey
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    onClick={handleNextStep}
-                                    disabled={isNextButtonDisabled()}
-                                  >
-                                    <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Add Options
-                                  </Button>
-                                </div>
-                              </Tab.Pane>
-                              <Tab.Pane eventKey="3">
-                                <Row>
-                                  <Col lg={4}>
-                                    <div className="mb-3">
-                                      <Form.Label htmlFor="Pax">
-                                        Recommanded Capacity
-                                      </Form.Label>
-                                      <Form.Control
-                                        type="text"
-                                        id="Pax"
-                                        required
-                                        className="mb-2"
-                                        name="Pax"
-                                        value={capacityRecommanded}
-                                        onChange={(e) =>
-                                          setCapacityRecommanded(e.target.value)
                                         }
-                                      />
-                                    </div>
-                                  </Col>
-                                </Row>
-                                <Row>
-                                  <Col lg={12}>
-                                    <div>
-                                      <h5 className="fs-14 mb-1">Extra</h5>
-                                      <p className="text-muted">
-                                        Slide the selected option to the right
-                                      </p>
-                                      <DualListBox
-                                        options={options}
-                                        selected={selected}
-                                        onChange={(e: any) => setSelected(e)}
-                                        icons={{
-                                          moveLeft: (
-                                            <span
-                                              className="mdi mdi-chevron-left"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveAllLeft: [
-                                            <span
-                                              className="mdi mdi-chevron-double-left"
-                                              key="key"
-                                            />,
-                                          ],
-                                          moveRight: (
-                                            <span
-                                              className="mdi mdi-chevron-right"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveAllRight: [
-                                            <span
-                                              className="mdi mdi-chevron-double-right"
-                                              key="key"
-                                            />,
-                                          ],
-                                          moveDown: (
-                                            <span
-                                              className="mdi mdi-chevron-down"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveUp: (
-                                            <span
-                                              className="mdi mdi-chevron-up"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveTop: (
-                                            <span
-                                              className="mdi mdi-chevron-double-up"
-                                              key="key"
-                                            />
-                                          ),
-                                          moveBottom: (
-                                            <span
-                                              className="mdi mdi-chevron-double-down"
-                                              key="key"
-                                            />
-                                          ),
-                                        }}
-                                      />
-                                    </div>
-                                  </Col>
-                                </Row>
-                                <Row>
-                                  <Col lg={12}>
-                                    <div className="mb-3">
-                                      <Form.Label htmlFor="VertimeassageInput">
-                                        Notes
-                                      </Form.Label>
-                                      <textarea
-                                        className="form-control"
-                                        id="VertimeassageInput"
-                                        rows={5}
-                                        placeholder="Enter your notes"
-                                      ></textarea>
-                                    </div>
-                                  </Col>
-                                </Row>
+                                      </div>
+                                    </Col>
 
-                                <div
-                                  className="d-flex align-items-start gap-3"
-                                  style={{ marginTop: "100px" }}
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-icon"
+                                      onClick={() =>
+                                        handleRemoveStopClick(stop.id)
+                                      }
+                                      style={{
+                                        marginTop: "29px",
+                                        marginLeft: "80px",
+                                      }}
+                                    >
+                                      <i className="ri-delete-bin-5-line"></i>
+                                    </button>
+                                  </Row>
+                                ))}
+                                <Link
+                                  to="#"
+                                  id="add-item"
+                                  className="btn btn-soft-secondary fw-medium"
+                                  onClick={handleAddStopClickWrapper(
+                                    "New Stop Address"
+                                  )}
                                 >
-                                  <Button
-                                    type="button"
-                                    className="btn btn-light btn-label previestab"
-                                    onClick={() => setactiveVerticalTab(2)}
-                                  >
-                                    <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                                    Back to Run Dates
-                                  </Button>
+                                  <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
+                                    {" "}
+                                    Via
+                                  </i>
+                                </Link>
+                                <Link
+                                  to="#"
+                                  id="add-item"
+                                  className="btn btn-soft-secondary fw-medium link"
+                                >
+                                  <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
+                                    {" "}
+                                    Options
+                                  </i>
+                                </Link>
+                              </div>
+                              {loading ? (
+                                <p>Calculating route...</p>
+                              ) : (
+                                <Button
+                                  type="submit"
+                                  onClick={calculateRoute}
+                                  className="custom-button"
+                                >
+                                  Plan Route
+                                </Button>
+                              )}
 
-                                  <Button
-                                    type="button"
-                                    className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                                    onClick={handleNextStep}
-                                    disabled={isNextButtonDisabled()}
-                                  >
-                                    <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                    Go To Resume
-                                  </Button>
-                                </div>
-                              </Tab.Pane>
-                              <Tab.Pane eventKey="4">
-                                {renderRecapPage()}
+                              {/* <div>
+                                {test && test2 && (
+                                  <div className="distance">
+                                    <Form.Label className="label">
+                                      Distance:{test}
+                                    </Form.Label>
+                                    <Form.Label className="label">
+                                      Duration: {test2}
+                                    </Form.Label>
+                                  </div>
+                                )}
+                              </div> */}
+                              </div>
+                            </Col>
 
+                            <Col lg={8}>
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  left: "0",
+                                  height: "530px",
+                                  width: "2315px",
+                                }}
+                              >
+                                <GoogleMap
+                                  center={center}
+                                  zoom={15}
+                                  mapContainerStyle={{
+                                    width: isMapFullScreen ? "100vw" : "43%",
+                                    height: isMapFullScreen ? "100vh" : "120%",
+                                  }}
+                                  options={{
+                                    zoomControl: false,
+                                    streetViewControl: false,
+                                    mapTypeControl: false,
+                                    fullscreenControl: true,
+
+                                    fullscreenControlOptions: {
+                                      position:
+                                        google.maps.ControlPosition.TOP_RIGHT,
+                                    },
+                                  }}
+                                  onLoad={(map) => setMap(map)}
+                                >
+                                  {selectedLocation && (
+                                    <Marker position={nom} />
+                                  )}
+                                  {selectedDestination && (
+                                    <Marker position={fatma} />
+                                  )}
+                                  {directionsResponse && (
+                                    <DirectionsRenderer
+                                      directions={directionsResponse}
+                                    />
+                                  )}
+                                </GoogleMap>
+                                <Button
+                                  aria-label="center back"
+                                  onClick={clearRoute}
+                                  variant="danger"
+                                  style={{
+                                    position: "absolute",
+                                    top: "10px",
+                                    left: "10px",
+                                    zIndex: 1000,
+                                    marginLeft: "15px",
+                                  }}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    width="20"
+                                    height="20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.146 14.146a.5.5 0 0 1-.708 0L8.5 7.207l-3.938 3.937a.5.5 0 0 1-.707-.707l4.146-4.146a1.5 1.5 0 0 1 2.121 0l6 6a.5.5 0 0 1 0 .708zM6.646 9.354a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"
+                                    />
+                                  </svg>
+                                  Clear Route
+                                </Button>
+                              </div>
+                              <div
+                                className="d-flex align-items-end"
+                                style={{ marginTop: "650px" }}
+                              >
                                 <Button
                                   type="button"
-                                  className="btn btn-light btn-label previestab"
-                                  onClick={() => setactiveVerticalTab(3)}
+                                  className="btn btn-success btn-label right ms-auto nexttab "
+                                  onClick={handleNextStep}
+                                  disabled={isNextButtonDisabled()}
                                 >
-                                  <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                                  Back to Options
+                                  <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                                  Set Run dates
                                 </Button>
-                              </Tab.Pane>
-                            </Tab.Content>
+
+                                <Dropdown style={{ marginLeft: "100px" }}>
+                                  <Dropdown.Toggle
+                                    variant="secondary"
+                                    id="dropdown-basic"
+                                  >
+                                    Route Information
+                                  </Dropdown.Toggle>
+                                  <Dropdown.Menu>
+                                    {routeSegments.map((segment, index) => (
+                                      <Dropdown.Item key={index}>
+                                        <div>
+                                          <p>
+                                            Route Segment: {segment.segment}
+                                          </p>
+                                          <p>
+                                            {segment.startAddress} To{" "}
+                                            {segment.endAddress}
+                                          </p>
+                                          <p>{segment.distance}</p>
+                                          <p>{segment.duration}</p>
+                                        </div>
+                                      </Dropdown.Item>
+                                    ))}
+                                  </Dropdown.Menu>
+                                </Dropdown>
+                              </div>
+                            </Col>
+                          </Row>
+                        </Tab.Pane>
+
+                        <Tab.Pane eventKey="2">
+                          <Row>
+                            <div className="mt-2">
+                              <h5>Trip Times</h5>
+                            </div>
+                            <Col lg={5}>
+                              <InputGroup>PickUp Time</InputGroup>
+                              <Flatpickr
+                                className="form-control"
+                                id="pickUp_time"
+                                options={{
+                                  enableTime: true,
+                                  noCalendar: true,
+                                  dateFormat: "H:i",
+                                  time_24hr: true,
+                                  // onChange: handlePickupTime,
+                                }}
+                              />
+                            </Col>
+
+                            <Col className="d-flex justify-content-center align-items-center"></Col>
+                            <Col lg={5}>
+                              <InputGroup>DropOff Time</InputGroup>
+                              <Flatpickr
+                                className="form-control"
+                                id="dropOff_time"
+                                options={{
+                                  enableTime: true,
+                                  noCalendar: true,
+                                  dateFormat: "H:i",
+                                  time_24hr: true,
+                                  // onChange: handleDroppOffTime,
+                                }}
+                              />
+                            </Col>
+                          </Row>
+                          <Row>
+                            <div className="mt-2">
+                              <h5>Run Dates</h5>
+                            </div>
+                            <Col lg={5}>
+                              <InputGroup>Start Date</InputGroup>
+                              <div className="mb-3">
+                                <Flatpickr
+                                  value={pickUp_date!}
+                                  onChange={handleDateChange1}
+                                  className="form-control flatpickr-input"
+                                  id="pickUp_date"
+                                  placeholder="Select Date"
+                                  options={{
+                                    dateFormat: "d M, Y",
+                                    onChange: (selectedDates: Date[]) => {
+                                      setPickUp_date(selectedDates[0]);
+                                    },
+                                  }}
+                                />
+                              </div>
+                            </Col>
+                            <Col className="d-flex justify-content-center align-items-center">
+                              <h5>to</h5>
+                            </Col>
+                            <Col lg={5}>
+                              <InputGroup>End Date</InputGroup>
+
+                              <Flatpickr
+                                value={dropOff_date!}
+                                onChange={handleDateChange2}
+                                className="form-control flatpickr-input"
+                                id="dropOff_date"
+                                placeholder="Select Date"
+                                options={{
+                                  dateFormat: "d M, Y",
+                                  onChange: (selectedDates: Date[]) => {
+                                    setDropOff_date(selectedDates[0]);
+                                  },
+                                }}
+                              />
+                            </Col>
+                          </Row>
+                          <Row>
+                            <div className="mt-2">
+                              <h5>Free Days</h5>
+                            </div>
+                            <Col lg={5}>
+                              <Flatpickr
+                                value={free_date!}
+                                onChange={handleDateChange3}
+                                className="form-control flatpickr-input"
+                                id="free_date"
+                                placeholder="Select Date"
+                                options={{
+                                  dateFormat: "d M, Y",
+                                  mode: "multiple",
+                                  onChange: (selectedDates: Date[]) => {
+                                    setFree_date(selectedDates);
+                                  },
+                                }}
+                              />
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col lg={12}>
+                              <div className="mt-2">
+                                <h5 className="fs-14 mb-1">
+                                  Days of week not running
+                                </h5>
+                                <p className="text-muted">
+                                  Slide the selected excepted days to the right
+                                </p>
+                                <DualListBox
+                                  options={options1}
+                                  selected={selected1}
+                                  onChange={(e: any) =>{
+                                    console.log("event",e)
+                                    setSelected1(e)}}
+                                  icons={{
+                                    moveLeft: (
+                                      <span
+                                        className="mdi mdi-chevron-left"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveAllLeft: [
+                                      <span
+                                        className="mdi mdi-chevron-double-left"
+                                        key="key"
+                                      />,
+                                    ],
+                                    moveRight: (
+                                      <span
+                                        className="mdi mdi-chevron-right"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveAllRight: [
+                                      <span
+                                        className="mdi mdi-chevron-double-right"
+                                        key="key"
+                                      />,
+                                    ],
+                                    moveDown: (
+                                      <span
+                                        className="mdi mdi-chevron-down"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveUp: (
+                                      <span
+                                        className="mdi mdi-chevron-up"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveTop: (
+                                      <span
+                                        className="mdi mdi-chevron-double-up"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveBottom: (
+                                      <span
+                                        className="mdi mdi-chevron-double-down"
+                                        key="key"
+                                      />
+                                    ),
+                                  }}
+                                />
+                              </div>
+                            </Col>
+                          </Row>
+                          <div
+                            className="d-flex align-items-start gap-3"
+                            style={{ marginTop: "100px" }}
+                          >
+                            <Button
+                              type="button"
+                              className="btn btn-light btn-label previestab"
+                              onClick={() => setactiveVerticalTab(1)}
+                            >
+                              <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                              Back to Journey
+                            </Button>
+                            <Button
+                              type="button"
+                              className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                              onClick={handleNextStep}
+                              disabled={isNextButtonDisabled()}
+                            >
+                              <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                              Add Options
+                            </Button>
                           </div>
-                        </Col>
-                      </Row>
+                        </Tab.Pane>
+                        <Tab.Pane eventKey="3">
+                          <Row>
+                            <Col lg={4}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="recommanded_capacity">
+                                  Recommanded Capacity
+                                </Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  id="recommanded_capacity"
+                                  required
+                                  className="mb-2"
+                                  name="recommanded_capacity"
+                                  value={programmData.recommanded_capacity}
+                                  onChange={onChangeProgramms}
+                                />
+                              </div>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col lg={12}>
+                              <div>
+                                <h5 className="fs-14 mb-1">Extra</h5>
+                                <p className="text-muted">
+                                  Slide the selected option to the right
+                                </p>
+                                <DualListBox
+                                  options={options}
+                                  selected={selected}
+                                  onChange={(e: any) => setSelected(e)}
+                                  icons={{
+                                    moveLeft: (
+                                      <span
+                                        className="mdi mdi-chevron-left"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveAllLeft: [
+                                      <span
+                                        className="mdi mdi-chevron-double-left"
+                                        key="key"
+                                      />,
+                                    ],
+                                    moveRight: (
+                                      <span
+                                        className="mdi mdi-chevron-right"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveAllRight: [
+                                      <span
+                                        className="mdi mdi-chevron-double-right"
+                                        key="key"
+                                      />,
+                                    ],
+                                    moveDown: (
+                                      <span
+                                        className="mdi mdi-chevron-down"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveUp: (
+                                      <span
+                                        className="mdi mdi-chevron-up"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveTop: (
+                                      <span
+                                        className="mdi mdi-chevron-double-up"
+                                        key="key"
+                                      />
+                                    ),
+                                    moveBottom: (
+                                      <span
+                                        className="mdi mdi-chevron-double-down"
+                                        key="key"
+                                      />
+                                    ),
+                                  }}
+                                />
+                              </div>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col lg={12}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="VertimeassageInput">
+                                  Notes
+                                </Form.Label>
+                                <textarea
+                                  className="form-control"
+                                  id="VertimeassageInput"
+                                  rows={5}
+                                  placeholder="Enter your notes"
+                                ></textarea>
+                              </div>
+                            </Col>
+                          </Row>
+
+                          <div
+                            className="d-flex align-items-start gap-3"
+                            style={{ marginTop: "100px" }}
+                          >
+                            <Button
+                              type="button"
+                              className="btn btn-light btn-label previestab"
+                              onClick={() => setactiveVerticalTab(2)}
+                            >
+                              <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                              Back to Run Dates
+                            </Button>
+
+                            <Button
+                              type="button"
+                              className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                              onClick={handleNextStep}
+                              disabled={isNextButtonDisabled()}
+                            >
+                              <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                              Go To Resume
+                            </Button>
+                          </div>
+                        </Tab.Pane>
+                        <Tab.Pane eventKey="4">
+                          {renderRecapPage()}
+
+                          <Button
+                            type="button"
+                            className="btn btn-light btn-label previestab"
+                            onClick={() => setactiveVerticalTab(3)}
+                          >
+                            <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                            Back to Options
+                          </Button>
+
+                          <Button
+                            variant="success"
+                            type="submit"
+                            className="w-sm"
+                          >
+                            Submit
+                          </Button>
+                        </Tab.Pane>
+                      </Tab.Content>
                     </Tab.Container>
                   </Form>
                 </Card.Body>

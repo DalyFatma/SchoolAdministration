@@ -10,6 +10,8 @@
     background-color: #d3a724;
     border: none;
     transition: background-color 0.3s;
+    margin-top: 1rem;
+    width: 350px;
 }
 
 .custom-button:hover {
@@ -19,4 +21,29 @@
 .flex{
   display: flex;
   justify-content: space-between;
+  
+}
+.distance{
+  margin-top: 10px;
+  display: grid;
+}
+.label{
+  font-style:normal;
+  font-size:20px
+}
+.link{
+  margin-left: 80px;
+}
+
+
+.switch-container i.ph {
+  font-size: 24px; /* adjust the size as needed */
+  margin-right: 10px; /* adjust the margin as needed */
+}
+.btn-switch{
+  width: 350px;
+}
+
+.dropdown-menu{
+  
 }
