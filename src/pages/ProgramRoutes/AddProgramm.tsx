@@ -26,7 +26,6 @@ import {
 import Swal from "sweetalert2";
 import "./AddProgram.css";
 import { useAddProgrammMutation } from "features/programms/programmSlice";
-import { number } from "yup";
 
 const options = [
   { value: "ForHandicap", label: "For Handicap" },
@@ -79,29 +78,12 @@ interface stopTime {
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
   const navigate = useNavigate();
-  const [showAddStations, setShowAddStations] = useState<boolean>(false);
-  const [pickupTime, setPickupTime] = useState<Date | null>(null);
-  const [dropoffTime, setDropoffTime] = useState<Date | null>(null);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [forceRender, setForceRender] = useState(false);
-  const [pathCoordinates, setPathCoordinates] = useState<google.maps.LatLng[]>(
-    []
-  );
-  const [clickedMarker, setClickedMarker] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState(1);
-  const [routeCoordinates, setRouteCoordinates] = useState(null);
+
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
-  const [originLocation, setOriginLocation] = useState("");
-  const [destinationLocation, setDestinationLocation] = useState("");
-  const [isOriginFirst, setIsOriginFirst] = useState(true);
-  const [switched, setSwitched] = useState(false);
-
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
   const [programName, setProgramName] = useState("");
   const [capacityRecommanded, setCapacityRecommanded] = useState("");
-
   const [selected, setSelected] = useState<string[]>([]);
   const [selected1, setSelected1] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState("");
@@ -117,13 +99,9 @@ const AddProgramm = (props: any) => {
   const [directionsResponse, setDirectionsResponse] =
     useState<google.maps.DirectionsResult | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [clickedMarkers, setClickedMarkers] = useState<number[]>([]);
-
   const [routeDirections, setRouteDirections] =
     useState<google.maps.DirectionsResult | null>(null);
-
   const [stopNames, setStopNames] = useState<string[]>([]);
-
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
 
   const originRef = useRef<any>(null);
@@ -160,9 +138,6 @@ const AddProgramm = (props: any) => {
 
   const [test, setTest] = useState("");
   const [test2, setTest2] = useState("");
-
-  const [dropOff_test, setDropOff_test] = useState("");
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
@@ -208,6 +183,8 @@ const AddProgramm = (props: any) => {
     recommanded_capacity: "",
     extra: [""],
     notes: "",
+    dropOff_time: "",
+    pickUp_Time: "",
   });
   const notify = () => {
     Swal.fire({
@@ -227,60 +204,10 @@ const AddProgramm = (props: any) => {
   const onSubmitProgramm = (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
-      programmData["extra"] = selected;
-      programmData["exceptDays"] = selected1;
-      programmData["freeDays_date"] = free_date.map((date) =>
-        date.toISOString()
-        // console.log(String(date.getFullYear)+)
-      );
-      programmData["droppOff_date"] = dropOff_date
-        ? dropOff_date.toString()
-        : "";
-      programmData["pickUp_date"] = pickUp_date ? pickUp_date.toString() : "";
-      const destinationPoint = destinationRef.current;
 
-      if (
-        destinationPoint &&
-        destinationPoint.placeName &&
-        destinationPoint.coordinates
-      ) {
-        programmData["destination_point"] = {
-          placeName: destinationPoint.placeName,
-          coordinates: destinationPoint.coordinates,
-        };
-      } else {
-        console.error("destinationRef does not have the expected properties.");
-      }
-
-      const originPoint = originRef.current;
-
-      if (originPoint && originPoint.placeName && originPoint.coordinates) {
-        setProgrammData((prevData) => ({
-          ...prevData,
-          origin_point: {
-            placeName: originPoint.placeName,
-            coordinates: originPoint.coordinates,
-          },
-        }));
-      } else {
-        console.error("originPoint does not have the expected properties.");
-      }
-
-      let stops = [];
-
-      for(let i = 0; i<waypts.length; i++){
-        stops.push({
-          id: "",
-          address: String(waypts[i].location),
-          time: String(stopTimes[i].hours).padStart(2, '0') + ':' + String(stopTimes[i].minutes).padStart(2, "0")
-        });
-      }
-
-      programmData["stops"] = stops;
-
-      // createProgram(programmData)
-      //   .then(() => notify())
-      //   .then(() => navigate(-1));
+      createProgram(programmData)
+        .then(() => notify())
+        .then(() => navigate(-1));
     } catch (error) {
       console.log(error);
     }
@@ -295,24 +222,25 @@ const AddProgramm = (props: any) => {
   };
 
   const handleRemoveStopClick = (idToRemove: any) => {
+    console.log(waypts);
     setStops2((prevStops) => {
       console.log("handleRemoveStopClick called with ID:", idToRemove);
       const updatedStops = prevStops.filter((stop) => stop.id !== idToRemove);
-      if(waypts.length !== 0){
-        const tempWaypts = waypts;
-        const newWaypts = tempWaypts.splice(stop.id - 1, 1);
-        setWaypts(newWaypts);
-        calculateRoute();
-      }
 
       return updatedStops;
     });
+
+    const newWaypts = [...waypts];
+    newWaypts.splice(idToRemove - 1, 1);
+    console.log(newWaypts);
+    setWaypts(newWaypts);
+    console.log(waypts);
+    calculateRoute();
   };
 
   const handleAddStopClickWrapper = (address: string) => {
     return () => handleAddStopClick(address);
   };
-  const labels = "CDEFGHIJKLMNOPQRSTUVWXYZ";
 
   useEffect(() => {
     if (originRef.current && destinationRef.current) {
@@ -373,21 +301,82 @@ const AddProgramm = (props: any) => {
     //   minute: "2-digit",
     // });
     setPickUp_time(formattedTime);
-    console.log("Hello Fatma")
+    console.log("Hello Fatma");
   };
 
   const handleStopTime = (selectedTime: any, index: number) => {
-    console.log("indexx",index);
+    console.log("indexx", index);
     const formattedTime = selectedTime[0];
     console.log(formattedTime);
     let hour = formattedTime?.getHours();
     let minute = formattedTime?.getMinutes();
 
-    let tempStopTimes = stopTimes;
-    tempStopTimes[index].hours = hour;
-    tempStopTimes[index].minutes = minute;
+    let tempStopTimes = [...stopTimes];
+
+    let newSelectedTime =
+      String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
+    console.log("newSelectedTime", newSelectedTime);
+
+    tempStopTimes[index] = {
+      hours: hour,
+      minutes: minute,
+    };
+
+    let apiTime =
+      String(stopTimes[index].hours).padStart(2, "0") +
+      ":" +
+      String(stopTimes[index].minutes).padStart(2, "0");
+
+    let comparisonTime = compareTimes(apiTime, newSelectedTime);
+
+    let duration = {
+      hours: 0,
+      minutes: 0,
+    };
+
+    if (comparisonTime === 2) {
+      duration = calculateDuration(apiTime, newSelectedTime);
+      console.log("duration", duration);
+    }
+    if (comparisonTime === 1) {
+      duration = calculateDuration(newSelectedTime, apiTime);
+      console.log("duration", duration);
+    }
+    for (let i = index + 1; i < stopTimes.length; i++) {
+      let oldTime =
+        String(stopTimes[i].hours).padStart(2, "0") +
+        ":" +
+        String(stopTimes[i].minutes).padStart(2, "0");
+
+      let newTime = {
+        hours: 0,
+        minutes: 0,
+      };
+      if (comparisonTime === 2) {
+        newTime = addDurationToTime(oldTime, duration.hours, duration.minutes);
+      }
+
+      if (comparisonTime === 1) {
+        newTime = subtractTime(oldTime, duration.hours, duration.minutes);
+      }
+
+      tempStopTimes[i].hours = newTime.hours;
+      tempStopTimes[i].minutes = newTime.minutes;
+    }
 
     setStopTimes(tempStopTimes);
+    console.log("stoptimes", stopTimes);
+  };
+
+  const handleDateClose = (selectedDates: any) => {
+    let tempStopTimes = stopTimes;
+    console.log("Selected date:", selectedDates[0]);
+    for (let i = 0; i < tempStopTimes.length; i++) {
+      tempStopTimes[i].hours = 0;
+      tempStopTimes[i].minutes = 0;
+    }
+    setStopTimes(tempStopTimes);
+    console.log("stoptimes", stopTimes);
   };
 
   const handleDateChange1 = (selectedDates: Date[]) => {
@@ -432,71 +421,106 @@ const AddProgramm = (props: any) => {
 
   const renderRecapPage = () => {
     return (
-      <Row className="d-flex justify-content-space-between">
-        <Col>
+      <>
+        <Row
+          className="d-flex justify-content-center"
+          style={{ marginLeft: "45%" }}
+        >
           <b> Journey Name: </b>
           <p> {programmData.programName}</p>
-          <b>Origin Location Name: </b>
-          <p>{recap.originRef}</p>
-          <b> Destination Location Name: </b>
-          <p> {recap.destinationRef}</p>
-          <b>List of stops Locations Name:</b>
-          <ul>
-            {stopNames.map((name, index) => (
-              <li key={index}>{name}</li>
-            ))}
-          </ul>
-          <b>PickUp Time: </b> <p> {recap.pickUp_time}</p>
-          <b>DropOff Time: </b> <p> {recap.dropOff_time}</p>
-          <b>Start Date: </b>
-          <p>
-            {new Date(recap.pickUp_date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </p>
-          <b>End Date: </b>
-          <p>
-            {new Date(recap.dropOff_date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </p>
-        </Col>
-        <Col>
-          <b>Free Dates: </b>
-          <ul>
-            {Array.isArray(recap.free_date) &&
-              recap.free_date.map((dateString, index) => (
+        </Row>
+        <Row className="d-flex justify-content-space-between">
+          <Col>
+            <div className="table-responsive">
+              <table className="table table-sm table-borderless align-middle description-table">
+                <tbody>
+                  <tr>
+                    <td>
+                      <b>Start Date: </b>
+                      <p>{programmData.pickUp_date}</p>
+                    </td>
+                    <td>
+                      <b>End Date: </b>
+                      <p>{programmData.droppOff_date}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Origin Address: </b>
+                      <p>{programmData.origin_point.placeName}</p>
+                    </td>
+                    <td>
+                      <b>Pick Up Time: </b> <p> {programmData.pickUp_Time}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b> Destination Location Name: </b>
+                      <p> {programmData.destination_point.placeName}</p>
+                    </td>
+                    <td>
+                      <b>Drop Off Time: </b> <p> {programmData.dropOff_time}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><b>List of Stops</b></td>
+                    <td>Stop Time</td>
+                  </tr>
+         
+                  {waypts.map((value, index) => (
+                    <tr key={index}>
+                      <td>{value.location?.toString()}</td>
+                      <td>{String(stopTimes[index]?.hours).padStart(2, '0')+':'+String(stopTimes[index]?.minutes).padStart(2, '0')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Col>
+          <Col>
+            <b>Free Dates: </b>
+            <ul>
+              {Array.isArray(programmData.freeDays_date) &&
+                programmData.freeDays_date.map((dateString, index) => (
+                  <li key={index}>{dateString}</li>
+                ))}
+            </ul>
+            {/* <b>Work Dates: </b>
+            <ul>
+              {getWorkDates().map((date: any, index: any) => (
                 <li key={index}>
-                  {new Date(dateString).toLocaleDateString("en-US", {
+                  {date.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </li>
               ))}
-          </ul>
-          <b>Work Dates: </b>
-          <ul>
-            {getWorkDates().map((date: any, index: any) => (
-              <li key={index}>
-                {date.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </li>
-            ))}
-          </ul>
-          <b>Capacity Recommended: </b>{" "}
-          <p> {programmData.recommanded_capacity}</p>
-          <b> Selected Options: </b> <p>{recap.selected.join(" ")}</p>
-          <b> Except Days: </b> <p> {recap.selected1.join(" ")}</p>
-        </Col>
-      </Row>
+            </ul> */}
+            <b>Capacity Recommended: </b>{" "}
+            <p> {programmData.recommanded_capacity}</p>
+            <b> Selected Options: </b> <p>{programmData.extra.join(" ")}</p>
+            <b> Except Days: </b> <p> {programmData.exceptDays.join(" ")}</p>
+          </Col>
+        </Row>
+        <b>Work Dates: </b>
+        <br />
+        <Flatpickr
+      className="form-control"
+      options={{
+        inline: true,
+        dateFormat: 'Y-m-d',
+        minDate: programmData.pickUp_date.substring(0,8)+ String(pickUp_date?.getDate().toLocaleString()).padStart(2,'0'),
+        maxDate: programmData.droppOff_date,
+        disable: [
+          function(date) {
+            // Disable dates outside of the specified range
+            return !(date >= new Date(programmData.pickUp_date) && date <= new Date(programmData.droppOff_date));
+          }
+        ],
+      }}
+    />
+      </>
     );
   };
 
@@ -574,7 +598,112 @@ const AddProgramm = (props: any) => {
         return false;
     }
   };
-  const handleNextStep = () => {
+  const handleNextStep = (isResume: boolean) => {
+    if (isResume === true) {
+      programmData["extra"] = selected;
+      programmData["exceptDays"] = selected1;
+
+      let freeDates = [];
+
+      for (let freeDay of free_date) {
+        const year = freeDay.getFullYear();
+        const month = freeDay.getMonth() + 1;
+        const day = freeDay.getDate().toLocaleString();
+
+        let date =
+          String(year) +
+          "-" +
+          String(month).padStart(2, "0") +
+          "-" +
+          String(day).padStart(2, "0");
+
+        freeDates.push(date);
+      }
+
+      console.log(freeDates);
+      programmData["freeDays_date"] = freeDates;
+
+      const dropYear = dropOff_date!.getFullYear();
+      const dropMonth = dropOff_date!.getMonth() + 1;
+      const dropDay = dropOff_date!.getDate().toLocaleString();
+
+      let dropOffDate =
+        String(dropYear) +
+        "-" +
+        String(dropMonth).padStart(2, "0") +
+        "-" +
+        String(dropDay).padStart(2, "0");
+      programmData["droppOff_date"] = dropOffDate;
+
+      const pickYear = pickUp_date!.getFullYear();
+      const pickMonth = pickUp_date!.getMonth() + 1;
+      const pickDay = pickUp_date!.getDate().toLocaleString();
+
+      let pickUpDate =
+        String(pickYear) +
+        "-" +
+        String(pickMonth).padStart(2, "0") +
+        "-" +
+        String(pickDay).padStart(2, "0");
+      programmData["pickUp_date"] = pickUpDate;
+
+      let pickUpHour = String(pickUp_time?.getHours()).padStart(2, "0");
+      let pickUpMinute = String(pickUp_time?.getMinutes()).padStart(2, "0");
+
+      let pickTime = pickUpHour + ":" + pickUpMinute;
+
+      programmData["pickUp_Time"] = pickTime;
+
+      let destTime =
+        String(stopTimes[stopTimes.length - 1]?.hours).padStart(2, "0") +
+        ":" +
+        String(stopTimes[stopTimes.length - 1]?.minutes).padStart(2, "0");
+      programmData["dropOff_time"] = destTime;
+
+      const destinationPoint = destinationRef.current;
+
+      if (
+        destinationPoint &&
+        destinationPoint.placeName &&
+        destinationPoint.coordinates
+      ) {
+        programmData["destination_point"] = {
+          placeName: destinationPoint.placeName,
+          coordinates: destinationPoint.coordinates,
+        };
+      } else {
+        console.error("destinationRef does not have the expected properties.");
+      }
+
+      const originPoint = originRef.current;
+
+      if (originPoint && originPoint.placeName && originPoint.coordinates) {
+        setProgrammData((prevData) => ({
+          ...prevData,
+          origin_point: {
+            placeName: originPoint.placeName,
+            coordinates: originPoint.coordinates,
+          },
+        }));
+      } else {
+        console.error("originPoint does not have the expected properties.");
+      }
+
+      let stops = [];
+
+      for (let i = 0; i < waypts.length; i++) {
+        stops.push({
+          id: "",
+          address: String(waypts[i].location),
+          time:
+            String(stopTimes[i].hours).padStart(2, "0") +
+            ":" +
+            String(stopTimes[i].minutes).padStart(2, "0"),
+        });
+      }
+
+      programmData["stops"] = stops;
+    }
     if (!isNextButtonDisabled()) {
       setactiveVerticalTab(activeVerticalTab + 1);
     } else {
@@ -922,16 +1051,17 @@ const AddProgramm = (props: any) => {
               temporarryTimes.push(time);
             }
 
-            const totalDurations = accumulateDurations(durations);
-            
-            const time_dest = addDurationToTime(
-              pickUpHour + ":" + pickUpMinute,
-              totalDurations.hours,
-              totalDurations.minutes
-            );
-            temporarryTimes.push(time_dest);
+            // const totalDurations = accumulateDurations(durations);
+
+            // const time_dest = addDurationToTime(
+            //   pickUpHour + ":" + pickUpMinute,
+            //   totalDurations.hours,
+            //   totalDurations.minutes
+            // );
+            // temporarryTimes.push(time_dest);
             console.log(temporarryTimes);
             setStopTimes(temporarryTimes);
+            console.log("Plan route stop times", stopTimes);
           });
 
           if (!selectedRoute) {
@@ -1016,6 +1146,27 @@ const AddProgramm = (props: any) => {
     const newHours = Math.floor(totalMinutes / 60) % 24;
     const newMinutes = totalMinutes % 60;
 
+    return {
+      hours: newHours,
+      minutes: newMinutes,
+    };
+  };
+  const subtractTime = (
+    time: string,
+    hoursToSubtract: number,
+    minutesToSubtract: number
+  ) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    let totalMinutes = hours * 60 + minutes;
+    totalMinutes -= hoursToSubtract * 60 + minutesToSubtract;
+
+    if (totalMinutes < 0) {
+      totalMinutes += 24 * 60; // Add 24 hours if the result is negative
+    }
+
+    const newHours = Math.floor(totalMinutes / 60);
+    const newMinutes = totalMinutes % 60;
+
     // return `${String(newHours).padStart(2, "0")}:${String(newMinutes).padStart(
     //   2,
     //   "0"
@@ -1026,39 +1177,73 @@ const AddProgramm = (props: any) => {
       minutes: newMinutes,
     };
   };
+  const calculateDuration = (startTime: string, endTime: string) => {
+    console.log("startTime", startTime);
+    console.log("endTime", endTime);
+    const [startHours, startMinutes] = startTime.split(":").map(Number);
+    const [endHours, endMinutes] = endTime.split(":").map(Number);
+
+    let totalStartMinutes = startHours * 60 + startMinutes;
+    let totalEndMinutes = endHours * 60 + endMinutes;
+
+    let durationInMinutes = totalEndMinutes - totalStartMinutes;
+
+    if (durationInMinutes < 0) {
+      durationInMinutes += 24 * 60;
+    }
+
+    const durationHours = Math.floor(durationInMinutes / 60);
+    const durationMinutes = durationInMinutes % 60;
+
+    let duration = {
+      hours: durationHours,
+      minutes: durationMinutes,
+    };
+
+    return duration;
+    //return `${durationHours} hours and ${durationMinutes} minutes`;
+  };
+  const compareTimes = (time1: string, time2: string) => {
+    let ref = 0;
+    if (time1 > time2) {
+      ref = 1;
+      alert("Time 1 is later than time 2");
+    } else if (time1 < time2) {
+      alert("Time 2 is later than time 1");
+      ref = 2;
+    }
+    return ref;
+  };
 
   const accumulateDurations = (durations: any) => {
-    console.log("Api durations",durations);
+    console.log("Api durations", durations);
     let totalDuration = {
-      hours:0,
-      minutes:0,
-    }
-    for(let duration of durations) {
-      const hours = Math.floor(
-        duration.duration / 3600
-      );
-      const minutes = Math.floor(
-        (duration.duration % 3600) / 60
-      );
+      hours: 0,
+      minutes: 0,
+    };
+    for (let duration of durations) {
+      const hours = Math.floor(duration.duration / 3600);
+      const minutes = Math.floor((duration.duration % 3600) / 60);
       totalDuration.hours += hours;
       totalDuration.minutes += minutes;
-      console.log("Tempo Total",totalDuration);
+      console.log("Tempo Total", totalDuration);
     }
 
-    let totalMinutes = (totalDuration.hours * 60) + totalDuration.minutes;
+    let totalMinutes = totalDuration.hours * 60 + totalDuration.minutes;
 
     let validHours = Math.floor(totalMinutes / 60) % 24;
     let valdMinutes = totalMinutes % 60;
 
     let total = {
       hours: validHours,
-      minutes: valdMinutes
-    }
+      minutes: valdMinutes,
+    };
 
-    console.log("Total",total)
+    console.log("Total", total);
 
     return total;
-  }
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -1086,133 +1271,162 @@ const AddProgramm = (props: any) => {
                       <Tab.Content>
                         <Tab.Pane eventKey="1">
                           <Row>
-                            <Col lg={4} >
-                              <div  style={{ maxHeight: 'calc(80vh - 80px)', overflowX: 'auto' }}>
-                              <Form.Label htmlFor="programName">
-                                Name
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="programName"
-                                style={{ width: "400px" }}
-                                required
-                                className="mb-2"
-                                placeholder="Add Program Name"
-                                name="programName"
-                                value={programmData.programName}
-                                onChange={onChangeProgramms}
-                              />
-                              <Form.Label htmlFor="customerName-field">
-                                coordinations
-                              </Form.Label>
-
-                              <InputGroup className="mb-3">
-                                <InputGroup.Text id="basic-addon1">
-                                  From
-                                </InputGroup.Text>
-                                <div className="d-flex">
-                                  <Autocomplete
-                                    onPlaceChanged={onPlaceChanged}
-                                    onLoad={onLoad}
-                                  >
-                                    <Form.Control
-                                      type="text"
-                                      style={{ width: "250px" }}
-                                      placeholder="Origin"
-                                      ref={originRef}
-                                      id="origin"
-                                      onClick={() => {
-                                        handleLocationButtonClick();
-                                        if (nom) {
-                                          map?.panTo(nom);
-                                          map?.setZoom(15);
-                                        }
-                                      }}
-                                      onChange={onChangeProgramms}
-                                    />
-                                  </Autocomplete>
-                                  <Flatpickr
-                                    className="form-control"
-                                    id="pickUp_time"
-                                    style={{ width: "100px" }}
-                                    options={{
-                                      enableTime: true,
-
-                                      noCalendar: true,
-                                      dateFormat: "H:i",
-                                      time_24hr: true,
-                                      onChange: handlePickupTime,
-                                    }}
-                                  />
-                                </div>
-                                {/* <p>{pickUp_time?.toDateString()}</p> */}
-                              </InputGroup>
-                              <InputGroup className="mb-3">
-                                <InputGroup.Text id="basic-addon1">
-                                  To
-                                </InputGroup.Text>
-
-                                <Autocomplete
-                                  onPlaceChanged={onPlaceChangedDest}
-                                  onLoad={onLoadDest}
-                                >
-                                  <Form.Control
-                                    type="text"
-                                    style={{ width: "300px" }}
-                                    placeholder="Destination"
-                                    ref={destinationRef}
-                                    id="dest"
-                                    onClick={() => {
-                                      handleLocationButtonClickDest();
-                                      if (fatma) {
-                                        map?.panTo(fatma);
-                                        map?.setZoom(15);
-                                      }
-                                    }}
-                                    onChange={onChangeProgramms}
-                                  />
-                                </Autocomplete>
-                                <Flatpickr
-                                  className="form-control"
-                                  id="pickUp_time"
-                                  style={{ width: "100px" }}
-                                  value={createDateFromStrings(
-                                    String(new Date().getFullYear()).padStart(
-                                      2,
-                                      "0"
-                                    ) +
-                                      "-" +
-                                      String(
-                                        new Date().getMonth() + 1
-                                      ).padStart(2, "0") +
-                                      "-" +
-                                      String(
-                                        new Date().getDate().toLocaleString()
-                                      ).padStart(2, "0"),
-                                    stopTimes[stopTimes.length - 1]?.hours +
-                                      ":" +
-                                      stopTimes[stopTimes.length - 1]?.minutes +
-                                      ":00"
-                                  ).getTime()}
-                                  options={{
-                                    enableTime: true,
-                                    noCalendar: true,
-                                    dateFormat: "H:i",
-                                    time_24hr: true,
-                                  }}
+                            <Col lg={4}>
+                              <div
+                                style={{
+                                  maxHeight: "calc(80vh - 80px)",
+                                  overflowX: "auto",
+                                }}
+                              >
+                                <Form.Label htmlFor="programName">
+                                  Name
+                                </Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  id="programName"
+                                  style={{ width: "450px" }}
+                                  required
+                                  className="mb-2"
+                                  placeholder="Add Program Name"
+                                  name="programName"
+                                  value={programmData.programName}
+                                  onChange={onChangeProgramms}
                                 />
-                              </InputGroup>
+                                <Form.Label htmlFor="customerName-field">
+                                  coordinations
+                                </Form.Label>
 
-                              <div className="flex">
+                                <InputGroup className="mb-3">
+                                  <InputGroup.Text id="basic-addon1">
+                                    From
+                                  </InputGroup.Text>
+                                  <div className="d-flex">
+                                    <Autocomplete
+                                      onPlaceChanged={onPlaceChanged}
+                                      onLoad={onLoad}
+                                    >
+                                      <Form.Control
+                                        type="text"
+                                        style={{ width: "285px" }}
+                                        placeholder="Origin"
+                                        ref={originRef}
+                                        id="origin"
+                                        onClick={() => {
+                                          handleLocationButtonClick();
+                                          if (nom) {
+                                            map?.panTo(nom);
+                                            map?.setZoom(15);
+                                          }
+                                        }}
+                                        onChange={onChangeProgramms}
+                                        required
+                                      />
+                                    </Autocomplete>
+                                    <Flatpickr
+                                      className="form-control"
+                                      id="pickUp_time"
+                                      style={{ width: "100px" }}
+                                      options={{
+                                        enableTime: true,
+
+                                        noCalendar: true,
+                                        dateFormat: "H:i",
+                                        time_24hr: true,
+                                        onChange: handlePickupTime,
+                                      }}
+                                    />
+                                  </div>
+                                  {/* <p>{pickUp_time?.toDateString()}</p> */}
+                                </InputGroup>
+                                <InputGroup className="mb-3">
+                                  <InputGroup.Text id="basic-addon1">
+                                    To
+                                  </InputGroup.Text>
+                                  <div className="d-flex">
+                                    <Autocomplete
+                                      onPlaceChanged={onPlaceChangedDest}
+                                      onLoad={onLoadDest}
+                                    >
+                                      <Form.Control
+                                        type="text"
+                                        style={{ width: "300px" }}
+                                        placeholder="Destination"
+                                        ref={destinationRef}
+                                        id="dest"
+                                        onClick={() => {
+                                          handleLocationButtonClickDest();
+                                          if (fatma) {
+                                            map?.panTo(fatma);
+                                            map?.setZoom(15);
+                                          }
+                                        }}
+                                        onChange={onChangeProgramms}
+                                        required
+                                      />
+                                    </Autocomplete>
+                                    <Flatpickr
+                                      className="form-control"
+                                      id="pickUp_time"
+                                      style={{ width: "100px" }}
+                                      value={createDateFromStrings(
+                                        String(
+                                          new Date().getFullYear()
+                                        ).padStart(2, "0") +
+                                          "-" +
+                                          String(
+                                            new Date().getMonth() + 1
+                                          ).padStart(2, "0") +
+                                          "-" +
+                                          String(
+                                            new Date()
+                                              .getDate()
+                                              .toLocaleString()
+                                          ).padStart(2, "0"),
+                                        stopTimes[stopTimes.length - 1]?.hours +
+                                          ":" +
+                                          stopTimes[stopTimes.length - 1]
+                                            ?.minutes +
+                                          ":00"
+                                      ).getTime()}
+                                      disabled={true}
+                                      options={{
+                                        enableTime: true,
+                                        noCalendar: true,
+                                        dateFormat: "H:i",
+                                        time_24hr: true,
+                                      }}
+                                    />
+                                    {/* <p>
+                                      {String(stopTimes[stopTimes.length - 1]?.hours).padStart(2,'0') +
+                                          ":" +
+                                          String(stopTimes[stopTimes.length - 1]
+                                            ?.minutes).padStart(2,'0')}
+                                    </p> */}
+                                  </div>
+                                </InputGroup>
+
+                                {loading ? (
+                                  <p>Calculating route...</p>
+                                ) : (
+                                  <Button
+                                    type="submit"
+                                    onClick={calculateRoute}
+                                    className="custom-button"
+                                  >
+                                    Plan Route
+                                  </Button>
+                                )}
+
+                                {/* <div className="flex">
                                 <Button
                                   onClick={switchRoute}
                                   className="btn btn-dark w-lg d-grid gap-2 btn-switch"
                                 >
                                   Switch
                                 </Button>
-                              </div>
+                              </div> */}
 
-                              {/* <Flatpickr
+                                {/* <Flatpickr
                                   className="form-control"
                                   id="dropOff_time"
                                   options={{
@@ -1224,118 +1438,118 @@ const AddProgramm = (props: any) => {
                                   }}
                                 /> */}
 
-                              <div style={{ marginTop: "20px" }}>
-                                {stops2.map((stop, index) => (
-                                  <Row>
-                                    <Col lg={6} key={index}>
-                                      <Form.Label htmlFor="customerName-field">
-                                        Stop {index + 1}
-                                      </Form.Label>
-                                      <div className="mb-3 d-flex">
-                                        <Autocomplete
-                                          onPlaceChanged={onPlaceChangedStop}
-                                          onLoad={onLoadStop}
-                                        >
-                                          <Form.Control
-                                            type="text"
-                                            style={{ width: "250px" }}
-                                            placeholder="Stop"
-                                            ref={stopRef}
-                                            id="stop"
-                                            onClick={() => {
-                                              handleLocationButtonClickStop();
-                                            }}
-                                          />
-                                        </Autocomplete>
-                                        {
-                                          <Flatpickr
-                                            className="form-control"
-                                          
-                                            style={{ width: "100px" }}
-                                            id="pickUp_time"
-                                            value={createDateFromStrings(
-                                              String(
-                                                new Date().getFullYear()
-                                              ).padStart(2, "0") +
-                                                "-" +
+                                <div style={{ marginTop: "20px" }}>
+                                  {stops2.map((stop, index) => (
+                                    <Row>
+                                      <Col lg={6} key={index}>
+                                        <Form.Label htmlFor="customerName-field">
+                                          Stop {index + 1}
+                                        </Form.Label>
+                                        <div className="mb-3 d-flex">
+                                          <Autocomplete
+                                            onPlaceChanged={onPlaceChangedStop}
+                                            onLoad={onLoadStop}
+                                          >
+                                            <Form.Control
+                                              type="text"
+                                              style={{ width: "280px" }}
+                                              placeholder="Stop"
+                                              ref={stopRef}
+                                              id="stop"
+                                              onClick={() => {
+                                                handleLocationButtonClickStop();
+                                              }}
+                                            />
+                                          </Autocomplete>
+                                          {
+                                            <Flatpickr
+                                              className="form-control"
+                                              style={{ width: "100px" }}
+                                              id="pickUp_time"
+                                              value={createDateFromStrings(
                                                 String(
-                                                  new Date().getMonth() + 1
+                                                  new Date().getFullYear()
                                                 ).padStart(2, "0") +
-                                                "-" +
-                                                String(
-                                                  new Date()
-                                                    .getDate()
-                                                    .toLocaleString()
-                                                ).padStart(2, "0"),
-                                              stopTimes[index]?.hours +
-                                                ":" +
-                                                stopTimes[index]?.minutes +
-                                                ":00"
-                                            ).getTime()}
-                                            options={{
-                                              enableTime: true,
-                                              noCalendar: true,
-                                              dateFormat: "H:i",
-                                              time_24hr: true,
-                                            }}
-                                            onChange={(selectedDates) => handleStopTime(selectedDates, index)}
-                                          />
-                                        }
-                                      </div>
-                                    </Col>
+                                                  "-" +
+                                                  String(
+                                                    new Date().getMonth() + 1
+                                                  ).padStart(2, "0") +
+                                                  "-" +
+                                                  String(
+                                                    new Date()
+                                                      .getDate()
+                                                      .toLocaleString()
+                                                  ).padStart(2, "0"),
+                                                stopTimes[index]?.hours +
+                                                  ":" +
+                                                  stopTimes[index]?.minutes +
+                                                  ":00"
+                                              ).getTime()}
+                                              options={{
+                                                enableTime: true,
+                                                noCalendar: true,
+                                                dateFormat: "H:i",
+                                                time_24hr: true,
+                                              }}
+                                              onChange={(selectedDates) =>
+                                                handleStopTime(
+                                                  selectedDates,
+                                                  index
+                                                )
+                                              }
+                                            />
+                                          }
+                                        </div>
+                                      </Col>
 
-                                    <button
-                                      type="button"
-                                      className="btn btn-danger btn-icon"
-                                      onClick={() =>
-                                        handleRemoveStopClick(stop.id)
-                                      }
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger btn-icon"
+                                        onClick={() =>
+                                          handleRemoveStopClick(stop.id)
+                                        }
+                                        style={{
+                                          marginTop: "29px",
+                                          marginLeft: "152px",
+                                        }}
+                                      >
+                                        <i className="ri-delete-bin-5-line"></i>
+                                      </button>
+                                    </Row>
+                                  ))}
+                                  <div className="d-flex flex-btn-via">
+                                    <Link
+                                      to="#"
+                                      id="add-item"
+                                      className="btn btn-soft-dark fw-medium"
+                                      onClick={handleAddStopClickWrapper(
+                                        "New Stop Address"
+                                      )}
+                                      style={{ width: "150px" }}
+                                    >
+                                      <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
+                                        {" "}
+                                        Via
+                                      </i>
+                                    </Link>
+                                    {/* <Link
+                                      to="#"
+                                      id="add-item"
+                                      className="btn btn-soft-dark fw-medium link"
                                       style={{
-                                        marginTop: "29px",
-                                        marginLeft: "80px",
+                                        width: "150px",
+                                        marginLeft: "150px",
                                       }}
                                     >
-                                      <i className="ri-delete-bin-5-line"></i>
-                                    </button>
-                                  </Row>
-                                ))}
-                                <Link
-                                  to="#"
-                                  id="add-item"
-                                  className="btn btn-soft-secondary fw-medium"
-                                  onClick={handleAddStopClickWrapper(
-                                    "New Stop Address"
-                                  )}
-                                >
-                                  <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
-                                    {" "}
-                                    Via
-                                  </i>
-                                </Link>
-                                <Link
-                                  to="#"
-                                  id="add-item"
-                                  className="btn btn-soft-secondary fw-medium link"
-                                >
-                                  <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
-                                    {" "}
-                                    Options
-                                  </i>
-                                </Link>
-                              </div>
-                              {loading ? (
-                                <p>Calculating route...</p>
-                              ) : (
-                                <Button
-                                  type="submit"
-                                  onClick={calculateRoute}
-                                  className="custom-button"
-                                >
-                                  Plan Route
-                                </Button>
-                              )}
+                                      <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
+                                        {" "}
+                                        Options
+                                      </i>
+                                    </Link> */}
+                                  </div>
+                                </div>
 
-                              {/* <div>
+                                {/* <div>
                                 {test && test2 && (
                                   <div className="distance">
                                     <Form.Label className="label">
@@ -1356,7 +1570,7 @@ const AddProgramm = (props: any) => {
                                   position: "absolute",
                                   left: "0",
                                   height: "530px",
-                                  width: "2315px",
+                                  width: "2350px",
                                 }}
                               >
                                 <GoogleMap
@@ -1422,19 +1636,9 @@ const AddProgramm = (props: any) => {
                                 className="d-flex align-items-end"
                                 style={{ marginTop: "650px" }}
                               >
-                                <Button
-                                  type="button"
-                                  className="btn btn-success btn-label right ms-auto nexttab "
-                                  onClick={handleNextStep}
-                                  disabled={isNextButtonDisabled()}
-                                >
-                                  <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                  Set Run dates
-                                </Button>
-
-                                <Dropdown style={{ marginLeft: "100px" }}>
+                                <Dropdown style={{ marginLeft: "0" }}>
                                   <Dropdown.Toggle
-                                    variant="secondary"
+                                    variant="light"
                                     id="dropdown-basic"
                                   >
                                     Route Information
@@ -1457,47 +1661,21 @@ const AddProgramm = (props: any) => {
                                     ))}
                                   </Dropdown.Menu>
                                 </Dropdown>
+                                <Button
+                                  type="button"
+                                  className="btn btn-success btn-label right ms-auto nexttab "
+                                  onClick={() => handleNextStep(false)}
+                                  disabled={isNextButtonDisabled()}
+                                >
+                                  <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                                  Set Run dates
+                                </Button>
                               </div>
                             </Col>
                           </Row>
                         </Tab.Pane>
 
                         <Tab.Pane eventKey="2">
-                          <Row>
-                            <div className="mt-2">
-                              <h5>Trip Times</h5>
-                            </div>
-                            <Col lg={5}>
-                              <InputGroup>PickUp Time</InputGroup>
-                              <Flatpickr
-                                className="form-control"
-                                id="pickUp_time"
-                                options={{
-                                  enableTime: true,
-                                  noCalendar: true,
-                                  dateFormat: "H:i",
-                                  time_24hr: true,
-                                  // onChange: handlePickupTime,
-                                }}
-                              />
-                            </Col>
-
-                            <Col className="d-flex justify-content-center align-items-center"></Col>
-                            <Col lg={5}>
-                              <InputGroup>DropOff Time</InputGroup>
-                              <Flatpickr
-                                className="form-control"
-                                id="dropOff_time"
-                                options={{
-                                  enableTime: true,
-                                  noCalendar: true,
-                                  dateFormat: "H:i",
-                                  time_24hr: true,
-                                  // onChange: handleDroppOffTime,
-                                }}
-                              />
-                            </Col>
-                          </Row>
                           <Row>
                             <div className="mt-2">
                               <h5>Run Dates</h5>
@@ -1574,9 +1752,10 @@ const AddProgramm = (props: any) => {
                                 <DualListBox
                                   options={options1}
                                   selected={selected1}
-                                  onChange={(e: any) =>{
-                                    console.log("event",e)
-                                    setSelected1(e)}}
+                                  onChange={(e: any) => {
+                                    console.log("event", e);
+                                    setSelected1(e);
+                                  }}
                                   icons={{
                                     moveLeft: (
                                       <span
@@ -1633,7 +1812,7 @@ const AddProgramm = (props: any) => {
                           </Row>
                           <div
                             className="d-flex align-items-start gap-3"
-                            style={{ marginTop: "100px" }}
+                            style={{ marginTop: "200px" }}
                           >
                             <Button
                               type="button"
@@ -1646,7 +1825,7 @@ const AddProgramm = (props: any) => {
                             <Button
                               type="button"
                               className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                              onClick={handleNextStep}
+                              onClick={() => handleNextStep(false)}
                               disabled={isNextButtonDisabled()}
                             >
                               <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
@@ -1756,7 +1935,7 @@ const AddProgramm = (props: any) => {
 
                           <div
                             className="d-flex align-items-start gap-3"
-                            style={{ marginTop: "100px" }}
+                            style={{ marginTop: "200px" }}
                           >
                             <Button
                               type="button"
@@ -1770,7 +1949,7 @@ const AddProgramm = (props: any) => {
                             <Button
                               type="button"
                               className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                              onClick={handleNextStep}
+                              onClick={() => handleNextStep(true)}
                               disabled={isNextButtonDisabled()}
                             >
                               <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
@@ -1779,24 +1958,35 @@ const AddProgramm = (props: any) => {
                           </div>
                         </Tab.Pane>
                         <Tab.Pane eventKey="4">
-                          {renderRecapPage()}
-
-                          <Button
-                            type="button"
-                            className="btn btn-light btn-label previestab"
-                            onClick={() => setactiveVerticalTab(3)}
+                          <div
+                            style={{
+                              maxHeight: "calc(80vh - 80px)",
+                              overflowX: "auto",
+                            }}
                           >
-                            <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                            Back to Options
-                          </Button>
-
-                          <Button
-                            variant="success"
-                            type="submit"
-                            className="w-sm"
+                            {renderRecapPage()}
+                          </div>
+                          <div
+                            className="d-flex justify-content-between"
+                            style={{ marginTop: "13px" }}
                           >
-                            Submit
-                          </Button>
+                            <Button
+                              type="button"
+                              className="btn btn-light btn-label previestab"
+                              onClick={() => setactiveVerticalTab(3)}
+                            >
+                              <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                              Back to Options
+                            </Button>
+
+                            <Button
+                              variant="success"
+                              type="submit"
+                              className="w-sm"
+                            >
+                              Submit
+                            </Button>
+                          </div>
                         </Tab.Pane>
                       </Tab.Content>
                     </Tab.Container>

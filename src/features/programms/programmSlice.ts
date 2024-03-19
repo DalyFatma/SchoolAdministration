@@ -30,6 +30,8 @@ export interface Programm {
   recommanded_capacity: string,
   extra: string[],
   notes: string,
+  dropOff_time:string,
+  pickUp_Time:string
   
 }
 

@@ -11,7 +11,7 @@
     border: none;
     transition: background-color 0.3s;
     margin-top: 1rem;
-    width: 350px;
+    width: 448px;
 }
 
 .custom-button:hover {
@@ -44,6 +44,6 @@
   width: 350px;
 }
 
-.dropdown-menu{
-  
+.flex-btn-via{
+  margin-bottom: 20px
 }
