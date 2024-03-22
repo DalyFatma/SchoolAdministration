@@ -31,7 +31,8 @@ export interface Programm {
   extra: string[],
   notes: string,
   dropOff_time:string,
-  pickUp_Time:string
+  pickUp_Time:string,
+  workDates:string[]
   
 }
 

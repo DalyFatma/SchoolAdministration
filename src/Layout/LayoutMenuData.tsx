@@ -99,44 +99,45 @@ const Navdata = () => {
             label: "Programming",
             icon: "ph ph-gear-six",
             link: "/programming",
-            // click: function (e: any) {
-            //     e.preventDefault();
-            //     setIsSchedle(!isSchedle);
-            //     setIscurrentState('Programming');
-            //     updateIconSidebar(e);
-            // },
-            // stateVariables: isSchedle,
-            // subItems: [
+            click: function (e: any) {
+                e.preventDefault();
+                setIsSchedle(!isSchedle);
+                setIscurrentState('Programming');
+                updateIconSidebar(e);
+            },
+            stateVariables: isSchedle,
+            subItems: [
                
-            //     {
-            //         id: "scheduling",
-            //         label: "Scheduling",
-            //         link: "/scheduling",
-            //         parentId: "scheduling",
-            //         icon: "ph ph-calendar",
-            //     },
-            //     {
-            //         id: "stations",
-            //         icon:"ph ph-map-pin",
-            //         label: "Stations",
-            //         link: "/stations",
-            //         parentId: "stations",
-            //     },
-            //     {
-            //         id: "tripModels",
-            //         label: "Trip Models",
-            //         link: "/trip-models",
-            //         parentId: "tripModels",
-            //         icon:"ph ph-file-plus",
-            //     },
-            //     {
-            //         id: "Contracts", 
-            //         label: "Contracts",
-            //         parentId: "contract",
-            //         icon: "ph ph-note-pencil",
-            //         link: "/Contracts",
-            //     },
-            // ],
+                {
+                    id: "addnew",
+                    label: "Add New Program",
+                    link: "/programming/add-program",
+                    parentId: "addnew",
+                    icon: "ph ph-plus-circle",
+                },
+                {
+                    id: "listofprogram",
+                    icon:"ph ph-list",
+                    label: "List of Programs",
+                    link: "/programming/listofprogram",
+                    parentId: "listofprogram",
+                },
+               
+                {
+                    id: "Contracts", 
+                    label: "Contracts",
+                    parentId: "contract",
+                    icon: "ph ph-note-pencil",
+                    link: "/Contracts",
+                },
+                {
+                    id: "offer",
+                    label: "Offers",
+                    link: "/offers",
+                    parentId: "offer",
+                    icon: "ph ph-megaphone",
+                },
+            ],
         },
        
         {
@@ -239,13 +240,7 @@ const Navdata = () => {
                     icon: "ph ph-bus",
                 },
               
-                {
-                    id: "offer",
-                    label: "Offer",
-                    link: "/offers",
-                    parentId: "students",
-                    icon: "ph ph-megaphone",
-                },
+               
                 // {
                 //     id: "delays&changes",
                 //     label: "Delays and changes",

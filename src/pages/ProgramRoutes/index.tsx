@@ -65,11 +65,11 @@ const ProgramList = (props: any) => {
       },
       sortable: true,
     },
-    {
-      name: <span className="font-weight-bold fs-13">Stops</span>,
-      selector: (row: any) => row.stops?.address!,
-      sortable: true,
-    },
+    // {
+    //   name: <span className="font-weight-bold fs-13">Stops</span>,
+    //   selector: (row: any) => row.stops?.address!,
+    //   sortable: true,
+    // },
     {
       name: <span className="font-weight-bold fs-13">From</span>,
       selector: (row: any) => row.pickUp_date,
@@ -80,16 +80,16 @@ const ProgramList = (props: any) => {
       selector: (row: any) => row.droppOff_date,
       sortable: true,
     },
-    {
-      name: <span className="font-weight-bold fs-13">Free Days date</span>,
-      selector: (row: any) => row.freeDays_date,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Exception</span>,
-      selector: (row: any) => row.exceptDays,
-      sortable: true,
-    },
+    // {
+    //   name: <span className="font-weight-bold fs-13">Free Days date</span>,
+    //   selector: (row: any) => row.freeDays_date,
+    //   sortable: true,
+    // },
+    // {
+    //   name: <span className="font-weight-bold fs-13">Exception</span>,
+    //   selector: (row: any) => row.exceptDays,
+    //   sortable: true,
+   // },
     {
       name: <span className="font-weight-bold fs-13">Action</span>,
       sortable: true,

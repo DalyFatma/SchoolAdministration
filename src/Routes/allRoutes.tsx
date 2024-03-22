@@ -171,7 +171,7 @@ const authProtectedRoutes = [
     //? Add programm
     {path:"/programming/add-program", component: <AddProgramm/>},
     // program routes
-    {path:"/programming", component: <ProgramRoutes/>},
+    {path:"/programming/listofprogram", component: <ProgramRoutes/>},
 
  //? Payment Management
  { path: "/payement-management", component: <PayementManagement /> },

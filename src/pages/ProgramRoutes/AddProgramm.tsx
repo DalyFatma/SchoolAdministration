@@ -26,7 +26,13 @@ import {
 import Swal from "sweetalert2";
 import "./AddProgram.css";
 import { useAddProgrammMutation } from "features/programms/programmSlice";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
+interface Option {
+  value: string;
+  label: string;
+}
 const options = [
   { value: "ForHandicap", label: "For Handicap" },
   { value: "Wifi", label: "Wifi" },
@@ -34,7 +40,7 @@ const options = [
   { value: "AC", label: "AC" },
 ];
 
-const options1 = [
+const options1: Option[] = [
   { value: "Monday", label: "Monday" },
   { value: "Tuesday", label: "Tuesday" },
   { value: "Wednesday", label: "Wednesday" },
@@ -75,6 +81,7 @@ interface stopTime {
   hours: number;
   minutes: number;
 }
+
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
   const navigate = useNavigate();
@@ -108,6 +115,8 @@ const AddProgramm = (props: any) => {
   const destinationRef = useRef<any>(null);
   const stopRef = useRef<any>(null);
 
+  const flatpickrRef = useRef<Flatpickr>(null);
+
   const [destSwitchRef, setDestSwitchRef] = useState<google.maps.LatLng[]>([]);
   const [originSwitchRef, setOriginSwitchRef] = useState<google.maps.LatLng[]>(
     []
@@ -139,6 +148,8 @@ const AddProgramm = (props: any) => {
   const [test, setTest] = useState("");
   const [test2, setTest2] = useState("");
 
+  const [date, setDate] = useState(new Date());
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
     libraries: ["places"],
@@ -151,6 +162,8 @@ const AddProgramm = (props: any) => {
   const [stopTimes, setStopTimes] = useState<stopTime[]>([]);
 
   const [routeSegments, setRouteSegments] = useState<RouteSegment[]>([]);
+
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const [createProgram] = useAddProgrammMutation();
   const [programmData, setProgrammData] = useState({
@@ -185,6 +198,7 @@ const AddProgramm = (props: any) => {
     notes: "",
     dropOff_time: "",
     pickUp_Time: "",
+    workDates: [""],
   });
   const notify = () => {
     Swal.fire({
@@ -409,7 +423,17 @@ const AddProgramm = (props: any) => {
               currentDate.toLocaleString("en-us", { weekday: "long" })
             )
           ) {
-            workDates.push(new Date(currentDate));
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            const day = currentDate.getDate().toLocaleString();
+
+            let date =
+              String(year) +
+              "-" +
+              String(month).padStart(2, "0") +
+              "-" +
+              String(day).padStart(2, "0");
+            workDates.push(date);
           }
         }
         currentDate.setDate(currentDate.getDate() + 1);
@@ -419,15 +443,65 @@ const AddProgramm = (props: any) => {
     return workDates;
   };
 
+  const tileClassName = ({ date }: any) => {
+    const formattedDate = `${date.getFullYear()}-${
+      date.getMonth() + 1
+    }-${date.getDate()}`;
+    const dayOfWeek = date.getDay();
+    if (date < pickUp_date! || date > dropOff_date!) {
+      return null;
+    }
+
+    let testDays = [];
+    for (let freeDay of programmData.freeDays_date) {
+      let day = createDateFromStrings(freeDay, "00:00:00");
+
+      let year = day.getFullYear();
+      let month = day.getMonth() + 1;
+      let d = day.getDate().toLocaleString();
+
+      let free_day = String(year) + "-" + String(month) + "-" + String(d);
+      testDays.push(free_day);
+    }
+
+    if (testDays.includes(formattedDate)) {
+      return "free-day";
+    }
+    const adjustedIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+    if (
+      selectedDays.includes(options1[adjustedIndex].value) ||
+      selected1.includes(options1[adjustedIndex].value)
+    ) {
+      return "selected-day";
+    }
+
+    return null;
+  };
+
+  const handleDayClick = (value: Date) => {
+    const dayOfWeek = value.getDay();
+    const selectedDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const selectedDay = options1[selectedDayIndex].value;
+
+    if (selectedDays.includes(selectedDay) || selected1.includes(selectedDay)) {
+      setSelectedDays(selectedDays.filter((day) => day !== selectedDay));
+      setSelected1(selected1.filter((day) => day !== selectedDay));
+    } else {
+      setSelectedDays([...selectedDays, selectedDay]);
+      setSelected1([...selected1, selectedDay]);
+    }
+  };
+
+  const tileDisabled = ({ date }: any) => {
+    return date < pickUp_date! || date > dropOff_date!;
+  };
+
   const renderRecapPage = () => {
     return (
       <>
-        <Row
-          className="d-flex justify-content-center"
-          style={{ marginLeft: "45%" }}
-        >
-          <b> Journey Name: </b>
-          <p> {programmData.programName}</p>
+        <Row className="d-flex resume-title">
+          <span className="title"> Journey Name: </span> <span className="title-value">{programmData.programName}</span>
         </Row>
         <Row className="d-flex justify-content-space-between">
           <Col>
@@ -436,41 +510,49 @@ const AddProgramm = (props: any) => {
                 <tbody>
                   <tr>
                     <td>
-                      <b>Start Date: </b>
+                      <b>Start Date </b>
                       <p>{programmData.pickUp_date}</p>
                     </td>
                     <td>
-                      <b>End Date: </b>
+                      <b>End Date </b>
                       <p>{programmData.droppOff_date}</p>
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      <b>Origin Address: </b>
+                      <b>Origin Address</b>
                       <p>{programmData.origin_point.placeName}</p>
                     </td>
                     <td>
-                      <b>Pick Up Time: </b> <p> {programmData.pickUp_Time}</p>
+                      <b>Pick Up Time </b> <p> {programmData.pickUp_Time}</p>
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      <b> Destination Location Name: </b>
+                      <b> Destination Address: </b>
                       <p> {programmData.destination_point.placeName}</p>
                     </td>
                     <td>
-                      <b>Drop Off Time: </b> <p> {programmData.dropOff_time}</p>
+                      <b>Drop Off Time </b> <p> {programmData.dropOff_time}</p>
                     </td>
                   </tr>
                   <tr>
-                    <td><b>List of Stops</b></td>
-                    <td>Stop Time</td>
+                    <td>
+                      <b>List of Stops</b>
+                    </td>
+                    <td>
+                      <b>Stop Time</b>
+                    </td>
                   </tr>
-         
+
                   {waypts.map((value, index) => (
                     <tr key={index}>
                       <td>{value.location?.toString()}</td>
-                      <td>{String(stopTimes[index]?.hours).padStart(2, '0')+':'+String(stopTimes[index]?.minutes).padStart(2, '0')}</td>
+                      <td>
+                        {String(stopTimes[index]?.hours).padStart(2, "0") +
+                          ":" +
+                          String(stopTimes[index]?.minutes).padStart(2, "0")}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -478,48 +560,63 @@ const AddProgramm = (props: any) => {
             </div>
           </Col>
           <Col>
-            <b>Free Dates: </b>
+            {/*  <b>Free Dates </b>
             <ul>
               {Array.isArray(programmData.freeDays_date) &&
                 programmData.freeDays_date.map((dateString, index) => (
                   <li key={index}>{dateString}</li>
                 ))}
-            </ul>
-            {/* <b>Work Dates: </b>
-            <ul>
-              {getWorkDates().map((date: any, index: any) => (
-                <li key={index}>
-                  {date.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </li>
-              ))}
             </ul> */}
-            <b>Capacity Recommended: </b>{" "}
-            <p> {programmData.recommanded_capacity}</p>
-            <b> Selected Options: </b> <p>{programmData.extra.join(" ")}</p>
-            <b> Except Days: </b> <p> {programmData.exceptDays.join(" ")}</p>
+
+            {/* <b> Except Days </b> <p> {programmData.exceptDays.join(" ")}</p> */}
+
+            <div className="table-responsive">
+              <table className="table table-sm table-borderless align-middle description-table">
+                <tbody>
+                  <tr>
+                    <td>
+                      <b>Capacity Recommended</b>{" "}
+                      <p> {programmData.recommanded_capacity}</p>
+                    </td>
+                    <td>
+                     
+                      <p className="legend-container">
+                        Excepted days{" "}
+                        <span className="legend bg-except-day"></span>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b> Selected Options </b>{" "}
+                      <p>{programmData.extra.join(", ")}</p>
+                    </td>
+                    <td>
+                    
+                      <p className="legend-container">
+                        Current day <span className="legend bg-now-day"></span>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td>
+                    <p className="legend-container">
+                        Free days <span className="legend bg-free-day"></span>
+                      </p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </Col>
         </Row>
         <b>Work Dates: </b>
         <br />
-        <Flatpickr
-      className="form-control"
-      options={{
-        inline: true,
-        dateFormat: 'Y-m-d',
-        minDate: programmData.pickUp_date.substring(0,8)+ String(pickUp_date?.getDate().toLocaleString()).padStart(2,'0'),
-        maxDate: programmData.droppOff_date,
-        disable: [
-          function(date) {
-            // Disable dates outside of the specified range
-            return !(date >= new Date(programmData.pickUp_date) && date <= new Date(programmData.droppOff_date));
-          }
-        ],
-      }}
-    />
+
+        <div className="calender-container">
+          <Calendar tileClassName={tileClassName} tileDisabled={tileDisabled} />
+        </div>
       </>
     );
   };
@@ -602,6 +699,7 @@ const AddProgramm = (props: any) => {
     if (isResume === true) {
       programmData["extra"] = selected;
       programmData["exceptDays"] = selected1;
+      programmData["workDates"] = getWorkDates();
 
       let freeDates = [];
 
@@ -904,74 +1002,6 @@ const AddProgramm = (props: any) => {
     destinationRef.current.value = "";
   }
 
-  // async function calculateRoute(): Promise<void> {
-  //   setOriginSwitchRef(originRef?.current!.value);
-  //   // console.log(originSwitchRef);
-  //   setDestSwitchRef(destinationRef?.current!.value);
-  //   // console.log(destSwitchRef);
-  //   // console.log("waypoints", waypts);
-
-  //   if (
-  //     originRef?.current!.value === "" ||
-  //     destinationRef?.current!.value === "" ||
-  //     !map
-  //   ) {
-  //     console.error("Invalid inputs or map not loaded.");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-
-  //   const directionsService = new google.maps.DirectionsService();
-
-  //   directionsService.route(
-  //     {
-  //       origin: originRef.current.value,
-  //       destination: destinationRef.current.value,
-  //       travelMode: google.maps.TravelMode.DRIVING,
-  //       waypoints: waypts,
-  //     },
-  //     (result, status) => {
-  //       setLoading(false);
-
-  //       if (status === google.maps.DirectionsStatus.OK) {
-  //         setDirectionsResponse(result);
-  //         setRouteDirections(result);
-
-  //         const selectedRoute = result.routes.find((route) => {
-  //           setTest(route.legs[0].distance.text.toString());
-  //           setTest2(route.legs[0].duration.text.toString());
-
-  //           // console.log("test", test);
-  //           // console.log("originRef.current.value", originRef.current.value);
-  //           // console.log(
-  //           //   "route.legs[0].start_address",
-  //           //   route.legs[0].start_address
-  //           // );
-  //           // console.log(
-  //           //   "destinationRef.current.value",
-  //           //   destinationRef.current.value
-  //           // );
-  //           // console.log("route.legs[0].end_address", route.legs[0].end_address);
-  //         });
-
-  //         if (!selectedRoute) {
-  //           // console.log("distanceInMeters");
-  //           return;
-  //         }
-
-  //         if (map && directionsResponse) {
-  //           const directionsRenderer = new google.maps.DirectionsRenderer();
-  //           directionsRenderer.setMap(map);
-  //           directionsRenderer.setDirections(directionsResponse);
-  //         }
-  //       } else {
-  //         console.error("Error fetching directions:", status);
-  //       }
-  //     }
-  //   );
-  // }
-
   async function calculateRoute(): Promise<void> {
     //stopTimes = [];
     setOriginSwitchRef(originRef?.current!.value);
@@ -1085,54 +1115,6 @@ const AddProgramm = (props: any) => {
     let date = new Date(YyyyMmDd + ", " + HhMmSs);
     return date;
   };
-  async function switchRoute(): Promise<void> {
-    setLoading(true);
-
-    const directionsService = new google.maps.DirectionsService();
-
-    directionsService.route(
-      {
-        origin: destinationRef.current.value,
-        destination: originRef.current.value,
-        travelMode: google.maps.TravelMode.DRIVING,
-        waypoints: waypts.reverse(),
-      },
-      (result, status) => {
-        setLoading(false);
-
-        if (status === google.maps.DirectionsStatus.OK) {
-          setDirectionsResponse(result);
-          setRouteDirections(result);
-
-          const selectedRoute = result.routes.find((route) => {
-            setTest(route.legs[0].distance.text.toString());
-            setTest2(route.legs[0].duration.value.toString());
-          });
-          console.log(hours);
-          let validHour = String(hours).padStart(2, "0");
-          console.log(validHour);
-
-          console.log(minutes);
-          let validMinutes = String(minutes).padStart(2, "0");
-          console.log(validMinutes);
-
-          const date = new Date();
-          const currentYear = date.getFullYear();
-          console.log(currentYear);
-          const currentMonth = date.getMonth() + 1;
-          console.log(currentMonth);
-          const currentDay = date.getDate().toLocaleString();
-          console.log("currentDay", currentDay);
-
-          if (!selectedRoute) {
-            return;
-          }
-        } else {
-          console.error("Error fetching directions:", status);
-        }
-      }
-    );
-  }
 
   const addDurationToTime = (
     time: string,
@@ -1207,9 +1189,9 @@ const AddProgramm = (props: any) => {
     let ref = 0;
     if (time1 > time2) {
       ref = 1;
-      alert("Time 1 is later than time 2");
+      // alert("Time 1 is later than time 2");
     } else if (time1 < time2) {
-      alert("Time 2 is later than time 1");
+      // alert("Time 2 is later than time 1");
       ref = 2;
     }
     return ref;
@@ -1243,7 +1225,23 @@ const AddProgramm = (props: any) => {
 
     return total;
   };
+  const getPreviousDay = (date: string) => {
+    let t = createDateFromStrings(date, "00:00:00");
+    t.setDate(t.getDate() - 1);
+    // return t.toISOString().split("T")[0];
+    const year = t.getFullYear();
+    const month = t.getMonth() + 1;
+    const day = t.getDate().toLocaleString();
 
+    let prevDate =
+      String(year) +
+      "-" +
+      String(month).padStart(2, "0") +
+      "-" +
+      String(day).padStart(2, "0");
+
+    return prevDate;
+  };
   return (
     <React.Fragment>
       <div className="page-content">
@@ -1255,9 +1253,9 @@ const AddProgramm = (props: any) => {
                 <Button variant="success" id="add-btn" className="btn-sm">
                   Save & Send
                 </Button>
-                <Button variant="info" id="add-btn" className="btn-sm">
+                {/* <Button variant="info" id="add-btn" className="btn-sm">
                   Quick Save
-                </Button>
+                </Button> */}
               </div>
             </Card.Header>
             <Card.Body className="form-steps">
@@ -1328,7 +1326,6 @@ const AddProgramm = (props: any) => {
                                       style={{ width: "100px" }}
                                       options={{
                                         enableTime: true,
-
                                         noCalendar: true,
                                         dateFormat: "H:i",
                                         time_24hr: true,
@@ -1634,7 +1631,7 @@ const AddProgramm = (props: any) => {
                               </div>
                               <div
                                 className="d-flex align-items-end"
-                                style={{ marginTop: "650px" }}
+                                style={{ marginTop: "670px" }}
                               >
                                 <Dropdown style={{ marginLeft: "0" }}>
                                   <Dropdown.Toggle
@@ -1812,7 +1809,7 @@ const AddProgramm = (props: any) => {
                           </Row>
                           <div
                             className="d-flex align-items-start gap-3"
-                            style={{ marginTop: "200px" }}
+                            style={{ marginTop: "250px" }}
                           >
                             <Button
                               type="button"
@@ -1961,14 +1958,14 @@ const AddProgramm = (props: any) => {
                           <div
                             style={{
                               maxHeight: "calc(80vh - 80px)",
-                              overflowX: "auto",
+                              overflowY: "auto",
                             }}
                           >
                             {renderRecapPage()}
                           </div>
                           <div
                             className="d-flex justify-content-between"
-                            style={{ marginTop: "13px" }}
+                            style={{ marginTop: "10px", marginBottom:"15px" }}
                           >
                             <Button
                               type="button"
