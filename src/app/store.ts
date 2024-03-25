@@ -9,11 +9,16 @@ import ProfileReducer from "../slices/auth/profile/reducer";
 import DashboardReducer from "../slices/dashboard/reducer";
 import { studentSlice } from "features/student/studentSlice";
 import { programmSlice } from "features/programms/programmSlice";
+import { accountSlice } from "features/account/accountSlice";
+import authSlice from "features/account/authSlice";
+
 
 export const store = configureStore({
   reducer: {
     [studentSlice.reducerPath]: studentSlice.reducer,
     [programmSlice.reducerPath]: programmSlice.reducer,
+    [accountSlice.reducerPath]: accountSlice.reducer,
+    auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
     Profile: ProfileReducer,
@@ -22,7 +27,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware().concat([
       studentSlice.middleware,
-      programmSlice.middleware
+      programmSlice.middleware,
+      accountSlice.middleware
     ]);
   },
 });
