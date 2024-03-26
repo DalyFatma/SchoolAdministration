@@ -5,6 +5,8 @@ import Breadcrumb from "Common/BreadCrumb";
 import { Link } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 
+
+
 const OperationsManagement = () => {
   document.title = " Operations Management | School Administration";
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,6 +16,8 @@ const OperationsManagement = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   
   const [modal_AddSellerModals, setmodal_AddSellerModals] = useState<boolean>(false);
+ 
+
  
   
   const columns = [

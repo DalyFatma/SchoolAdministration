@@ -97,6 +97,7 @@ import ProgramClone from "pages/ProgramRoutes/ProgramClone";
 import ProgramDetails from "pages/ProgramRoutes/ProgramDetails";
 import Program from "pages/Program";
 import AddProgramm from "pages/ProgramRoutes/AddProgramm";
+import Login from "pages/Authentication/Login";
 
 
 
@@ -188,16 +189,15 @@ const authProtectedRoutes = [
  { path: "/program-details/:name", component: < ProgramDetails/> },
  { path: "/program", component: < Program/> },
 
+ { path: "/", exact: true, component: <Navigate to="/map-tracking" /> },
+  { path: "*", component: <Navigate to="/map-tracking" /> },
+  { path: "/user-profile", component: <UserProfile /> },
 
-
-
-  
-  
 ];
 
 const publicRoutes = [
   // AuthenticationInner
-  { path: "/authSchool/loginSchool", component: <SignIn /> },
+  { path: "/login", component: <Login /> },
   { path: "/auth-pass-reset-basic", component: <PasswordReset /> },
   { path: "/auth-pass-change-basic", component: <PasswordCreate /> },
   { path: "/auth-success-msg-basic", component: <SuccessMessage /> },
@@ -210,9 +210,8 @@ const publicRoutes = [
 
  // this route should be at the end of all other routes
  // eslint-disable-next-line react/display-name
- { path: "/", exact: true, component: <Navigate to="/map-tracking" /> },
- { path: "*", component: <Navigate to="/map-tracking" /> },
- { path: "/user-profile", component: <UserProfile /> },
+
+
 ];
 
 export { authProtectedRoutes, publicRoutes };

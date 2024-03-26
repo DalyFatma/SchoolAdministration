@@ -11,7 +11,7 @@ import { AuthProtected } from './AuthProtected';
 const Index = () => {
     return (
         <React.Fragment>
-            <Routes>
+            {/* <Routes>
                 <Route>
                     {authProtectedRoutes.map((route: any, idx: number) => (
                         <Route
@@ -33,7 +33,36 @@ const Index = () => {
                         />
                     ))}
                 </Route>
-            </Routes>
+            </Routes> */}
+            <Routes>
+        <Route>
+          {publicRoutes.map((route: any, idx: number) => (
+            <Route
+              key={idx}
+              path={route.path}
+              element={
+              <NonAuthLayout> {route.component} </NonAuthLayout>}
+              // exact={true}
+            />
+          ))}
+        </Route>
+
+        <Route>
+          {authProtectedRoutes.map((route: any, idx: number) => (
+            <Route
+              key={idx}
+              path={route.path}
+              element={
+                <AuthProtected>
+                  {" "}
+                  <Layout>{route.component}</Layout>{" "}
+                </AuthProtected>
+              }
+              // exact={true}
+            />
+          ))}
+        </Route>
+      </Routes>
         </React.Fragment>
     );
 }
