@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Card, Col, Button, Offcanvas } from "react-bootstrap";
+import { Container, Row, Card, Col, Offcanvas } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link } from "react-router-dom";
@@ -14,12 +14,7 @@ const OperationsManagement = () => {
   const [showCouponDetails, setShowCouponsDetails] = useState<any>({});
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  
-  const [modal_AddSellerModals, setmodal_AddSellerModals] = useState<boolean>(false);
- 
 
- 
-  
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">Trip</span>,

@@ -230,7 +230,6 @@ const Maptracking = (props: any) => {
     },
   ];
 
-  const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
   const [isHovered, setHover] = useState(false);
   const [navWidth, setNavWidth] = useState(150);
   function openNav() {

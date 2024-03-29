@@ -140,7 +140,7 @@ const Offers = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Offers" pageTitle="Tools" />
+          <Breadcrumb title="Offers" pageTitle="Programming" />
           <Row className="mb-4">
             {/* Filter Select */}
             <Col xxl={2} md={4} className="d-flex align-items-end">

@@ -13,6 +13,11 @@ import { Link, useNavigate } from "react-router-dom";
 import ModalEmail from "./ModalEmail";
 import ModalNote from "./ModalNote";
 import ModalClaim from "./ModalClaim";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "features/account/authSlice";
+import { RootState } from '../../app/store';
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const VerticalLayout = (props: any) => {
   const swalWithBootstrapButtons = Swal.mixin({
@@ -77,6 +82,18 @@ const VerticalLayout = (props: any) => {
   function tog_ModalClaim() {
     setModal_Claim(!modal_Claim);
   }
+
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
+
+  const logout = () =>{
+    axios.post(`http://localhost:3000/api/authSchool/logout/${user._id}`,{})
+    .then((res: any)=> {
+      console.log(res);
+      Cookies.remove('astk');
+      navigate("/login")
+
+    })
+};
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -436,7 +453,7 @@ const VerticalLayout = (props: any) => {
                 title="LogOut"
                 type="button"
                 className="btn btn-soft-info btn-icon d-grid"
-                // onClick={() => tog_ModalNotes()}
+                onClick={logout}
               >
                 <i
                   className="bi bi-box-arrow-right"

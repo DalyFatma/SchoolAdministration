@@ -85,7 +85,7 @@ const Contract = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Programming" pageTitle="Contracts" />
+          <Breadcrumb title="Contracts" pageTitle="Programming" />
           <Row className="mb-4">
             <Col xxl={12}></Col>
             <Col xxl={6} md={10} className="mx-auto"></Col>

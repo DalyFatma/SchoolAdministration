@@ -25,7 +25,7 @@ import {
 
 import Swal from "sweetalert2";
 import "./AddProgram.css";
-import { useAddProgrammMutation } from "features/programms/programmSlice";
+import { useAddProgrammMutation, useFetchProgrammsQuery } from "features/programms/programmSlice";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
@@ -108,7 +108,6 @@ const AddProgramm = (props: any) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [routeDirections, setRouteDirections] =
     useState<google.maps.DirectionsResult | null>(null);
-  const [stopNames, setStopNames] = useState<string[]>([]);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
 
   const originRef = useRef<any>(null);
@@ -145,10 +144,7 @@ const AddProgramm = (props: any) => {
     pickUp_time: "",
   });
 
-  const [test, setTest] = useState("");
   const [test2, setTest2] = useState("");
-
-  const [date, setDate] = useState(new Date());
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
@@ -199,6 +195,11 @@ const AddProgramm = (props: any) => {
     dropOff_time: "",
     pickUp_Time: "",
     workDates: [""],
+    clientID: "",
+    program_status: [{
+      status: "",
+      date_status: "",
+    }]
   });
   const notify = () => {
     Swal.fire({
@@ -501,7 +502,8 @@ const AddProgramm = (props: any) => {
     return (
       <>
         <Row className="d-flex resume-title">
-          <span className="title"> Journey Name: </span> <span className="title-value">{programmData.programName}</span>
+          <span className="title"> Journey Name: </span>{" "}
+          <span className="title-value">{programmData.programName}</span>
         </Row>
         <Row className="d-flex justify-content-space-between">
           <Col>
@@ -560,16 +562,6 @@ const AddProgramm = (props: any) => {
             </div>
           </Col>
           <Col>
-            {/*  <b>Free Dates </b>
-            <ul>
-              {Array.isArray(programmData.freeDays_date) &&
-                programmData.freeDays_date.map((dateString, index) => (
-                  <li key={index}>{dateString}</li>
-                ))}
-            </ul> */}
-
-            {/* <b> Except Days </b> <p> {programmData.exceptDays.join(" ")}</p> */}
-
             <div className="table-responsive">
               <table className="table table-sm table-borderless align-middle description-table">
                 <tbody>
@@ -579,7 +571,6 @@ const AddProgramm = (props: any) => {
                       <p> {programmData.recommanded_capacity}</p>
                     </td>
                     <td>
-                     
                       <p className="legend-container">
                         Excepted days{" "}
                         <span className="legend bg-except-day"></span>
@@ -592,7 +583,6 @@ const AddProgramm = (props: any) => {
                       <p>{programmData.extra.join(", ")}</p>
                     </td>
                     <td>
-                    
                       <p className="legend-container">
                         Current day <span className="legend bg-now-day"></span>
                       </p>
@@ -601,7 +591,7 @@ const AddProgramm = (props: any) => {
                   <tr>
                     <td></td>
                     <td>
-                    <p className="legend-container">
+                      <p className="legend-container">
                         Free days <span className="legend bg-free-day"></span>
                       </p>
                     </td>
@@ -698,6 +688,10 @@ const AddProgramm = (props: any) => {
   const handleNextStep = (isResume: boolean) => {
     if (isResume === true) {
       programmData["extra"] = selected;
+     programmData["program_status"]=[{
+      status:"Pending",
+      date_status:""
+     }]
       programmData["exceptDays"] = selected1;
       programmData["workDates"] = getWorkDates();
 
@@ -824,35 +818,6 @@ const AddProgramm = (props: any) => {
     setSearchDestination(autocomplete);
   }
 
-  // function onPlaceChanged() {
-  //   if (searchResult != null) {
-  //     const place = (
-  //       searchResult as unknown as google.maps.places.Autocomplete
-  //     ).getPlace();
-  //     console.log("place", place);
-  //     const name = place.name;
-  //     // setRecap((prevRecap) => ({
-  //     //   ...prevRecap,
-  //     //   originRef: name,
-  //     // }));
-
-  //     const location = place.geometry?.location;
-  //     if (location) {
-  //       const nom = { lat: location.lat(), lng: location.lng() };
-  //       setNom(nom);
-  //       const status = place.business_status;
-  //       const formattedAddress = place.formatted_address;
-  //       console.log(`Name: ${name}`);
-  //       console.log(`Business Status: ${status}`);
-  //       console.log(`Formatted Address: ${formattedAddress}`);
-  //     } else {
-  //       console.error("Location not found in place object");
-  //     }
-  //   } else {
-  //     alert("Please enter text");
-  //   }
-  // }
-
   function onPlaceChanged() {
     if (searchResult != null) {
       const place = (
@@ -921,30 +886,6 @@ const AddProgramm = (props: any) => {
     }
   }
 
-  // function onPlaceChangedDest() {
-  //   if (searchDestination != null) {
-  //     const place = (
-  //       searchDestination as unknown as google.maps.places.Autocomplete
-  //     ).getPlace();
-  //     const name = place.name;
-  //     setRecap((prevRecap) => ({
-  //       ...prevRecap,
-  //       destinationRef: name,
-  //     }));
-
-  //     const location = place.geometry?.location;
-  //     setFatma(location);
-
-  //     const status = place.business_status;
-  //     const formattedAddress = place.formatted_address;
-  //     console.log(`Name: ${name}`);
-  //     console.log(`Business Status: ${status}`);
-  //     console.log(`Formatted Address: ${formattedAddress}`);
-  //   } else {
-  //     alert("Please enter text");
-  //   }
-  // }
-
   function onPlaceChangedDest() {
     if (searchDestination != null) {
       const place = (
@@ -1003,7 +944,6 @@ const AddProgramm = (props: any) => {
   }
 
   async function calculateRoute(): Promise<void> {
-    //stopTimes = [];
     setOriginSwitchRef(originRef?.current!.value);
     setDestSwitchRef(destinationRef?.current!.value);
 
@@ -1048,7 +988,6 @@ const AddProgramm = (props: any) => {
               duration: leg.duration.value,
             }));
             console.log("durations", durations);
-            //durations.pop();
             const hours_first = Math.floor(durations[0].duration / 3600);
             const minutes_first = Math.floor(
               (durations[0].duration % 3600) / 60
@@ -1080,15 +1019,6 @@ const AddProgramm = (props: any) => {
               );
               temporarryTimes.push(time);
             }
-
-            // const totalDurations = accumulateDurations(durations);
-
-            // const time_dest = addDurationToTime(
-            //   pickUpHour + ":" + pickUpMinute,
-            //   totalDurations.hours,
-            //   totalDurations.minutes
-            // );
-            // temporarryTimes.push(time_dest);
             console.log(temporarryTimes);
             setStopTimes(temporarryTimes);
             console.log("Plan route stop times", stopTimes);
@@ -1189,9 +1119,7 @@ const AddProgramm = (props: any) => {
     let ref = 0;
     if (time1 > time2) {
       ref = 1;
-      // alert("Time 1 is later than time 2");
     } else if (time1 < time2) {
-      // alert("Time 2 is later than time 1");
       ref = 2;
     }
     return ref;
@@ -1246,7 +1174,7 @@ const AddProgramm = (props: any) => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Breadcrumb title="Program" pageTitle="Management" />
+          <Breadcrumb title="Add New Program" pageTitle="Programming" />
           <Card className="overflow-hidden">
             <Card.Header className="border-0">
               <div className="hstack gap-2 justify-content-end">
@@ -1393,12 +1321,6 @@ const AddProgramm = (props: any) => {
                                         time_24hr: true,
                                       }}
                                     />
-                                    {/* <p>
-                                      {String(stopTimes[stopTimes.length - 1]?.hours).padStart(2,'0') +
-                                          ":" +
-                                          String(stopTimes[stopTimes.length - 1]
-                                            ?.minutes).padStart(2,'0')}
-                                    </p> */}
                                   </div>
                                 </InputGroup>
 
@@ -1413,27 +1335,6 @@ const AddProgramm = (props: any) => {
                                     Plan Route
                                   </Button>
                                 )}
-
-                                {/* <div className="flex">
-                                <Button
-                                  onClick={switchRoute}
-                                  className="btn btn-dark w-lg d-grid gap-2 btn-switch"
-                                >
-                                  Switch
-                                </Button>
-                              </div> */}
-
-                                {/* <Flatpickr
-                                  className="form-control"
-                                  id="dropOff_time"
-                                  options={{
-                                    enableTime: true,
-                                    noCalendar: true,
-                                    dateFormat: "H:i",
-                                    time_24hr: true,
-                                   
-                                  }}
-                                /> */}
 
                                 <div style={{ marginTop: "20px" }}>
                                   {stops2.map((stop, index) => (
@@ -1529,35 +1430,8 @@ const AddProgramm = (props: any) => {
                                         Via
                                       </i>
                                     </Link>
-                                    {/* <Link
-                                      to="#"
-                                      id="add-item"
-                                      className="btn btn-soft-dark fw-medium link"
-                                      style={{
-                                        width: "150px",
-                                        marginLeft: "150px",
-                                      }}
-                                    >
-                                      <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
-                                        {" "}
-                                        Options
-                                      </i>
-                                    </Link> */}
                                   </div>
                                 </div>
-
-                                {/* <div>
-                                {test && test2 && (
-                                  <div className="distance">
-                                    <Form.Label className="label">
-                                      Distance:{test}
-                                    </Form.Label>
-                                    <Form.Label className="label">
-                                      Duration: {test2}
-                                    </Form.Label>
-                                  </div>
-                                )}
-                              </div> */}
                               </div>
                             </Col>
 
@@ -1965,7 +1839,7 @@ const AddProgramm = (props: any) => {
                           </div>
                           <div
                             className="d-flex justify-content-between"
-                            style={{ marginTop: "10px", marginBottom:"15px" }}
+                            style={{ marginTop: "10px", marginBottom: "15px" }}
                           >
                             <Button
                               type="button"
