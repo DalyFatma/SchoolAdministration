@@ -91,6 +91,7 @@ interface TableContainerProps {
   iscustomPageSize?: boolean;
   SearchPlaceholder: string;
   isProductsFilter?: boolean;
+
 }
 
 const TableContainer = ({
@@ -110,7 +111,9 @@ const TableContainer = ({
   customPageSize,
   iscustomPageSize,
   customPageSizeOptions,
-  SearchPlaceholder
+  SearchPlaceholder,
+
+  
 }: TableContainerProps) => {
   const {
     getTableProps,
@@ -272,7 +275,7 @@ const TableContainer = ({
           </tbody>
         </Table>
       </div>
-      <Row className="align-items-center mt-2 py-2 px-2 gy-2 text-center text-sm-start">
+     <Row className="align-items-center mt-2 py-2 px-2 gy-2 text-center text-sm-start">
         <div className="col-sm">
           <div className="text-muted">Showing <span className="fw-semibold">{pageIndex + 1}</span> of <span className="fw-semibold">{pageOptions.length}</span> Results</div>
         </div>
@@ -294,6 +297,7 @@ const TableContainer = ({
           </ul>
         </div>
       </Row>
+      
     </Fragment>
   );
 };

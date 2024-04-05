@@ -11,6 +11,11 @@ import { studentSlice } from "features/student/studentSlice";
 import { programmSlice } from "features/programms/programmSlice";
 import { accountSlice } from "features/account/accountSlice";
 import authSlice from "features/account/authSlice";
+import { contractSlice } from "features/contract/contractSlice";
+import { quoteSlice } from "features/quotes/quotesSlice";
+import { vehicleTypeSlice } from "features/vehicleType/vehicleType";
+import { luggageSlice } from "features/luggage/luggage";
+import { journeySlice } from "features/journey/journey";
 
 
 export const store = configureStore({
@@ -18,6 +23,11 @@ export const store = configureStore({
     [studentSlice.reducerPath]: studentSlice.reducer,
     [programmSlice.reducerPath]: programmSlice.reducer,
     [accountSlice.reducerPath]: accountSlice.reducer,
+    [quoteSlice.reducerPath]: quoteSlice.reducer,
+    [contractSlice.reducerPath]: contractSlice.reducer,
+    [vehicleTypeSlice.reducerPath]: vehicleTypeSlice.reducer,
+    [luggageSlice.reducerPath]: luggageSlice.reducer,
+    [journeySlice.reducerPath]: journeySlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -28,7 +38,12 @@ export const store = configureStore({
     return getDefaultMiddleware().concat([
       studentSlice.middleware,
       programmSlice.middleware,
-      accountSlice.middleware
+      accountSlice.middleware,
+      contractSlice.middleware,
+      quoteSlice.middleware,
+      journeySlice.middleware,
+      luggageSlice.middleware,
+      vehicleTypeSlice.middleware,
     ]);
   },
 });

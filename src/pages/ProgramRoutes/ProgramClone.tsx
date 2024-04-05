@@ -196,7 +196,11 @@ const ProgramClone = (props: any) => {
     dropOff_time: "",
     pickUp_Time: "",
     workDates: [""],
-    clientID: ""
+    vehiculeType:"",
+    luggage:"",
+    journeyType:"",
+    clientID: "",
+    note:""
   });
   const notify = () => {
     Swal.fire({
@@ -566,6 +570,10 @@ const ProgramClone = (props: any) => {
                     <td>
                       <b>Capacity Recommended</b>{" "}
                       <p> {programmData.recommanded_capacity}</p>
+                    </td>
+                    <td>
+                      <b>Notes</b>{" "}
+                      <p> {programmData.note}</p>
                     </td>
                     <td>
                       <p className="legend-container">

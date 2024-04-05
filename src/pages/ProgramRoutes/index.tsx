@@ -19,9 +19,8 @@ import {
   useSendResponseMutation,
 } from "features/programms/programmSlice";
 import Swal from "sweetalert2";
-import { forEach } from "lodash";
 import { useSelector } from "react-redux";
-import { RootState } from "../../app/store"; // Import your RootState interface
+import { RootState } from "../../app/store";
 import { selectCurrentUser } from "../../features/account/authSlice";
 interface ResponseMsg {
   msg: string;
@@ -99,32 +98,6 @@ const ProgramList = (props: any) => {
   const [isChecked, setIsChecked] = useState(false);
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsChecked(event.target.checked);
-    // let date = new Date().toDateString();
-    // let time = new Date().toLocaleTimeString();
-    // let upadteDate = date + " " + time;
-    // let prev_status: any = [];
-    // programLocation?.state?.program_status!.forEach((element: any) => {
-    //   prev_status.push(element);
-    // });
-    // console.log(event.target.checked);
-    // let newResponseStatus: ResponseStatus = { status: "", date_status: "" };
-    // if (event.target.checked === true) {
-    //   console.log("isChecked");
-    //   // setCurrentStatus("Approved");
-    //   newResponseStatus = {
-    //     status: "Approved",
-    //     date_status: upadteDate,
-    //   };
-    // } else {
-    //   console.log("not isChecked");
-    //   newResponseStatus = {
-    //     status: "Revised By Client",
-    //     date_status: upadteDate,
-    //   };
-    // }
-
-    // setResponseStatus(() => [...prev_status, newResponseStatus]);
-    // console.log(newResponseStatus);
   };
 
   const handleResponseMsgChange = (
@@ -324,51 +297,92 @@ const ProgramList = (props: any) => {
       selector: (row: any) => row.droppOff_date,
       sortable: true,
     },
+    // {
+    //   name: <span className="font-weight-bold fs-13">Status</span>,
+    //   selector: (row: any) => row.program_status,
+    //   sortable: true,
+    //   cell: (row: any, index: number) => {
+    //     switch (row.program_status[row.program_status.length - 1]?.status!) {
+    //       case "Approved By Client":
+    //         return (
+    //           <span className="badge bg-success-subtle text-success">
+    //             {row.program_status[row.program_status.length - 1]?.status!}
+    //           </span>
+    //         );
+    //       case "Pending":
+    //         return (
+    //           <span className="badge bg-danger-subtle text-danger">
+    //             {row.program_status[row.program_status.length - 1]?.status!}
+    //           </span>
+    //         );
+    //       case "Answered By Client":
+    //         return (
+    //           <span className="badge bg-secondary-subtle text-secondary">
+    //             {row.program_status[row.program_status.length - 1]?.status!}
+    //           </span>
+    //         );
+    //       case "Answered By Admin":
+    //         return (
+    //           <span className="badge bg-info-subtle text-info">
+    //             {row.program_status[row.program_status.length - 1]?.status!}
+    //           </span>
+    //         );
+    //         case "Approved By Admin":
+    //         return (
+    //           <span className="badge bg-dark-subtle text-dark">
+    //             {row.program_status[row.program_status.length - 1]?.status!}
+    //           </span>
+    //         );
+    //       default:
+    //         return (
+    //           <span className="badge bg-secondary-subtle text-secondary">
+    //             {row.program_status[row.program_status.length - 1]?.status!}
+    //           </span>
+    //         );
+    //     }
+    //   },
+    // },
+
     {
       name: <span className="font-weight-bold fs-13">Status</span>,
       selector: (row: any) => row.program_status,
       sortable: true,
       cell: (row: any, index: number) => {
-        switch (row.program_status[row.program_status.length - 1]?.status!) {
-          case "Approved By Client":
-            return (
-              <span className="badge bg-success-subtle text-success">
-                {row.program_status[row.program_status.length - 1]?.status!}
-              </span>
-            );
-          case "Pending":
-            return (
-              <span className="badge bg-danger-subtle text-danger">
-                {row.program_status[row.program_status.length - 1]?.status!}
-              </span>
-            );
-          case "Answered By Client":
-            return (
-              <span className="badge bg-secondary-subtle text-secondary">
-                {row.program_status[row.program_status.length - 1]?.status!}
-              </span>
-            );
-          case "Answered By Admin":
-            return (
-              <span className="badge bg-info-subtle text-info">
-                {row.program_status[row.program_status.length - 1]?.status!}
-              </span>
-            );
-            case "Approved By Admin":
-            return (
-              <span className="badge bg-dark-subtle text-dark">
-                {row.program_status[row.program_status.length - 1]?.status!}
-              </span>
-            );
-          default:
-            return (
-              <span className="badge bg-secondary-subtle text-secondary">
-                {row.program_status[row.program_status.length - 1]?.status!}
-              </span>
-            );
-        }
+        const latestStatus = row.program_status[row.program_status.length - 1]?.status;
+        const penultimateStatus = row.program_status[row.program_status.length - 2]?.status;
+    
+        return (
+          (latestStatus === "Approved By Client" && penultimateStatus === "Approved By Admin") || 
+          (penultimateStatus === "Approved By Client" && latestStatus === "Approved By Admin") ?
+            <span className="badge badge-soft-success text-uppercase">
+              Converted To Contract
+            </span> :
+          latestStatus === "Pending" ?
+            <span className="badge bg-danger-subtle text-danger">
+              Pending
+            </span> :
+          latestStatus === "Answered By Client" ?
+            <span className="badge bg-secondary-subtle text-dark">
+              Answered By Client
+            </span> :
+          latestStatus === "Answered By Admin" ?
+            <span className="badge bg-info-subtle text-dark">
+              Answered By Admin
+            </span> :
+          latestStatus === "Approved By Admin" ?
+            <span className="badge bg-dark-subtle text-dark">
+              Approved By Admin
+            </span> :
+          latestStatus === "Approved By Client" ?
+            <span className="badge bg-success-subtle text-dark">
+              Approved By Client
+            </span> :
+          null
+        );
       },
-    },
+    }
+    ,
+    
     {
       name: <span className="font-weight-bold fs-13">Action</span>,
       sortable: true,

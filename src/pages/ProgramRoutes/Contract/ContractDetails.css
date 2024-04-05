@@ -1,0 +1,28 @@
+@media print {
+    .table-container {
+      overflow: hidden !important;
+    }
+  }
+
+  @media print {
+    .print-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%; /* Ensure the container takes up the full width */
+    }
+  
+    .canvas-container {
+      width: 50%; /* Set the width of each canvas container */
+      margin-top: 20px; /* Add margin top */
+    }
+  
+    .canvas-container canvas {
+      width: 100%; /* Ensure the canvas fills its container */
+      border: 1px solid black;
+    }
+  }
+  
+  
+  
+  
+  

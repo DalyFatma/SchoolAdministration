@@ -11,10 +11,13 @@ import {
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { sellerGrid } from "Common/data";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useGetAllContractsQuery } from "features/contract/contractSlice";
 
 const Contract = () => {
   document.title = "Contracts | School Administration";
+
+  const { data = [] } = useGetAllContractsQuery();
 
   // Pagination
   const [pagination, setPagination] = useState<boolean>(true);
@@ -186,7 +189,7 @@ const Contract = () => {
                     </Modal> */}
 
           <Row id="seller-list">
-            {(currentpages || []).map((item: any, key: number) => (
+            {(data || []).map((item: any, key: number) => (
               <Col xxl={3} lg={6} key={key}>
                 <Card>
                   <Card.Body className="p-4">
@@ -200,14 +203,17 @@ const Contract = () => {
                         <h5 className="mb-1">{item.contractName}</h5>
                       </Link>
                       <p className="text-muted fs-16 mb-4">
-                    <span className="fw-medium"> January 1, 2023 </span> to <span className="fw-medium">December 31, 2023</span>
+                        <span className="fw-medium">
+                          {" "}
+                          {item.invoiceFrequency}
+                        </span>
                       </p>
                     </div>
                     <Row>
                       <div className="col-6">
                         <div className="text-center">
                           <p className="text-muted mb-2 fs-15">Payment</p>
-                          <h5 className="mb-0 fs-15">£{item.pay}</h5>
+                          <h5 className="mb-0 fs-15">£{item.prices}</h5>
                         </div>
                       </div>
                       <div className="col-6 border-start border-start-dashed">
@@ -215,25 +221,27 @@ const Contract = () => {
                           <p className="text-muted mb-2 fs-15">Status</p>
                           <h5
                             className={`mb-0 ${
-                              item.status === "Active"
+                              item.contractStatus === "Approved"
                                 ? "text-success"
+                                : item.contractStatus === "Pending"
+                                ? "text-warning"
                                 : "text-primary"
                             }`}
                           >
-                            {item.status}
+                            {item.contractStatus}
                           </h5>
                         </div>
                       </div>
                     </Row>
                     <div className="mt-4 hstack gap-2 d-flex justify-content-between">
-                      <Link to="/contract/contract-details">
+                    <Link to={`/contract/${item._id}`} state={item}>
                         <Button variant="soft-secondary" className="w-300 ">
                           View Details
                         </Button>
                       </Link>
                       <Link to="#">
                         <Button variant="soft-info" className="w-300 ">
-                        Archive
+                          Archive
                         </Button>
                       </Link>
                     </div>

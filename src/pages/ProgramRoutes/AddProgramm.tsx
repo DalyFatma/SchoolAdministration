@@ -25,9 +25,18 @@ import {
 
 import Swal from "sweetalert2";
 import "./AddProgram.css";
-import { useAddProgrammMutation, useFetchProgrammsQuery } from "features/programms/programmSlice";
+import {
+  useAddProgrammMutation,
+  useFetchProgrammsQuery,
+} from "features/programms/programmSlice";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { useGetAllVehicleTypesQuery } from "features/vehicleType/vehicleType";
+import { useGetAllLuggageQuery } from "features/luggage/luggage";
+import { useGetAllJourneyQuery } from "features/journey/journey";
+import { useSelector } from "react-redux";
+import { RootState } from "app/store";
+import { selectCurrentUser } from "features/account/authSlice";
 
 interface Option {
   value: string;
@@ -85,7 +94,7 @@ interface stopTime {
 const AddProgramm = (props: any) => {
   document.title = "Program | School Administration";
   const navigate = useNavigate();
-
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
@@ -162,8 +171,35 @@ const AddProgramm = (props: any) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const [createProgram] = useAddProgrammMutation();
+  const { data: AllVehicleTypes = [] } = useGetAllVehicleTypesQuery();
+  const { data: AllLuggages = [] } = useGetAllLuggageQuery();
+  const { data: AllJourneys = [] } = useGetAllJourneyQuery();
+
+  const [selectedVehicleType, setSelectedVehicletype] = useState<string>("");
+  // This function is triggered when the select Vehicle Type
+  const handleSelectVehicleType = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedVehicletype(value);
+  };
+
+  const [selectedLuggage, setSelectedLuggage] = useState<string>("");
+  // This function is triggered when the select Luggage
+  const handleSelectLuggage = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedLuggage(value);
+  };
+
+  const [selectedJourney, setSelectedJourney] = useState<string>("");
+  // This function is triggered when the select Journey
+  const handleSelectJourney = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedJourney(value);
+  };
   const [programmData, setProgrammData] = useState({
     programName: "",
+    note: "",
     origin_point: {
       placeName: "",
       coordinates: {
@@ -186,6 +222,9 @@ const AddProgramm = (props: any) => {
       },
     },
     pickUp_date: "",
+    vehiculeType: "",
+    luggage: "",
+    journeyType: "",
     droppOff_date: "",
     freeDays_date: [""],
     exceptDays: [""],
@@ -196,10 +235,12 @@ const AddProgramm = (props: any) => {
     pickUp_Time: "",
     workDates: [""],
     clientID: "",
-    program_status: [{
-      status: "",
-      date_status: "",
-    }]
+    program_status: [
+      {
+        status: "",
+        date_status: "",
+      },
+    ],
   });
   const notify = () => {
     Swal.fire({
@@ -210,7 +251,21 @@ const AddProgramm = (props: any) => {
       timer: 2000,
     });
   };
-  const onChangeProgramms = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeProgramms = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setProgrammData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+  const onChangeProgrammsSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setProgrammData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+  const onChangeProgrammsNotes = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setProgrammData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
@@ -688,10 +743,12 @@ const AddProgramm = (props: any) => {
   const handleNextStep = (isResume: boolean) => {
     if (isResume === true) {
       programmData["extra"] = selected;
-     programmData["program_status"]=[{
-      status:"Pending",
-      date_status:""
-     }]
+      programmData["program_status"] = [
+        {
+          status: "Pending",
+          date_status: "",
+        },
+      ];
       programmData["exceptDays"] = selected1;
       programmData["workDates"] = getWorkDates();
 
@@ -714,6 +771,10 @@ const AddProgramm = (props: any) => {
 
       console.log(freeDates);
       programmData["freeDays_date"] = freeDates;
+      programmData["journeyType"] = selectedJourney;
+      programmData["luggage"] = selectedLuggage;
+      programmData['vehiculeType'] = selectedVehicleType;
+      programmData['clientID'] = user?._id! ;
 
       const dropYear = dropOff_date!.getFullYear();
       const dropMonth = dropOff_date!.getMonth() + 1;
@@ -1706,7 +1767,7 @@ const AddProgramm = (props: any) => {
                         </Tab.Pane>
                         <Tab.Pane eventKey="3">
                           <Row>
-                            <Col lg={4}>
+                            <Col lg={6}>
                               <div className="mb-3">
                                 <Form.Label htmlFor="recommanded_capacity">
                                   Recommanded Capacity
@@ -1720,6 +1781,82 @@ const AddProgramm = (props: any) => {
                                   value={programmData.recommanded_capacity}
                                   onChange={onChangeProgramms}
                                 />
+                              </div>
+                            </Col>
+                            <Col lg={6}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="vehicleType">
+                                  Vehicle Type
+                                </Form.Label>
+                                <div>
+                                  <select
+                                    className="form-select text-muted"
+                                    name="vehicleType"
+                                    id="vehicleType"
+                                    onChange={handleSelectVehicleType}
+                                  >
+                                    <option value="">
+                                      Select Vehicle Type
+                                    </option>
+                                    {AllVehicleTypes.map((vehicleType) => (
+                                      <option
+                                        value={vehicleType._id}
+                                        key={vehicleType._id}
+                                      >
+                                        {vehicleType.type}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col lg={6}>
+                              <div className="mb-4">
+                                <Form.Label htmlFor="journeyType">
+                                  Journey Type
+                                </Form.Label>
+                                <select
+                                  className="form-select text-muted"
+                                  name="journeyType"
+                                  id="journeyType"
+                                  onChange={handleSelectJourney}
+                                >
+                                  <option value="">Select Journey Type</option>
+                                  {AllJourneys.map((journeys) => (
+                                    <option
+                                      value={journeys._id}
+                                      key={journeys._id}
+                                    >
+                                      {journeys.type}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </Col>
+
+                            <Col lg={6}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="luggageDetails">
+                                  Luggage Details
+                                </Form.Label>
+                                <select
+                                  className="form-select text-muted"
+                                  name="luggageDetails"
+                                  id="luggageDetails"
+                                  onChange={handleSelectLuggage}
+                                >
+                                  <option value="">Select Luggage</option>
+                                  {AllLuggages.map((Luggage) => (
+                                    <option
+                                      value={Luggage._id}
+                                      key={Luggage._id}
+                                    >
+                                      {Luggage.description}
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                             </Col>
                           </Row>
@@ -1796,9 +1933,11 @@ const AddProgramm = (props: any) => {
                                 </Form.Label>
                                 <textarea
                                   className="form-control"
-                                  id="VertimeassageInput"
+                                  id="note"
                                   rows={5}
                                   placeholder="Enter your notes"
+                                  value={programmData.note}
+                                  onChange={onChangeProgrammsNotes}
                                 ></textarea>
                               </div>
                             </Col>

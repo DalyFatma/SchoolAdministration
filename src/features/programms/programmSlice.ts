@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface Programm {
   _id?: string;
+  note:string;
   programName: string;
   origin_point: {
     placeName: string;
@@ -28,6 +29,9 @@ export interface Programm {
   exceptDays: string[];
   recommanded_capacity: string;
   extra: string[];
+  vehiculeType:string;
+  luggage:string;
+  journeyType:string;
   notes: string;
   dropOff_time: string;
   pickUp_Time: string;

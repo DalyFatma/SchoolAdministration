@@ -78,13 +78,13 @@ import Parents from "pages/Accounts/Parents";
 import TripsManagement from "pages/Promgramming/TripsManagement";
 import Offers from "pages/Tools/Offers/index";
 import Station from "pages/Promgramming/Stations/index";
-import Contract from "pages/Promgramming/Contract";
+import Contract from "pages/ProgramRoutes/Contract";
 import ExtraTrip from "pages/ExtraTrip";
 import ListExtraTrip from "pages/ExtraTrip/ListExtraTrip";
 import AddNewStation from "pages/Promgramming/Stations/AddNewStation";
 import SingleProfile from "pages/Accounts/Students/SingleAccount";
 import EditStudent from "pages/Accounts/Students/EditStudent";
-import ContractDetails from "pages/Promgramming/Contract/ContractDetails";
+import ContractDetails from "pages/ProgramRoutes/Contract/ContractDetails";
 import ParentDetails from "pages/Accounts/Parents/ParentDetails";
 import ReportError from "pages/Help/RepportError";
 import RequestFeature from "pages/Help/RequestFeature";
@@ -120,7 +120,7 @@ const authProtectedRoutes = [
   { path: "/contracts", component: <Contract /> },
   // contract details
 
- { path: "/contract/contract-details", component: <ContractDetails /> },
+ { path: "/contract/:id", component: <ContractDetails /> },
 
   // ? Students
   { path: "/groups", component: <Groups /> },
@@ -181,6 +181,8 @@ const authProtectedRoutes = [
 
  //? Notes
  { path: "/notes", component: <Notes /> },
+
+ { path: "/contract", component: <InvoiceDetails /> },
 
  { path: "/invoices", component: <InvoiceListTable /> },
 

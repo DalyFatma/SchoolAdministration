@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 const ProfileDropdown = () => {
 
     const user = useSelector((state: RootState) => selectCurrentUser(state));
+
     const navigate = useNavigate()
 
     const [userName, setUserName] = useState<any>("Admin");

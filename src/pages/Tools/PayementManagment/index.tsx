@@ -144,7 +144,7 @@ const PayementManagement = () => {
         Header: "ID Contract",
         disableFilters: true,
         filterable: true,
-        accessor: "transactionID"
+        accessor: "id"
       },
       {
         Header: "Invoice Number",
