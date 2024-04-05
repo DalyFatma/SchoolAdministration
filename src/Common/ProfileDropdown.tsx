@@ -39,7 +39,7 @@ const ProfileDropdown = () => {
     }, [success]);
 
     const logout = () =>{
-        axios.post(`http://localhost:3000/api/authSchool/logout/${user._id}`,{})
+        axios.post(`https://bouden.uk.oxa.cloud/authSchool/logout/${user._id}`,{})
         .then((res: any)=> {
           console.log(res);
           Cookies.remove('astk');

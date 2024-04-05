@@ -23,7 +23,7 @@ export interface Contract {
 export const contractSlice = createApi({
   reducerPath: "contract",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/api/contract/",
+    baseUrl: "https://bouden.uk.oxa.cloud/api/contract/",
   }),
   tagTypes: ["Contract"],
   endpoints(builder) {

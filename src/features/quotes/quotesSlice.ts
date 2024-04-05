@@ -41,7 +41,7 @@ export interface Quote {
 export const quoteSlice = createApi({
   reducerPath: "quote",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/api/quote",
+    baseUrl: "https://bouden.uk.oxa.cloud/api/quote",
   }),
   tagTypes: ["Quote"],
   endpoints(builder) {

@@ -86,7 +86,7 @@ const VerticalLayout = (props: any) => {
   const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const logout = () =>{
-    axios.post(`http://localhost:3000/api/authSchool/logout/${user._id}`,{})
+    axios.post(`https://bouden.uk.oxa.cloud/api/authSchool/logout/${user._id}`,{})
     .then((res: any)=> {
       console.log(res);
       Cookies.remove('astk');

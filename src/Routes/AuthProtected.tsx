@@ -31,7 +31,7 @@ const AuthProtected = (props: any) => {
   }
 
   console.log(token);
-  axios.post(`http://localhost:3000/api/authSchool/getSchoolByToken`, { token: tokenc })
+  axios.post(`https://bouden.uk.oxa.cloud/api/authSchool/getSchoolByToken`, { token: tokenc })
   .then((res: any)=> {
     console.log(res);
     dispatch(setCredentials(res));
