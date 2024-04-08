@@ -26,7 +26,7 @@ const ContractDetails: React.FC = () => {
   const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const { data = [] } = useGetQuoteByIdScheduleQuery({
-    id_schedule: contract?.idProgram._id,
+    id_schedule: contract?.idProgram?._id!,
   });
   console.log("data quote", data);
 
@@ -152,7 +152,7 @@ const ContractDetails: React.FC = () => {
               <Card id="demo">
                 <Row>
                   <Col lg={12}>
-                    <Card.Header className="border-bottom-dashed p-4">
+                    <Card.Header className="border-bottom-dashed p-4 ">
                       <div className="d-flex justify-content-between">
                         <div>
                           <img
@@ -174,13 +174,10 @@ const ContractDetails: React.FC = () => {
                           </h5>
                         </div>
                         <div>
-                          <h6>
-                            <span className="text-muted fw-normal">
-                              Company Name:
-                            </span>{" "}
+                          <h6  className="mb-0">
                             <span id="email">Bouden Coach Travel</span>
                           </h6>
-                          <h6>
+                          <h6  className="mb-0">
                             <span className="text-muted fw-normal">
                               Website:
                             </span>{" "}
@@ -195,7 +192,7 @@ const ContractDetails: React.FC = () => {
                           </h6>
                           <h6 className="mb-0">
                             <span className="text-muted fw-normal">
-                              Contact No:{" "}
+                              Phone No:{" "}
                             </span>
                             <span id="contact-no"> 0800 112 3770</span>
                           </h6>
@@ -212,7 +209,7 @@ const ContractDetails: React.FC = () => {
                     </Card.Header>
                   </Col>
                   <Col lg={12}>
-                    <Card.Body className="p-4 border-top border-top-dashed">
+                    <Card.Body className="p-4">
                       <h6 className="d-flex justify-content-center fw-semibold fs-14">
                         Between Bouden Coach Travel Ltd (Service Provider) and{" "}
                         {user.name}
@@ -318,39 +315,38 @@ const ContractDetails: React.FC = () => {
                           </p>
                         </Col> */}
                         <Col lg={12}>
-                        
-                           <h5>1. Introduction </h5> 
-                            <p
+                          <h5>1. Introduction </h5>
+                          <p
                             className=" text-muted fw-medium mb-2 fs-16"
                             id="billing-name"
-                          >This Transportation Services
-                            Agreement (“Agreement”) is entered into between
-                            Bouden Coach Travel Ltd, a company registered at
-                            Unit 18 Haywards Industrial Park, Orton Way,
-                            Birmingham B35 7BT , here in after referred to as
-                            the “Service Provider,” and {user.name}, a{" "}
-                            {user.activity} with registered address at{" "}
-                            {user.address}, here in after referred to as the
-                            “Client.”
+                          >
+                            This Transportation Services Agreement (“Agreement”)
+                            is entered into between Bouden Coach Travel Ltd, a
+                            company registered at Unit 18 Haywards Industrial
+                            Park, Orton Way, Birmingham B35 7BT , here in after
+                            referred to as the “Service Provider,” and{" "}
+                            {user.name}, a {user.activity} with registered
+                            address at {user.address}, here in after referred to
+                            as the “Client.”
                           </p>
-                          
-                          <h5>2. Scope of Services </h5>  
-                            <p
+
+                          <h5>2. Scope of Services </h5>
+                          <p
                             className="text-muted fw-medium mb-2 fs-16"
                             id="billing-name"
-                          >The Service Provider agrees to
-                            provide ground transportation services to the
-                            Client. The scope of services includes but is not
-                            limited to:
+                          >
+                            The Service Provider agrees to provide ground
+                            transportation services to the Client. The scope of
+                            services includes but is not limited to:
                             <ul>
-                              <li>Journey: {contract.journeyType.type}</li>
+                              <li>Journey: {contract.journeyType?.type!}</li>
                               <li>
                                 Luggage Details:{" "}
-                                {contract.luggageDetails.description}
+                                {contract.luggageDetails?.description!}
                               </li>
                               <li>
                                 Passengers:{" "}
-                                {contract.idProgram.recommanded_capacity}
+                                {contract?.idProgram?.recommanded_capacity!}
                               </li>
                               <li>
                                 Vehicle Options:
@@ -375,12 +371,12 @@ const ContractDetails: React.FC = () => {
                               <li>
                                 Limitations or Exclusions:
                                 <ul>
-                                  <li>Extra: {contract.idProgram.extra}</li>
+                                  <li>Extra: {contract.idProgram?.extra!}</li>
                                   <li>
-                                    Except Days: {contract.idProgram.exceptDays}
+                                    Except Days: {contract.idProgram?.exceptDays!}
                                   </li>
                                   <li>
-                                    Client Note: {contract.idProgram.note}
+                                    Client Note: {contract.idProgram?.note!}
                                   </li>
                                 </ul>
                               </li>
@@ -388,9 +384,7 @@ const ContractDetails: React.FC = () => {
                           </p>
                           <div>
                             <section>
-                              <h5>
-                                3. Service Standards and Responsibilities
-                              </h5>
+                              <h5>3. Service Standards and Responsibilities</h5>
                               <p className="text-muted fw-medium mb-2 fs-16">
                                 <b>3.1 Service Provider's Responsibilities</b>
                                 <ul>
@@ -427,9 +421,7 @@ const ContractDetails: React.FC = () => {
                             </section>
 
                             <section>
-                              <h5>
-                                4. Payment Terms
-                              </h5>
+                              <h5>4. Payment Terms</h5>
                               <p className="text-muted fw-medium mb-2 fs-16">
                                 <b>4.1 Rates and Payment Structure</b>
                                 The Client agrees to pay the Service Provider
@@ -480,13 +472,15 @@ const ContractDetails: React.FC = () => {
                                 </td> */}
 
                                 <td>{item.start_point.placeName}</td>
-                                <td>{item.estimated_start_time}</td>
+                                <td>{item.date} at {item?.pickup_time}</td>
                                 <td>{item.destination_point.placeName}</td>
                                 <td className="text-end">
-                                  {item.estimated_return_start_time}
+                                  {item?.return_time}
                                 </td>
-
-                                <td>{item.automatic_cost}</td>
+                                <td className="text-end">
+                                  {item.mid_stations.address}
+                                </td>
+                                <td>{item.manual_cost}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -500,13 +494,13 @@ const ContractDetails: React.FC = () => {
                           <tbody>
                             <tr>
                               <td>Sub Total</td>
-                              <td className="text-end">£7000.00</td>
+                              <td className="text-end">£8000.00</td>
                             </tr>
                             <tr>
                               <td>
                                 VAT <small className="text-muted"></small>
                               </td>
-                              <td className="text-end"> £292.00</td>
+                              <td className="text-end"> £0000.00</td>
                             </tr>
                             <tr className="border-top border-top-dashed fs-15">
                               <th scope="row">Total Amount</th>
@@ -527,9 +521,7 @@ const ContractDetails: React.FC = () => {
                         </section>
 
                         <section>
-                          <h5>
-                            5. Rights and Obligations
-                          </h5>
+                          <h5>5. Rights and Obligations</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
                             <b>5.1 Service Provider's Rights</b>
                             <br />
@@ -559,9 +551,7 @@ const ContractDetails: React.FC = () => {
                         </section>
 
                         <section>
-                          <h5>
-                            6. Termination and Cancellation
-                          </h5>
+                          <h5>6. Termination and Cancellation</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
                             Either party may terminate this Agreement with 30
                             days' written notice.
@@ -573,9 +563,7 @@ const ContractDetails: React.FC = () => {
                         </section>
 
                         <section>
-                          <h5>
-                            7. Confidentiality and Data Protection
-                          </h5>
+                          <h5>7. Confidentiality and Data Protection</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
                             Either party may terminate this Agreement with 30
                             days' written notice.
@@ -587,9 +575,7 @@ const ContractDetails: React.FC = () => {
                         </section>
 
                         <section>
-                          <h5>
-                            8. Insurance and Liability
-                          </h5>
+                          <h5>8. Insurance and Liability</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
                             The Service Provider shall maintain insurance
                             coverage for vehicles, passengers, and third
@@ -603,9 +589,7 @@ const ContractDetails: React.FC = () => {
                         </section>
 
                         <section>
-                          <h5>
-                            9. Dispute Resolution
-                          </h5>
+                          <h5>9. Dispute Resolution</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
                             Any disputes arising from this Agreement shall be
                             resolved through negotiation, mediation, or
@@ -618,9 +602,7 @@ const ContractDetails: React.FC = () => {
                         </section>
 
                         <section>
-                          <h5>
-                            Signatures and Effective Date
-                          </h5>
+                          <h5>Signatures and Effective Date</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
                             This Agreement shall be effective as of [Effective
                             Date].
@@ -666,8 +648,9 @@ const ContractDetails: React.FC = () => {
                                                     </p>
                                                 </div>
                                             </div> */}
+                                            
 
-                      <div className="print-container">
+                      <div className="print-container d-flex justify-content-between mt-4">
                         <div className="canvas-container">
                           <canvas
                             ref={ownerSignatureCanvasRef}
@@ -684,20 +667,8 @@ const ContractDetails: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="hstack gap-2 justify-content-end d-print-none mt-4">
-                        {/* <Link
-                          onClick={printInvoice}
-                          to="#"
-                          className="btn btn-success"
-                        >
-                          <i className="ri-printer-line align-bottom me-1"></i>{" "}
-                          Print
-                        </Link> */}
-
-                        <Button>
-                          <i className="ri-download-2-line align-bottom me-1"></i>{" "}
-                          Download
-                        </Button>
+                      <div className="hstack gap-2 justify-content-end d-print-none mt-4 print-button">
+                        
 
                         <ReactToPrint
                           trigger={() => (

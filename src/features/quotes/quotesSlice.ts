@@ -4,8 +4,8 @@ export interface Quote {
   _id?: string;
   passengers_number: number;
   journey_type: string;
-  estimated_start_time: string;
-  estimated_return_start_time: string;
+  pickup_time: string;
+  return_time: string;
   destination_point: {
     placeName: string;
     coordinates: {
@@ -15,6 +15,13 @@ export interface Quote {
   };
   start_point: {
     placeName: string;
+    coordinates: {
+      lat: number;
+      lon: number;
+    };
+  };
+  mid_stations: {
+    address: string;
     coordinates: {
       lat: number;
       lon: number;
@@ -35,7 +42,9 @@ export interface Quote {
   total_price: string,
   deposit_percentage: string,
   automatic_cost: string,
-  deposit_amount: string
+  deposit_amount: string,
+  date:string
+
 }
 
 export const quoteSlice = createApi({

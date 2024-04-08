@@ -277,7 +277,7 @@ const AddProgramm = (props: any) => {
 
       createProgram(programmData)
         .then(() => notify())
-        .then(() => navigate(-1));
+        .then(() => navigate("/listofprogram"));
     } catch (error) {
       console.log(error);
     }

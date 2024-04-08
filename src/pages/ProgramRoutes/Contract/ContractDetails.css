@@ -1,8 +1,3 @@
-@media print {
-    .table-container {
-      overflow: hidden !important;
-    }
-  }
 
   @media print {
     .print-container {
@@ -20,8 +15,51 @@
       width: 100%; /* Ensure the canvas fills its container */
       border: 1px solid black;
     }
+      /* Set margin space for the printed page */
+      @page {
+        margin: 20mm;
+        size: auto;
+        margin: 20px;
+      }
+    
+      body {
+        font-size: 12pt;
+        margin: 0;
+        padding: 0;
+      }
+    
+      /* Define styles for headers, logos, and other elements */
+      .page-content {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+    
+      .card-logo {
+        margin-bottom: 20px; /* Add margin below logos */
+      }
+    
+      .card-header {
+        padding: 20px; /* Add padding to header sections */
+        margin-bottom: 20px; /* Add margin below headers */
+      }
+    
+      .section {
+        margin-bottom: 20px; /* Add margin between sections */
+      }
+    
+      /* Adjust layout for printing */
+      .page-content .row {
+        display: block;
+      }
+    
   }
-  
+  .print-button {
+    position: fixed;
+    bottom: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    z-index: 999; /* Ensure it's above other content */
+  }
   
   
   
