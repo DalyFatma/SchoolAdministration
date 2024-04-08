@@ -242,13 +242,13 @@ const ContractDetails: React.FC = () => {
 
                         <Col lg={3} className="col-6">
                           <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
-                            Invoice Frequency
+                            Contract Status
                           </p>
                           <span
                             className="badge bg-success-subtle text-success"
                             id="payment-status"
                           >
-                            {contract.invoiceFrequency}
+                            {contract.contractStatus}
                           </span>
                         </Col>
                         <Col lg={3} className="col-6">
@@ -494,7 +494,7 @@ const ContractDetails: React.FC = () => {
                           <tbody>
                             <tr>
                               <td>Sub Total</td>
-                              <td className="text-end">£8000.00</td>
+                              <td className="text-end">£0000.00</td>
                             </tr>
                             <tr>
                               <td>

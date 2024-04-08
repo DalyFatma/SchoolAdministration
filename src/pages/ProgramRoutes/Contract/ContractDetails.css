@@ -5,7 +5,13 @@
       flex-direction: row;
       width: 100%; /* Ensure the container takes up the full width */
     }
+    .card-logo {
+      margin-right: 50px; /* Adjust margin bottom for logo */
+    }
   
+    h5 {
+      margin-top: 10px; /* Adjust margin top for h5 element */
+    }
     .canvas-container {
       width: 50%; /* Set the width of each canvas container */
       margin-top: 20px; /* Add margin top */
