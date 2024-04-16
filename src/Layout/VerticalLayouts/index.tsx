@@ -15,7 +15,7 @@ import ModalNote from "./ModalNote";
 import ModalClaim from "./ModalClaim";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "features/account/authSlice";
-import { RootState } from '../../app/store';
+import { RootState } from "../../app/store";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -85,15 +85,15 @@ const VerticalLayout = (props: any) => {
 
   const user = useSelector((state: RootState) => selectCurrentUser(state));
 
-  const logout = () =>{
-    axios.post(`https://bouden.uk.oxa.cloud/api/authSchool/logout/${user._id}`,{})
-    .then((res: any)=> {
-      console.log(res);
-      Cookies.remove('astk');
-      navigate("/login")
-
-    })
-};
+  const logout = () => {
+    axios
+      .post(`https://bouden.uk.oxa.cloud/api/authSchool/logout/${user._id}`, {})
+      .then((res: any) => {
+        console.log(res);
+        Cookies.remove("astk");
+        navigate("/login");
+      });
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -180,6 +180,9 @@ const VerticalLayout = (props: any) => {
     navigate("/offers");
   }
 
+  function tog_Claim() {
+    navigate("/complains");
+  }
   return (
     <React.Fragment>
       {/* menu Items */}
@@ -421,7 +424,7 @@ const VerticalLayout = (props: any) => {
                 title="Send Complain"
                 type="button"
                 className="btn btn-soft-danger btn-icon d-grid"
-                onClick={() => tog_ModalClaim()}
+                onClick={() => tog_Claim()}
               >
                 <i
                   className="bi bi-chat-left-quote"
@@ -523,7 +526,6 @@ const VerticalLayout = (props: any) => {
         <Modal.Header className="px-4 pt-4" closeButton>
           <h5 className="modal-title fs-18" id="exampleModalLabel">
             Add New Complain
-            
           </h5>
         </Modal.Header>
         <Modal.Body className="p-4">

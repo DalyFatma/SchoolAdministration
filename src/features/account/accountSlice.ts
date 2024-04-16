@@ -53,7 +53,7 @@ export interface LoginRequest {
 export const accountSlice = createApi({
   reducerPath: "account",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://bouden.uk.oxa.cloud/api/authSchool/",
+    baseUrl: "http://localhost:3000/api/authSchool/",
     prepareHeaders: (headers, { getState }) => {
       // By default, if we have a token in the store, let's use that for authenticated requests
       const token = (getState() as RootState).auth?.school.api_token;

@@ -8,7 +8,7 @@ export interface Journey {
 export const journeySlice = createApi({
   reducerPath: "journey",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://bouden.uk.oxa.cloud/api/journey",
+    baseUrl: "http://localhost:3000/api/journey",
   }),
   tagTypes: ["Journey"],
   endpoints(builder) {

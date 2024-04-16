@@ -16,9 +16,22 @@ import ReactToPrint from "react-to-print";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "features/account/authSlice";
 import { RootState } from "app/store";
-
+interface JourneyType {
+  type: string;
+}
+interface LuggageType {
+  size: string;
+  description: string;
+}
+interface VehicleType {
+  base_change: string;
+  type: string;
+}
 const ContractDetails: React.FC = () => {
   document.title = "Contract Details | School Administration";
+  const [journeyType, setJourneyType] = useState<JourneyType | null>(null);
+  const [luggage, setLuggage] = useState<LuggageType | null>(null);
+  const [vehicleType, setVehicleType] = useState<VehicleType | null>(null);
   const location = useLocation();
   const contract = location.state;
   console.log("contract", contract);
@@ -46,16 +59,16 @@ const ContractDetails: React.FC = () => {
         ctx.font = "14px Arial";
         ctx.fillText("Service Provider Signature", 10, 20);
         ctx.fillText("Name: Bouden Coach Travel", 10, 60);
-        ctx.fillText("Legal status: Legal", 10, 80);
+        // ctx.fillText("Legal status: Legal", 10, 80);
       }
     }
-    if (clientCanvas && contract && contract.salesperson) {
+    if (clientCanvas && user) {
       const ctx = clientCanvas.getContext("2d");
       if (ctx) {
         ctx.font = "14px Arial";
         ctx.fillText("Client Signature", 10, 20);
         ctx.fillText(`Name: ${user.name}`, 10, 60);
-        ctx.fillText(`Legal Status: ${user.legal_status}`, 10, 80);
+        // ctx.fillText(`Legal Status: ${user.legal_status}`, 10, 80);
       }
     }
   }, [contract]);
@@ -140,7 +153,72 @@ const ContractDetails: React.FC = () => {
         );
     }
   };
+
   const componentRef = useRef();
+
+  function generateContractNumber(length: any) {
+    const characters = "0123456789";
+    let contractNumber = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      contractNumber += characters[randomIndex];
+    }
+
+    return contractNumber;
+  }
+
+  const contractNo = generateContractNumber(6);
+  console.log(contractNo);
+
+  async function fetchJourneyTypeById(id: string): Promise<JourneyType> {
+    const response = await fetch(
+      `http://localhost:3000/api/journey/getJourney/${id}`
+    );
+    const data = await response.json();
+    return data;
+  }
+  async function fetchLuggageById(id: string): Promise<LuggageType> {
+    const response = await fetch(
+      `http://localhost:3000/api/luggage/getLuggage/${id}`
+    );
+    const data = await response.json();
+    return data;
+  }
+  async function fetchVehicleTypeById(id: string): Promise<VehicleType> {
+    const response = await fetch(
+      `http://localhost:3000/api/vehicleType/getVehiclesType/${id}`
+    );
+    const data = await response.json();
+    return data;
+  }
+  useEffect(() => {
+    if (contract?.idProgram?.journeyType) {
+      fetchJourneyTypeById(contract.idProgram.journeyType)
+        .then((data) => setJourneyType(data))
+        .catch((error) => console.error("Error fetching journey type:", error));
+    }
+    if (contract?.idProgram?.luggage) {
+      fetchLuggageById(contract.idProgram.luggage)
+        .then((data) => setLuggage(data))
+        .catch((error) => console.error("Error fetching Luggage:", error));
+    }
+    if (contract?.idProgram?.vehiculeType) {
+      fetchVehicleTypeById(contract.idProgram.vehiculeType)
+        .then((data) => setVehicleType(data))
+        .catch((error) => console.error("Error fetching Luggage:", error));
+    }
+  }, [contract]);
+  let badgeClass = "";
+  let textColorClass = "";
+
+  if (contract.contractStatus === "Approved") {
+    badgeClass = "bg-success";
+    textColorClass = "#FFFFFF";
+  } else if (contract.contractStatus === "Pending") {
+    badgeClass = "bg-danger";
+    textColorClass = "#FFFFFF";
+  }
   return (
     <React.Fragment>
       <div className="page-content">
@@ -159,7 +237,7 @@ const ContractDetails: React.FC = () => {
                             src={logo}
                             className="card-logo card-logo-dark"
                             alt="logo dark"
-                            height="60"
+                            height="40"
                           />
                           <img
                             src={logoLight}
@@ -169,20 +247,26 @@ const ContractDetails: React.FC = () => {
                           />
                         </div>
                         <div>
-                          <h5 className="d-flex justify-content-center">
+                          <h5 className="d-flex justify-content-center title-center">
                             Transportation Services Agreement
                           </h5>
                         </div>
-                        <div>
-                          <h6  className="mb-0">
+                        <div className="website">
+                          <h6 className="mb-0">
                             <span id="email">Bouden Coach Travel</span>
                           </h6>
-                          <h6  className="mb-0">
+                          <h6 className="mb-0">
                             <span className="text-muted fw-normal">
-                              Website:
+                              <i className="ph ph-phone"></i>
+                            </span>
+                            <span className="text-muted"> 0800 112 3770</span>
+                          </h6>
+                          <h6 className="mb-0">
+                            <span className="text-muted fw-normal">
+                              <i className="ph ph-globe"></i>
                             </span>{" "}
                             <Link
-                              to="htthttps://www.boudencoachtravel.co.uk/"
+                              to="https://www.boudencoachtravel.co.uk/"
                               className="link-primary"
                               target="_blank"
                               id="website"
@@ -190,17 +274,12 @@ const ContractDetails: React.FC = () => {
                               www.boudencoachtravel.co.uk
                             </Link>
                           </h6>
+
                           <h6 className="mb-0">
                             <span className="text-muted fw-normal">
-                              Phone No:{" "}
+                              <i className="ph ph-envelope-simple"></i>
                             </span>
-                            <span id="contact-no"> 0800 112 3770</span>
-                          </h6>
-                          <h6 className="mb-0">
-                            <span className="text-muted fw-normal">
-                              Email:{" "}
-                            </span>
-                            <span id="contact-no">
+                            <span className="text-muted">
                               sales@boudencoachtravel.co.uk
                             </span>
                           </h6>
@@ -210,10 +289,10 @@ const ContractDetails: React.FC = () => {
                   </Col>
                   <Col lg={12}>
                     <Card.Body className="p-4">
-                      <h6 className="d-flex justify-content-center fw-semibold fs-14">
+                      <h4 className="d-flex justify-content-center title-center">
                         Between Bouden Coach Travel Ltd (Service Provider) and{" "}
                         {user.name}
-                      </h6>
+                      </h4>
                       <div className="mt-3 border-top border-top-dashed"></div>
                     </Card.Body>
                   </Col>
@@ -225,7 +304,8 @@ const ContractDetails: React.FC = () => {
                             Contract No
                           </p>
                           <h5 className="fs-15 mb-0">
-                            #TTB<span id="invoice-no">441477</span>
+                            {contract?.accountRef!}
+                            <span id="invoice-no"></span>
                           </h5>
                         </Col>
                         <Col lg={3} className="col-6">
@@ -233,25 +313,35 @@ const ContractDetails: React.FC = () => {
                             Start Date
                           </p>
                           <h5 className="fs-15 mb-0">
-                            <span id="invoice-date">14 Jan, 2023</span>{" "}
-                            <small className="text-muted" id="invoice-time">
-                              12:22PM
-                            </small>
+                            <span id="invoice-date">
+                              {contract?.idProgram?.pickUp_date!}
+                            </span>{" "}
                           </h5>
                         </Col>
 
-                        <Col lg={3} className="col-6">
+                        <Col lg={2} className="col-6">
                           <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
                             Contract Status
                           </p>
                           <span
-                            className="badge bg-success-subtle text-success"
+                            className={`badge ${badgeClass} ${textColorClass}`}
                             id="payment-status"
                           >
                             {contract.contractStatus}
                           </span>
                         </Col>
-                        <Col lg={3} className="col-6">
+                        <Col lg={2} className="col-6">
+                          <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
+                            Billing Frequency
+                          </p>
+                          <span
+                            className="badge bg-info-subtle text-info"
+                            id="payment-status"
+                          >
+                            {contract.invoiceFrequency}
+                          </span>
+                        </Col>
+                        <Col lg={2} className="col-6">
                           <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
                             Total Amount
                           </p>
@@ -339,41 +429,55 @@ const ContractDetails: React.FC = () => {
                             transportation services to the Client. The scope of
                             services includes but is not limited to:
                             <ul>
-                              <li>Journey: {contract.journeyType?.type!}</li>
                               <li>
-                                Luggage Details:{" "}
-                                {contract.luggageDetails?.description!}
+                                <strong> Journey Type: </strong>
+                                {journeyType ? journeyType.type : "Loading..."}
                               </li>
+
                               <li>
-                                Passengers:{" "}
+                                <strong>Luggage Details: </strong>
+                                <ul>
+                                  Description :
+                                  {luggage ? luggage.description : "Loading..."}{" "}
+                                </ul>
+                                <ul>
+                                  Size :{luggage ? luggage.size : "Loading..."}{" "}
+                                </ul>
+                              </li>
+
+                              <li>
+                                <strong>Passengers: </strong>
                                 {contract?.idProgram?.recommanded_capacity!}
                               </li>
                               <li>
-                                Vehicle Options:
+                                <strong>Vehicle Options:</strong>
                                 <ul>
                                   <li>
                                     Vehicle Type:{" "}
-                                    {contract.vehicleType &&
-                                      contract.vehicleType.type}
+                                    {vehicleType
+                                      ? vehicleType.type
+                                      : "Loading..."}{" "}
                                   </li>
-                                  <li>
+                                  {/* <li>
                                     Coverage Mile:{" "}
                                     {contract.vehicleType &&
                                       contract.vehicleType.coverage_mile}
-                                  </li>
+                                  </li> */}
                                   <li>
                                     Base Change:{" "}
-                                    {contract.vehicleType &&
-                                      contract.vehicleType.base_change}
+                                    {vehicleType
+                                      ? vehicleType.base_change
+                                      : "Loading..."}{" "}
                                   </li>
                                 </ul>
                               </li>
                               <li>
-                                Limitations or Exclusions:
+                                <strong>Limitations or Exclusions:</strong>
                                 <ul>
                                   <li>Extra: {contract.idProgram?.extra!}</li>
                                   <li>
-                                    Except Days: {contract.idProgram?.exceptDays!}
+                                    Except Days:{" "}
+                                    {contract.idProgram?.exceptDays!}
                                   </li>
                                   <li>
                                     Client Note: {contract.idProgram?.note!}
@@ -424,10 +528,12 @@ const ContractDetails: React.FC = () => {
                               <h5>4. Payment Terms</h5>
                               <p className="text-muted fw-medium mb-2 fs-16">
                                 <b>4.1 Rates and Payment Structure</b>
-                                The Client agrees to pay the Service Provider
-                                according to the following rates: [Specify
-                                hourly rates, per trip rates, etc.] Additional
-                                charges will be billed separately.
+                                <p>
+                                  The Client agrees to pay the Service Provider
+                                  according to the following rates: [Specify
+                                  hourly rates, per trip rates, etc.].
+                                  Additional charges will be billed separately.
+                                </p>
                               </p>
                             </section>
                           </div>
@@ -472,7 +578,9 @@ const ContractDetails: React.FC = () => {
                                 </td> */}
 
                                 <td>{item.start_point.placeName}</td>
-                                <td>{item.date} at {item?.pickup_time}</td>
+                                <td>
+                                  {item.date} at {item?.pickup_time}
+                                </td>
                                 <td>{item.destination_point.placeName}</td>
                                 <td className="text-end">
                                   {item?.return_time}
@@ -648,28 +756,25 @@ const ContractDetails: React.FC = () => {
                                                     </p>
                                                 </div>
                                             </div> */}
-                                            
 
                       <div className="print-container d-flex justify-content-between mt-4">
                         <div className="canvas-container">
                           <canvas
                             ref={ownerSignatureCanvasRef}
                             width={300}
-                            height={150}
+                            height={200}
                           ></canvas>
                         </div>
                         <div className="canvas-container">
                           <canvas
                             ref={clientSignatureCanvasRef}
                             width={300}
-                            height={150}
+                            height={200}
                           ></canvas>
                         </div>
                       </div>
 
                       <div className="hstack gap-2 justify-content-end d-print-none mt-4 print-button">
-                        
-
                         <ReactToPrint
                           trigger={() => (
                             <button className="btn btn-success">

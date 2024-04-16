@@ -10,7 +10,7 @@ export interface VehicleType {
 export const vehicleTypeSlice = createApi({
   reducerPath: "vehicleType",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://bouden.uk.oxa.cloud/api/vehicleType",
+    baseUrl: "http://localhost:3000/api/vehicleType",
   }),
   tagTypes: ["VehicleType"],
   endpoints(builder) {

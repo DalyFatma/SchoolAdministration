@@ -16,6 +16,7 @@ import { quoteSlice } from "features/quotes/quotesSlice";
 import { vehicleTypeSlice } from "features/vehicleType/vehicleType";
 import { luggageSlice } from "features/luggage/luggage";
 import { journeySlice } from "features/journey/journey";
+import { complainSlice } from "features/complains/ComplainSlice";
 
 
 export const store = configureStore({
@@ -28,6 +29,7 @@ export const store = configureStore({
     [vehicleTypeSlice.reducerPath]: vehicleTypeSlice.reducer,
     [luggageSlice.reducerPath]: luggageSlice.reducer,
     [journeySlice.reducerPath]: journeySlice.reducer,
+    [complainSlice.reducerPath]:complainSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -44,6 +46,7 @@ export const store = configureStore({
       journeySlice.middleware,
       luggageSlice.middleware,
       vehicleTypeSlice.middleware,
+      complainSlice.middleware
     ]);
   },
 });

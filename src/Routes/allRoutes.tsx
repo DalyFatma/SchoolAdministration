@@ -64,7 +64,6 @@ import AddNewStudent from "pages/Accounts/Students/AddNewStudent";
 
 import InvoiceListTable from "pages/Invoices/InvoiceList/InvoiceListTable";
 import Groups from "pages/Students/Groups/Index";
-import Claims from "pages/Tools/Claims/Index"
 import ReportingManagement from "../pages/Tools/ReportingManagement/index"
 import Tracking from "../pages/Tracking/MapTracking"
 import Attendances from "pages/Students/Attendances/index";
@@ -98,8 +97,7 @@ import ProgramDetails from "pages/ProgramRoutes/ProgramDetails";
 import Program from "pages/Program";
 import AddProgramm from "pages/ProgramRoutes/AddProgramm";
 import Login from "pages/Authentication/Login";
-
-
+import Claims from "pages/Claims/Index";
 
 const authProtectedRoutes = [
   
@@ -161,7 +159,7 @@ const authProtectedRoutes = [
 // View Profile student
 { path: "/student/view-profile", component: <Profile /> },
  //? Claims Management
- {path:"/claims-management", component: <Claims/>},
+ {path:"/complains", component: <Claims/>},
 
   //settings
   {path:"/settings", component: <Settings/>},

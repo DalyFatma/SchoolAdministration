@@ -9,7 +9,7 @@ export interface Luggage {
 export const luggageSlice = createApi({
   reducerPath: "lugagge",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://bouden.uk.oxa.cloud/api/luggage",
+    baseUrl: "http://localhost:3000/api/luggage",
   }),
   tagTypes: ["Luggage"],
   endpoints(builder) {
