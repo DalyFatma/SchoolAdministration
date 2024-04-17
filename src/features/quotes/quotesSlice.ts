@@ -20,13 +20,7 @@ export interface Quote {
       lon: number;
     };
   };
-  mid_stations: {
-    address: string;
-    coordinates: {
-      lat: number;
-      lon: number;
-    };
-  };
+  mid_stations: string[];
   vehicle_type: string;
   id_visitor: string;
   notes: string;

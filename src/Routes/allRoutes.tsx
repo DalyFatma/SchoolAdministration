@@ -98,6 +98,7 @@ import Program from "pages/Program";
 import AddProgramm from "pages/ProgramRoutes/AddProgramm";
 import Login from "pages/Authentication/Login";
 import Claims from "pages/Claims/Index";
+import ArchivedComplains from "pages/Claims/ArchivedComplains";
 
 const authProtectedRoutes = [
   
@@ -160,7 +161,8 @@ const authProtectedRoutes = [
 { path: "/student/view-profile", component: <Profile /> },
  //? Claims Management
  {path:"/complains", component: <Claims/>},
-
+// ? Archive Claims
+{path:"/complains/archive", component: <ArchivedComplains/>},
   //settings
   {path:"/settings", component: <Settings/>},
 

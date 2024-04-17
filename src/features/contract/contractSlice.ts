@@ -18,6 +18,12 @@ export interface Contract {
   accountName: string;
   accountEmail: string;
   accountPhone: string;
+  effectiveDate: String,
+  within_payment_days: string,
+  contract_number: string,
+  subTotal: string,
+  tva: string,
+  contractRef:string,
 }
 
 export const contractSlice = createApi({

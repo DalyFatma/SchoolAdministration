@@ -241,13 +241,13 @@ const Navdata = () => {
                 },
               
                
-                // {
-                //     id: "delays&changes",
-                //     label: "Delays and changes",
-                //     link: "/delays&changes",
-                //     parentId: "tracking",
-                //     icon: "ph ph-timer",
-                // },
+                {
+                    id: "ArchivedComplains",
+                    label: "Archived Complains",
+                    link: "/complains/archive",
+                    parentId: "ArchivedComplains",
+                    icon: "ph ph-quotes",
+                },
 
 
                 

@@ -167,11 +167,6 @@ const VerticalLayout = (props: any) => {
   };
 
   const navigate = useNavigate();
-
-  // function tog_Claim() {
-  //   navigate("/claims-management");
-  // }
-
   function tog_ExtraTrip() {
     navigate("/add-extraTrip/extra-trips");
   }
@@ -468,25 +463,7 @@ const VerticalLayout = (props: any) => {
           </Col>
         </Row>
       </Row>
-      {/* <Modal
-        className="fade zoomIn"
-        size="lg"
-        show={modal_AddModalAffiliate}
-        onHide={() => {
-          tog_AddModalAffiliate();
-        }}
-        centered
-      >
-        <Modal.Header className="px-4 pt-4" closeButton>
-          <h5 className="modal-title fs-18" id="exampleModalLabel">
-            List Affiliate
-          </h5>
-        </Modal.Header>
-        <Modal.Body className="p-4">
-          <ModalNote />
-        </Modal.Body>
-      </Modal> */}
-
+      
       {/*Modal Email*/}
       <Modal
         className="fade zoomIn"
@@ -535,7 +512,7 @@ const VerticalLayout = (props: any) => {
       {/*Modal Notes*/}
       <Modal
         className="fade zoomIn"
-        size="sm"
+        size="lg"
         show={modal_Note}
         onHide={() => {
           tog_ModalNotes();

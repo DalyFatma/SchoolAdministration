@@ -34,14 +34,12 @@ const ContractDetails: React.FC = () => {
   const [vehicleType, setVehicleType] = useState<VehicleType | null>(null);
   const location = useLocation();
   const contract = location.state;
-  console.log("contract", contract);
 
   const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const { data = [] } = useGetQuoteByIdScheduleQuery({
     id_schedule: contract?.idProgram?._id!,
   });
-  console.log("data quote", data);
 
   const printInvoice = () => {
     window.print();
@@ -304,7 +302,7 @@ const ContractDetails: React.FC = () => {
                             Contract No
                           </p>
                           <h5 className="fs-15 mb-0">
-                            {contract?.accountRef!}
+                            {contract?.contractRef!}
                             <span id="invoice-no"></span>
                           </h5>
                         </Col>
@@ -464,7 +462,7 @@ const ContractDetails: React.FC = () => {
                                       contract.vehicleType.coverage_mile}
                                   </li> */}
                                   <li>
-                                    Base Change:{" "}
+                                    Base Charge:{" "}
                                     {vehicleType
                                       ? vehicleType.base_change
                                       : "Loading..."}{" "}
@@ -586,7 +584,7 @@ const ContractDetails: React.FC = () => {
                                   {item?.return_time}
                                 </td>
                                 <td className="text-end">
-                                  {item.mid_stations.address}
+                                  {item.mid_stations.length}
                                 </td>
                                 <td>{item.manual_cost}</td>
                               </tr>
@@ -602,17 +600,17 @@ const ContractDetails: React.FC = () => {
                           <tbody>
                             <tr>
                               <td>Sub Total</td>
-                              <td className="text-end">£0000.00</td>
+                              <td className="text-end">£ {contract?.subTotal!}</td>
                             </tr>
                             <tr>
                               <td>
                                 VAT <small className="text-muted"></small>
                               </td>
-                              <td className="text-end"> £0000.00</td>
+                              <td className="text-end">£ {contract?.tva!}</td>
                             </tr>
                             <tr className="border-top border-top-dashed fs-15">
                               <th scope="row">Total Amount</th>
-                              <th className="text-end"> £{contract.prices}</th>
+                              <th className="text-end">£ {contract.prices}</th>
                             </tr>
                           </tbody>
                         </Table>
@@ -623,7 +621,7 @@ const ContractDetails: React.FC = () => {
                             4.2 Payment Due Dates
                           </h3>
                           <p className="text-muted fw-medium mb-2 fs-16">
-                            Payment is due within [number] days from the date of
+                            Payment is due within {contract.within_payment_days} days from the date of
                             service. Late payments may incur additional fees.
                           </p>
                         </section>
@@ -712,8 +710,7 @@ const ContractDetails: React.FC = () => {
                         <section>
                           <h5>Signatures and Effective Date</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
-                            This Agreement shall be effective as of [Effective
-                            Date].
+                            This Agreement shall be effective as of {contract.effectiveDate}.
                           </p>
                         </section>
                       </div>
