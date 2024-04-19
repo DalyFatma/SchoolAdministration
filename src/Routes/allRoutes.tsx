@@ -156,7 +156,8 @@ const authProtectedRoutes = [
  { path: "/trip-models", component: <SellersGridView /> },
  // add station
  { path: "/add-station/stations", component: <AddNewStation /> },
-
+ //? Group page
+ { path: "/groups", component: <Groups /> },
 // View Profile student
 { path: "/student/view-profile", component: <Profile /> },
  //? Claims Management

@@ -30,6 +30,13 @@ export const luggageSlice = createApi({
         },
         invalidatesTags: ["Luggage"],
       }),
+      fetchLuggageById: builder.query<Luggage, string | void>({
+        query: (_id) => ({
+          url: `/getLuggage/${_id}`,
+          method: "GET",
+        }),
+        providesTags: ["Luggage"],
+      }),
       deleteLuggage: builder.mutation<void, Luggage>({
         query: (_id) => ({
             url: `/deleteLuggage/${_id}`,
@@ -44,5 +51,6 @@ export const luggageSlice = createApi({
 export const {
 useGetAllLuggageQuery,
 useAddNewLuggageMutation,
-useDeleteLuggageMutation
+useDeleteLuggageMutation,
+useFetchLuggageByIdQuery
 } = luggageSlice;

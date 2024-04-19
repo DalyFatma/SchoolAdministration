@@ -79,6 +79,13 @@ const Navdata = () => {
             label: "Menu",
             isHeader: true,
         },
+        {
+            id: "Dashboard",
+            label: "Dashboard",
+            icon: "bi bi-speedometer2",
+            link: "/dashboard",
+
+        },
        
         {
             id: "mapTracking", 
@@ -209,6 +216,7 @@ const Navdata = () => {
             },
             stateVariables: isTools,
             subItems: [
+                
                 {
                     id: "Complains",
                     label: "Complains",

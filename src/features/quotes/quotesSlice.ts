@@ -71,8 +71,9 @@ export const quoteSlice = createApi({
         providesTags: ["Quote"],
       }),
       
-    
-    
+
+      
+      
     };
   },
 });

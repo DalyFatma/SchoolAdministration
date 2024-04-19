@@ -85,6 +85,9 @@ const AddNewStudent = () => {
     photo_id: "",
     PhotoIdBase64String: "",
     PhotoIdExtension: "",
+    idSchool: "",
+    groupId: "",
+    groupJoiningDate: "",
   });
 
   // const dispatch = useAppDispatch();
@@ -104,11 +107,11 @@ const AddNewStudent = () => {
       // formData["pickUp_date"] = selectedDate3!.toISOString();
       // formData["DropOff_date"] = selectedDate4!.toISOString();
       formData["status_account"] = selectedOption1;
-      formData["group"] = selectedOption2;
-      formData["pickUp_station"] = selectedOption3;
-      formData["DropOff_station"] = selectedOption4;
-      formData["pickUp_time"] = selectedPickupTime!.toISOString() ?? null;
-      formData["DropOff_time"] = selectedDropOffTime!.toISOString() ?? null;
+      // formData["group"] = selectedOption2;
+      // formData["pickUp_station"] = selectedOption3;
+      // formData["DropOff_station"] = selectedOption4;
+      // formData["pickUp_time"] = selectedPickupTime!.toISOString() ?? null;
+      // formData["DropOff_time"] = selectedDropOffTime!.toISOString() ?? null;
 
       createStudent(formData).then(() => setFormData(formData));
       notify();
@@ -287,10 +290,10 @@ const AddNewStudent = () => {
     // Assuming you only need the first selected date
     setSelectedDate4(selectedDates[0]);
   };
-  const handlePickupTimeChange = (selectedDates:any) => {
+  const handlePickupTimeChange = (selectedDates: any) => {
     setSelectedPickupTime(selectedDates[0]);
   };
-  const handleDroppOffTimeChange = (selectedDates:any) => {
+  const handleDroppOffTimeChange = (selectedDates: any) => {
     setSelectedDropOffTime(selectedDates[0]);
   };
 
@@ -735,25 +738,24 @@ const AddNewStudent = () => {
                                 </div>
                               </Col>
                               <Col lg={3}>
-                                  <div className="mb-3">
-                                    <label
-                                      htmlFor="statusSelect"
-                                      className="form-label"
-                                    >
-                                      Card Pdf File
-                                    </label>
-                                    <Form.Control
-                                      name="PhotoIdBase64String"
-                                      onChange={handlePDFUpload}
-                                       type="file"
-                                       id="PhotoIdBase64String"
-                                       accept=".pdf"
-                                       placeholder="Choose File"
-                                       className="text-muted"
-                                     
-                                    />
-                                  </div>
-                                  </Col>
+                                <div className="mb-3">
+                                  <label
+                                    htmlFor="statusSelect"
+                                    className="form-label"
+                                  >
+                                    Card Pdf File
+                                  </label>
+                                  <Form.Control
+                                    name="PhotoIdBase64String"
+                                    onChange={handlePDFUpload}
+                                    type="file"
+                                    id="PhotoIdBase64String"
+                                    accept=".pdf"
+                                    placeholder="Choose File"
+                                    className="text-muted"
+                                  />
+                                </div>
+                              </Col>
 
                               {/* <Col lg={3}>
                                 <div className="text-center mb-3">
@@ -904,213 +906,6 @@ const AddNewStudent = () => {
                           </Card.Body>
                         </Col>
 
-                        <Col lg={12}>
-                          <Card.Header>
-                            <div className="d-flex">
-                              <div className="flex-shrink-0 me-3">
-                                <div className="avatar-sm">
-                                  <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                                    <i className="ph ph-bus"></i>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex-grow-1">
-                                <h5 className="card-title">
-                                  Transportation-Specific Information
-                                </h5>
-                              </div>
-                            </div>
-                          </Card.Header>
-                          <Card.Body>
-                            <Row>
-                              <Col lg={2}>
-                                <div className="mb-3">
-                                  <label htmlFor="group" className="form-label">
-                                    Group
-                                  </label>
-                                  <select
-                                    className="form-select text-muted"
-                                    name="group"
-                                    id="group"
-                                    onChange={selectChange2}
-                                  >
-                                    <option value="">Group</option>
-                                    <option value="Group 1">Group 1</option>
-                                    <option value="Group 2">Group 2</option>
-                                    <option value="Group 3">Group 3</option>
-                                    <option value="Group 4">Group 4</option>
-                                  </select>
-                                </div>
-                              </Col>
-                              <Col lg={3}>
-                                <div className="mb-3">
-                                  <label
-                                    htmlFor="pickUp_station"
-                                    className="form-label"
-                                  >
-                                    PickUp Station
-                                  </label>
-                                  <select
-                                    className="form-select text-muted"
-                                    name="pickUp_station"
-                                    id="pickUp_station"
-                                    onChange={selectChange3}
-                                  >
-                                    <option value="">Station</option>
-                                    <option value="Birmingham Brunel Street">
-                                      Birmingham Brunel Street{" "}
-                                    </option>
-                                    <option value="Colmore Row (Stop SH1)	">
-                                      Colmore Row (Stop SH1)
-                                    </option>
-                                    <option value="Adderley St">
-                                      Adderley St
-                                    </option>
-                                    <option value="Allison St (Stop DS2)">
-                                      Allison St (Stop DS2)
-                                    </option>
-                                  </select>
-                                </div>
-                              </Col>
-                              {/* <Col lg={3}>
-                                <div className="mb-3">
-                                  <Form.Label htmlFor="supplierName-field">
-                                    PickUp Date
-                                  </Form.Label>
-
-                                  <Flatpickr
-                                    value={selectedDate3!}
-                                    onChange={handleDateChange3}
-                                    className="form-control flatpickr-input"
-                                    placeholder="Select Date"
-                                    options={{
-                                      dateFormat: "d M, Y",
-                                    }}
-                                    id="DropOff_date"
-                                  />
-                                </div>
-                              </Col> */}
-                              {/* <Col lg={3}>
-                                <div className="mt-3">
-                                  <Form.Label className="form-label mb-0">
-                                    PickUp Time
-                                  </Form.Label>
-
-                                  <Flatpickr
-                                    className="form-control"
-                                    options={{
-                                      enableTime: true,
-                                      noCalendar: true,
-                                      // inline: true,
-                                    }}
-                                  />
-                                </div>
-                              </Col> */}
-
-                              <Col lg={2}>
-                                <div className="mt-3">
-                                  <Form.Label className="form-label mb-0">
-                                    PickUp Time
-                                  </Form.Label>
-                                 
-                                  <Flatpickr
-                                    className="form-control"
-                                    options={{
-                                      enableTime: true,
-                                      noCalendar: true,
-                                      // inline: true,
-                                      onChange: handlePickupTimeChange
-                                    }}
-                                  />
-                                </div>
-                              </Col>
-
-                              <Col lg={3}>
-                                <div className="mb-3">
-                                  <label
-                                    htmlFor="DropOff_station"
-                                    className="form-label"
-                                  >
-                                    DropOff Station
-                                  </label>
-                                  <select
-                                    className="form-select text-muted"
-                                    name="DropOff_station"
-                                    id="DropOff_station"
-                                    onChange={selectChange4}
-                                  >
-                                    <option value="">Station</option>
-                                    <option value="">Station</option>
-                                    <option value="Birmingham Brunel Street">
-                                      Birmingham Brunel Street{" "}
-                                    </option>
-                                    <option value="Colmore Row (Stop SH1)	">
-                                      Colmore Row (Stop SH1)
-                                    </option>
-                                    <option value="Adderley St">
-                                      Adderley St
-                                    </option>
-                                    <option value="Allison St (Stop DS2)">
-                                      Allison St (Stop DS2)
-                                    </option>
-                                  </select>
-                                </div>
-                              </Col>
-
-                              <Col lg={2}>
-                                <div className="mt-3">
-                                  <Form.Label className="form-label mb-0">
-                                    DroppOff Time
-                                  </Form.Label>
-                                 
-                                  <Flatpickr
-                                    className="form-control"
-                                    options={{
-                                      enableTime: true,
-                                      noCalendar: true,
-                                      // inline: true,
-                                      onChange: handleDroppOffTimeChange
-                                    }}
-                                  />
-                                </div>
-                              </Col>
-                              {/* <Col lg={3}>
-                                <div className="mb-3">
-                                  <Form.Label htmlFor="supplierName-field">
-                                    DropOff Date
-                                  </Form.Label>
-
-                                  <Flatpickr
-                                    value={selectedDate4!}
-                                    onChange={handleDateChange4}
-                                    className="form-control flatpickr-input"
-                                    placeholder="Select Date"
-                                    options={{
-                                      dateFormat: "d M, Y",
-                                    }}
-                                    id="DropOff_date"
-                                  />
-                                </div>
-                              </Col> */}
-                              {/* <Col lg={3}>
-                                <div className="mt-3">
-                                  <Form.Label className="form-label mb-0">
-                                    DropOff Time
-                                  </Form.Label>
-
-                                  <Flatpickr
-                                    className="form-control"
-                                    options={{
-                                      enableTime: true,
-                                      noCalendar: true,
-                                      // inline: true,
-                                    }}
-                                  />
-                                </div>
-                              </Col> */}
-                            </Row>
-                          </Card.Body>
-                        </Col>
                         {/* 
                          <Col lg={12}>
                             <Card.Header>

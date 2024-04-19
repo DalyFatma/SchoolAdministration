@@ -31,6 +31,13 @@ export const vehicleTypeSlice = createApi({
         },
         invalidatesTags: ["VehicleType"],
       }),
+      fetchVehicleTypeById: builder.query<VehicleType, string | void>({
+        query: (_id) => ({
+          url: `/getVehiclesType/${_id}`,
+          method: "GET",
+        }),
+        providesTags: ["VehicleType"],
+      }),
       deleteVehicleType: builder.mutation<void, VehicleType>({
         query: (_id) => ({
             url: `/deleteVehicleType/${_id}`,
@@ -45,5 +52,6 @@ export const vehicleTypeSlice = createApi({
 export const {
 useGetAllVehicleTypesQuery,
 useAddNewVehicleTypeMutation,
-useDeleteVehicleTypeMutation
+useDeleteVehicleTypeMutation,
+useFetchVehicleTypeByIdQuery
 } = vehicleTypeSlice;

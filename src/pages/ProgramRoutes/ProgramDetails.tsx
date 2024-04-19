@@ -9,6 +9,9 @@ import {
 } from "@react-google-maps/api";
 
 import { useLocation } from "react-router-dom";
+import { useFetchVehicleTypeByIdQuery } from "features/vehicleType/vehicleType";
+import { useFetchLuggageByIdQuery } from "features/luggage/luggage";
+import { useFetchJourneyByIdQuery } from "features/journey/journey";
 
 // Define libraries outside of the component
 // const libraries: Library[] = ["places"];
@@ -20,6 +23,11 @@ const ProgramDetails = (props: any) => {
 
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null); 
   const [stopCoordinates, setStopCoordinates] = useState<google.maps.LatLngLiteral[]>([]);
+
+
+  const OneVehicleType = useFetchVehicleTypeByIdQuery(program.vehiculeType);
+  const OneLuggage = useFetchLuggageByIdQuery(program.luggage);
+  const OneJourney = useFetchJourneyByIdQuery(program.journeyType);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
@@ -173,12 +181,12 @@ const ProgramDetails = (props: any) => {
                       <p className="mb-0 fw-medium">
                         Free Dates:{" "}
                         <span className="fw-medium">
-                          {program.freeDays_date}
+                        {program.freeDays_date.join(" / ")}
                         </span>
                       </p>
                       <p className="mb-0">
                         Except Days:{" "}
-                        <span className="fw-medium">{program.exceptDays}</span>
+                        <span className="fw-medium">{program.exceptDays.join(" / ")}</span>
                       </p>
                       <p className="mb-1">
                       
@@ -211,12 +219,12 @@ const ProgramDetails = (props: any) => {
                       </p>
                       <p className="mb-0">
                         note:{" "}
-                        <span className="fw-medium">{program.note}</span>
+                        <span className="fw-medium">{program.notes}</span>
                       </p>
                       <p className="mb-1">
                         Extra :{" "}
                         <span className="fw-medium">
-                          {program.extra}
+                        {program.extra.join(" , ")}
                         </span>
                       </p>
                       {/* <p className="mb-1">Extra</p> */}
@@ -224,6 +232,93 @@ const ProgramDetails = (props: any) => {
                     <div className="avatar-sm flex-shrink-0">
                       <div className="avatar-title bg-primary-subtle text-primary rounded fs-3">
                         <i className="ph-map-pin"></i>
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col xxl={3} lg={6}>
+              <Card className="bg-danger bg-opacity-10 border-0">
+                <Card.Body>
+                  <div className="d-flex gap-3">
+                    <div className="flex-grow-1">
+                      <h6 className="fs-18 mb-3">Price</h6>
+                      <p className="mb-0 fw-medium">
+                        Unit Price:{" "}
+                        <span className="fw-medium">
+                          £ {program.unit_price}
+                        </span>
+                      </p>
+                      {/* <p className="mb-0">
+                        Note: <span className="fw-medium">{program.note}</span>
+                      </p> */}
+                      <p className="mb-1">
+                        Total Price :{" "}
+                        <span className="fw-medium">
+                          £ {program.total_price}
+                        </span>
+                      </p>
+                      <p className="mb-1">
+                        Within Payment Days :{" "}
+                        {program.within_payment_days === "1" ? (
+                          <span className="fw-medium">
+                            {program.within_payment_days} day
+                          </span>
+                        ) : (
+                          <span className="fw-medium">
+                            {program.within_payment_days} days
+                          </span>
+                        )}
+                      </p>
+                      <p className="mb-1">
+                        Invoice Frequency :{" "}
+                        <span className="fw-medium">
+                          {program.invoiceFrequency}
+                        </span>
+                      </p>
+                      {/* <p className="mb-1">Extra</p> */}
+                    </div>
+                    <div className="avatar-sm flex-shrink-0">
+                      <div className="avatar-title bg-danger-subtle text-danger rounded fs-3">
+                        <i className="bi bi-currency-pound"></i>
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col xxl={3} lg={6}>
+              <Card className="bg-info bg-opacity-10 border-0">
+                <Card.Body>
+                  <div className="d-flex gap-3">
+                    <div className="flex-grow-1">
+                      <h6 className="fs-18 mb-3">Vehicle</h6>
+                      <p className="mb-0 fw-medium">
+                        Vehicle Type:{" "}
+                        <span className="fw-medium">
+                          {OneVehicleType.currentData?.type}
+                        </span>
+                      </p>
+                      <p className="mb-0">
+                        Luggage Details:{" "}
+                        <span className="fw-medium">
+                          {OneLuggage.currentData?.description}
+                        </span>
+                      </p>
+                      <p className="mb-1">
+                        Journey Type :{" "}
+                        <span className="fw-medium">
+                          {OneJourney.currentData?.type}
+                        </span>
+                      </p>
+                      {/* <p className="mb-1">Extra</p> */}
+                    </div>
+                    <div className="avatar-sm flex-shrink-0">
+                      <div className="avatar-title bg-info-subtle text-info rounded fs-3">
+                        <i className="ph ph-bus"></i>
                       </div>
                     </div>
                   </div>

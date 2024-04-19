@@ -1,84 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DualListBox from 'react-dual-listbox'
 
 import { Row, Col } from "react-bootstrap";
 
 import "react-dual-listbox/lib/react-dual-listbox.css";
-
-const options = [
-  { value: "High Street (Stop MS20)", label: "High Street (Stop MS20)" },
-  { value: "Dudley Street", label: "Dudley Street" },
-  { value: "Allison St (Stop DS2)", label: "Allison St (Stop DS2)" },
-  { value: "Colmore Row (Stop SH2)", label: "Colmore Row (Stop SH2)" },
-  { value: "Livery Street (Stop SH4", label: "Livery Street (Stop SH4" },
+import { useFetchStudentsQuery } from '../../../features/student/studentSlice';
 
 
-];
+interface SelectionProps {
+  onSelectionChange: (selected: string[]) => void; // Define the onSelectionChange prop
+}
 
-const Optgroup = [
-  {
-    label: "Cars",
-    options: [
-      { value: "chevrolet", label: "Chevrolet" },
-      { value: "fiat", label: "Fiat" },
-      { value: "ford", label: "Ford" },
-      { value: "honda", label: "Honda" },
-      { value: "hyundai", label: "Hyundai" },
-      { value: "kia", label: "Kia" },
-      { value: "mahindra", label: "Mahindra" },
-      { value: "maruti", label: "Maruti" },
-      { value: "mistubishi", label: "Mistubishi" },
-      { value: "mg", label: "MG" },
-      { value: "nissan", label: "Nissan" },
-      { value: "renault", label: "Renault" },
-      { value: "skoda", label: "Skoda" },
-      { value: "tata", label: "Tata" },
-      { value: "toyota", label: "Toyota" },
-      { value: "volkswagen", label: "Volkswagen" },
-    ],
-  },
-];
+const Selection: React.FC<SelectionProps> = ({onSelectionChange}) => {
+ 
+ const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [options, setOptions] = useState<{ value: string; label: string; }[]>([]);
+  // const [selected, setSelected] =  useState<string[]>([]);
+  const { data = [] } = useFetchStudentsQuery();
+  const filteredStudents = data.filter(student => student.groupId === null);
 
-const OptgroupFilter = [
-  {
-    label: "Skoda",
-    options: [
-      { value: "kushaq", label: "Kushaq" },
-      { value: "superb", label: "Superb" },
-      { value: "octavia", label: "Octavia" },
-      { value: "rapid", label: "Rapid" },
-    ],
-  },
-  {
-    label: "Volkswagen",
-    options: [
-      { value: "polo", label: "Polo" },
-      { value: "taigun", label: "Taigun" },
-      { value: "vento", label: "Vento" },
-    ],
-  },
-];
 
-const Selection = () => {
-  const [selected, setSelected] = useState(["apple", "blueberry", "cherry"]);
-  const [selectedOptGroup, setSelectedOptGroup] = useState([
-    "hyundai",
-    "skoda",
-    "tata",
-    "toyota",
-  ]);
-  const [selectedFilter, setSelectedFilter] = useState(["luna"]);
+
+  useEffect(() => {
+    if (filteredStudents) {
+   
+      const names:any = filteredStudents.map(item => ({ value: item._id, label:item.firstName + item.lastName}));
+      setOptions(names);
+    }
+  }, [data]);
+ 
+  
+   
+  const handleSelectionChange = (selected:any) => {
+    setSelectedItems(selected);
+    onSelectionChange(selected); // Pass selectedItems to the parent component
+    
+  };
+
 
   return (
     <React.Fragment>
       <Col lg={12}>
           <div>
             <h5 className="fs-14 mb-1">Students</h5>
-            <p className="text-muted">Slide the selected students to the right </p>
+            <p className="text-muted">Slide the selected Students to the right </p>
             <DualListBox
               options={options}
-              selected={selected}
-              onChange={(e: any) => setSelected(e)}
+              selected={selectedItems}
+              onChange={handleSelectionChange}
               icons={{
                 moveLeft: <span className="mdi mdi-chevron-left" key="key" />,
                 moveAllLeft: [

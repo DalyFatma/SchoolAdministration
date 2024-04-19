@@ -97,7 +97,7 @@ const handleClick = () => {
                         {studentDetails.state &&
                           studentDetails.state.id_file && (
                             <img
-                              src={`https://bouden.uk.oxa.cloud/studentFiles/img/${studentDetails.state.id_file}`}
+                              src={`http://localhost:3000/studentFiles/img/${studentDetails.state.id_file}`}
                               alt=""
                               className="rounded object-fit-cover"
                               style={{

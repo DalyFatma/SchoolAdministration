@@ -7,6 +7,7 @@ import {
   Modal,
   Button,
   Form,
+  Dropdown,
 } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
@@ -39,6 +40,11 @@ const ProgramList = (props: any) => {
   const user = useSelector((state: RootState) => selectCurrentUser(state));
   const [modal_Pickup, setmodal_Pickup] = useState<boolean>(false);
   const [modal_Destination, setmodal_Destination] = useState<boolean>(false);
+
+  const [openChatModal, setOpenChatModal] = useState<boolean>(false);
+  const tog_OpenChatModal = () => {
+    setOpenChatModal(!openChatModal);
+  };
   const { data = [] } = useFetchProgrammsQuery();
   function tog_Pickup() {
     setmodal_Pickup(!modal_Pickup);
@@ -291,11 +297,13 @@ const ProgramList = (props: any) => {
       name: <span className="font-weight-bold fs-13">From</span>,
       selector: (row: any) => row.pickUp_date,
       sortable: true,
+      width: "140px",
     },
     {
       name: <span className="font-weight-bold fs-13">To</span>,
       selector: (row: any) => row.droppOff_date,
       sortable: true,
+      width: "140px",
     },
     // {
     //   name: <span className="font-weight-bold fs-13">Status</span>,
@@ -348,41 +356,90 @@ const ProgramList = (props: any) => {
       selector: (row: any) => row.program_status,
       sortable: true,
       cell: (row: any, index: number) => {
-        const latestStatus = row.program_status[row.program_status.length - 1]?.status;
-        const penultimateStatus = row.program_status[row.program_status.length - 2]?.status;
-    
-        return (
-          (latestStatus === "Approved By Client" && penultimateStatus === "Approved By Admin") || 
-          (penultimateStatus === "Approved By Client" && latestStatus === "Approved By Admin") ?
-            <span className="badge badge-soft-success text-uppercase">
-              Converted To Contract
-            </span> :
-          latestStatus === "Pending" ?
-            <span className="badge bg-danger-subtle text-danger">
-              Pending
-            </span> :
-          latestStatus === "Answered By Client" ?
-            <span className="badge bg-secondary-subtle text-dark">
-              Answered By Client
-            </span> :
-          latestStatus === "Answered By Admin" ?
-            <span className="badge bg-info-subtle text-dark">
-              Answered By Admin
-            </span> :
-          latestStatus === "Approved By Admin" ?
-            <span className="badge bg-dark-subtle text-dark">
-              Approved By Admin
-            </span> :
-          latestStatus === "Approved By Client" ?
-            <span className="badge bg-success-subtle text-dark">
-              Approved By Client
-            </span> :
-          null
+        const latestStatus =
+          row.program_status[row.program_status.length - 1]?.status;
+        const penultimateStatus =
+          row.program_status[row.program_status.length - 2]?.status;
+
+        return (latestStatus === "Approved By Client" &&
+          penultimateStatus === "Approved By Admin") ||
+          (penultimateStatus === "Approved By Client" &&
+            latestStatus === "Approved By Admin") ? (
+          <span className="badge badge-soft-success text-uppercase">
+            Converted To Contract
+          </span>
+        ) : latestStatus === "Pending" ? (
+          <span className="badge bg-danger-subtle text-danger">Pending</span>
+        ) : latestStatus === "Answered By Client" ? (
+          <span className="badge bg-secondary-subtle text-dark">
+            Answered By Client
+          </span>
+        ) : latestStatus === "Answered By Admin" ? (
+          <span className="badge bg-info-subtle text-dark">
+            Answered By Admin
+          </span>
+        ) : latestStatus === "Approved By Admin" ? (
+          <span className="badge bg-dark-subtle text-dark">
+            Approved By Admin
+          </span>
+        ) : latestStatus === "Approved By Client" ? (
+          <span className="badge bg-success-subtle text-dark">
+            Approved By Client
+          </span>
+        ) : null;
+      },
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Price</span>,
+      selector: (row: any) => {
+        return row.total_price === "" ? (
+          <span>No Price</span>
+        ) : (
+          <span>£ {row.total_price}</span>
         );
       },
-    }
-    ,
-    
+      sortable: true,
+      width: "140px",
+    },
+
+    {
+      name: <span className="font-weight-bold fs-13">Invoice Frequency</span>,
+      selector: (cell: any) => {
+        switch (cell.invoiceFrequency) {
+          case "Weekly":
+            return (
+              <span className="badge bg-primary">{cell.invoiceFrequency}</span>
+            );
+          case "Bi Weekly":
+            return (
+              <span className="badge bg-info"> {cell.invoiceFrequency} </span>
+            );
+          case "Daily":
+            return (
+              <span className="badge bg-success">
+                {" "}
+                {cell.invoiceFrequency}{" "}
+              </span>
+            );
+          case "Third Weekly":
+            return (
+              <span className="badge bg-secondary">
+                {" "}
+                {cell.invoiceFrequency}{" "}
+              </span>
+            );
+          case "Monthly":
+            return (
+              <span className="badge bg-dark"> {cell.invoiceFrequency} </span>
+            );
+          default:
+            return <span>--</span>;
+        }
+      },
+      sortable: true,
+      width: "160px",
+    },
+
     {
       name: <span className="font-weight-bold fs-13">Action</span>,
       sortable: true,
@@ -459,6 +516,43 @@ const ProgramList = (props: any) => {
                 ></i>
               </Link>
             </li>
+
+            <li>
+              <Dropdown
+                className="topbar-head-dropdown ms-1 header-item"
+                id="notificationDropdown"
+              >
+                <Link
+                  to="#"
+                  state={row}
+                  id="notification"
+                  type="button"
+                  className="badge badge-soft-info edit-item-btn"
+                  onClick={() => tog_OpenChatModal()}
+                >
+                  <i
+                    className="ph ph-chats"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.9em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                  <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-danger">
+                    <span className="notification-badge">
+                      {row?.notes_for_client.length}
+                    </span>
+                  </span>
+                </Link>
+              </Dropdown>
+            </li>
+
             <li>
               <Link
                 to={`/edit-program/${row.Name}`}
@@ -610,6 +704,30 @@ const ProgramList = (props: any) => {
           </Modal.Header>
           <Modal.Body className="p-4">
             <Form onSubmit={onSubmitSendResponse}>
+           
+              <Col lg={12} className="mb-2">
+                <Form.Label htmlFor="unit_price">Unit Price</Form.Label>
+                <Form.Control
+                      type="text"
+                      name="unit_price"
+                      id="unit_price"
+                      placeholder="£ 00.00"
+                      defaultValue={programLocation?.state?.unit_price!}
+                      readOnly
+                    />
+              </Col>
+              <Col lg={12} className="mb-2">
+                    <Form.Label htmlFor="total_price">Total Price</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="total_price"
+                      id="total_price"
+                      placeholder="£ 00.00"
+                      // onChange={onChangeUnitPrice}
+                      defaultValue={programLocation?.state?.total_price!}
+                      readOnly
+                    />
+                  </Col>
               <Col lg={12} className="mb-2">
                 <Form.Label htmlFor="notes_for_client">Notes</Form.Label>
                 <textarea
@@ -623,28 +741,6 @@ const ProgramList = (props: any) => {
                   onChange={handleResponseMsgChange}
                 ></textarea>
               </Col>
-              {/* <Col lg={12} className="mb-2">
-                <Form.Label htmlFor="unit_price">Unit Price</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="unit_price"
-                    id="unit_price"
-                    placeholder="£ 00.00"
-                    onChange={onChangeSendResponse}
-                    value={sendResponse.unit_price}
-                  />
-              </Col>
-              <Col lg={12} className="mb-2">
-                <Form.Label htmlFor="total_price">Total Price</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="total_price"
-                    id="total_price"
-                    placeholder="£ 00.00"
-                    onChange={onChangeSendResponse}
-                    value={sendResponse.total_price}
-                  />
-              </Col> */}
               <Col lg={4} className="d-flex align-items-center">
                 <div className="form-check m-2">
                   <Form.Control
@@ -684,6 +780,41 @@ const ProgramList = (props: any) => {
                 </div>
               </Col>
             </Form>
+          </Modal.Body>
+        </Modal>
+
+         {/* Modal Display Notes  */}
+         <Modal
+          className="fade zoomIn"
+          size="lg"
+          show={openChatModal}
+          onHide={() => {
+            tog_OpenChatModal();
+          }}
+          centered
+        >
+          <Modal.Header className="px-4 pt-4" closeButton>
+            <h5 className="modal-title fs-18" id="exampleModalLabel">
+              Chat
+            </h5>
+          </Modal.Header>
+          <Modal.Body className="p-4">
+            
+            {programLocation?.state?.notes_for_client!.map((notes: any) => (
+              <Card>
+                <Card.Header>
+                  <h6>{notes.sender}</h6>
+                </Card.Header>
+                <Card.Body>
+                  <Form.Control
+                    type="text"
+                    defaultValue={notes.msg}
+                    className="mb-2"
+                  />
+                  <Form.Control type="text" defaultValue={notes.date} />
+                </Card.Body>
+              </Card>
+            ))}
           </Modal.Body>
         </Modal>
       </div>

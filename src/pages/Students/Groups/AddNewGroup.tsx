@@ -246,7 +246,7 @@ const AddNewGroup: React.FC<AddNewGroupProps> = (props) => {
                   <Form className="tablelist-form">
                     <input type="hidden" id="id-field" />
                     <Row>
-                      <Selection />
+      
                       <Col lg={12} className="mt-2">
                         <div className="hstack gap-2 justify-content-end">
                           <Button

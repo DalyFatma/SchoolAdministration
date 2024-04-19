@@ -29,13 +29,16 @@ export interface Student {
   group:string,
   photo_id:string,
   PhotoIdBase64String:string,
-  PhotoIdExtension:string
+  PhotoIdExtension:string,
+  idSchool?: string,
+  groupId?:string | null ,
+  groupJoiningDate:string | null 
 }
 
 export const studentSlice = createApi({
   reducerPath: "student",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://bouden.uk.oxa.cloud/api/student/",
+    baseUrl: "http://localhost:3000/api/student/",
   }),
   tagTypes: ["Student"],
   endpoints(builder) {
@@ -65,6 +68,24 @@ export const studentSlice = createApi({
         },
         invalidatesTags: ["Student"],
       }),
+      fetchStudentBySchool: builder.query<Student[], { idSchool: string }>({
+        query({ idSchool }) {
+          return {
+            url: `/getStudentByIdSchool`,
+            method: "POST", 
+            body: { idSchool }, 
+          };
+        },
+        providesTags: ["Student"],
+      }),
+
+      removeStudentFromGroup : builder.mutation<void, { studentId: string, groupId: string }>({
+        query: ({ studentId, groupId }) => ({
+          url: `students/${studentId}/groups/${groupId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['Student'],
+      }),
       //   updateProduct: builder.mutation<void, Student>({
       //     query: ({ idproduit, ...rest }) => ({
       //       url: `updateproduct/${idproduit}`,
@@ -88,4 +109,5 @@ export const {
   useFetchStudentsQuery,
   useAddStudentMutation,
   useDeleteStudentMutation,
+  useRemoveStudentFromGroupMutation
 } = studentSlice;

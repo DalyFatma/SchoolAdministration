@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Button,
   Card,
@@ -10,7 +10,6 @@ import {
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import TableContainer from "Common/TableContainer";
-import { student } from "Common/data/students";
 import { Link, useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 import Swal from "sweetalert2";
@@ -20,7 +19,6 @@ import {
   Student,
   useDeleteStudentMutation,
 } from "features/student/studentSlice";
-import { IdentificationBadge } from "phosphor-react";
 
 const Students = (props: any) => {
   document.title = "Students | School Administartion";
@@ -29,10 +27,7 @@ const Students = (props: any) => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // const dispatch= useAppDispatch();
-
   const { data = [] } = useFetchStudentsQuery();
-  console.log("data",data)
   const [deleteStudent] = useDeleteStudentMutation();
 
   const swalWithBootstrapButtons = Swal.mixin({
@@ -108,7 +103,7 @@ const Students = (props: any) => {
             <div className="d-flex align-items-center gap-2">
               <div className="flex-shrink-0">
                 <img
-                  src={`https://bouden.uk.oxa.cloud/studentFiles/img/${students.id_file}`}
+                src={`http://localhost:3000/studentFiles/img/${students.id_file}`}
                   alt="student-img"
                   id="id_file"
                   className="avatar-xs rounded-circle user-profile-img "
@@ -135,49 +130,49 @@ const Students = (props: any) => {
         disableFilters: true,
         filterable: true,
       },
-      {
-        Header: "Group",
-        accessor: "group",
-        disableFilters: true,
-        filterable: true,
-      },
+      // {
+      //   Header: "Group",
+      //   accessor: "group",
+      //   disableFilters: true,
+      //   filterable: true,
+      // },
       {
         Header: "Email Address",
         accessor: "email",
         disableFilters: true,
         filterable: true,
       },
-      {
-        Header: "PickUp Station",
-        accessor: "pickUp_station",
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "PickUp Time/Date",
-        accessor: (students: Student) => {
-          const formattedPickUpTime = new Date(students.pickUp_time).toLocaleString();
-          return formattedPickUpTime;
-        },
-        disableFilters: true,
-        filterable: true,
-      },
+      // {
+      //   Header: "PickUp Station",
+      //   accessor: "pickUp_station",
+      //   disableFilters: true,
+      //   filterable: true,
+      // },
+      // {
+      //   Header: "PickUp Time/Date",
+      //   accessor: (students: Student) => {
+      //     const formattedPickUpTime = new Date(students.pickUp_time).toLocaleString();
+      //     return formattedPickUpTime;
+      //   },
+      //   disableFilters: true,
+      //   filterable: true,
+      // },
     
-      {
-        Header: "DropDown Station",
-        accessor: "DropOff_station",
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "DropOff Time/Date",
-        accessor: (students: Student) => {
-          const formattedDropOffTime = new Date(students.DropOff_time).toLocaleString();
-          return formattedDropOffTime;
-        },
-        disableFilters: true,
-        filterable: true,
-      },
+      // {
+      //   Header: "DropDown Station",
+      //   accessor: "DropOff_station",
+      //   disableFilters: true,
+      //   filterable: true,
+      // },
+      // {
+      //   Header: "DropOff Time/Date",
+      //   accessor: (students: Student) => {
+      //     const formattedDropOffTime = new Date(students.DropOff_time).toLocaleString();
+      //     return formattedDropOffTime;
+      //   },
+      //   disableFilters: true,
+      //   filterable: true,
+      // },
       {
         Header: "Account Status",
         disableFilters: true,

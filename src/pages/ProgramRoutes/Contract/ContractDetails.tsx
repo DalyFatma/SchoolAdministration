@@ -6,9 +6,7 @@ import Breadcrumb from "Common/BreadCrumb";
 import logo from "assets/images/logo.png";
 import logoLight from "assets/images/logo-light.png";
 import { Link, useLocation } from "react-router-dom";
-import TableContainer from "Common/TableContainer";
 import {
-  Quote,
   useGetQuoteByIdScheduleQuery,
 } from "features/quotes/quotesSlice";
 import "./ContractDetails.css";
@@ -40,11 +38,6 @@ const ContractDetails: React.FC = () => {
   const { data = [] } = useGetQuoteByIdScheduleQuery({
     id_schedule: contract?.idProgram?._id!,
   });
-
-  const printInvoice = () => {
-    window.print();
-  };
-
   const ownerSignatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const clientSignatureCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -71,103 +64,8 @@ const ContractDetails: React.FC = () => {
     }
   }, [contract]);
 
-  const columns = useMemo(
-    () => [
-      {
-        Header: "No",
-        disableFilters: true,
-        filterable: true,
-        accessor: "id", // Assuming this is the unique identifier for each entry
-      },
-      {
-        Header: "Date",
-        accessor: "createdAt", // Assuming this is the date field
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "Origin",
-        accessor: "start_point.placeName", // Assuming start_point contains placeName for origin
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "Pick Up",
-        accessor: "estimated_start_time", // Assuming this is the estimated start time
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "Destination",
-        accessor: "destination_point.placeName", // Assuming destination_point contains placeName for destination
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "Drop Off",
-        accessor: "estimated_return_start_time", // Assuming this is the estimated return start time
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "Stops",
-        accessor: "mid_stations.length", // Assuming mid_stations is an array and you want the count of stops
-        disableFilters: true,
-        filterable: true,
-      },
-      {
-        Header: "Price",
-        accessor: "automatic_cost", // Assuming this is the automatic cost
-        disableFilters: true,
-        filterable: true,
-      },
-    ],
-    []
-  );
-
-  const Status = ({ status }: any) => {
-    switch (status) {
-      case "Approved":
-        return (
-          <span className="badge bg-success-subtle text-success">
-            {" "}
-            {status}
-          </span>
-        );
-      case "Pending":
-        return (
-          <span className="badge bg-danger-subtle text-danger"> {status}</span>
-        );
-      case "Answered By Client":
-        return (
-          <span className="badge bg-primary-subtle text-primary">
-            {" "}
-            {status}
-          </span>
-        );
-      default:
-        return (
-          <span className="badge bg-success-subtle text-success">{status}</span>
-        );
-    }
-  };
 
   const componentRef = useRef();
-
-  function generateContractNumber(length: any) {
-    const characters = "0123456789";
-    let contractNumber = "";
-
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      contractNumber += characters[randomIndex];
-    }
-
-    return contractNumber;
-  }
-
-  const contractNo = generateContractNumber(6);
-  console.log(contractNo);
 
   async function fetchJourneyTypeById(id: string): Promise<JourneyType> {
     const response = await fetch(
@@ -472,13 +370,13 @@ const ContractDetails: React.FC = () => {
                               <li>
                                 <strong>Limitations or Exclusions:</strong>
                                 <ul>
-                                  <li>Extra: {contract.idProgram?.extra!}</li>
+                                  <li>Extra: {contract.idProgram?.extra!.join(" / ")}</li>
                                   <li>
                                     Except Days:{" "}
-                                    {contract.idProgram?.exceptDays!}
+                                    {contract.idProgram?.exceptDays!.join(" / ")}
                                   </li>
                                   <li>
-                                    Client Note: {contract.idProgram?.note!}
+                                    Client Note: {contract.idProgram?.notes!}
                                   </li>
                                 </ul>
                               </li>
@@ -714,45 +612,6 @@ const ContractDetails: React.FC = () => {
                           </p>
                         </section>
                       </div>
-
-                      {/* <div className="mt-3">
-                        <h6 className="text-muted text-uppercase fw-semibold mb-3">
-                          Payment Details:
-                        </h6>
-                        <p className="text-muted mb-1">
-                          Payment Method:{" "}
-                          <span className="fw-medium" id="payment-method">
-                            Mastercard
-                          </span>
-                        </p>
-                        <p className="text-muted mb-1">
-                          Card Holder:{" "}
-                          <span className="fw-medium" id="card-holder-name">
-                            David Nichols
-                          </span>
-                        </p>
-                        <p className="text-muted mb-1">
-                          Card Number:{" "}
-                          <span className="fw-medium" id="card-number">
-                            xxx xxxx xxxx 1234
-                          </span>
-                        </p>
-                        <p className="text-muted">
-                          Total Amount: <span className="fw-medium">$ </span>
-                          <span id="card-total-amount">1406.92</span>
-                        </p>
-                      </div> */}
-                      {/* <div className="mt-4">
-                                                <div className="alert alert-info">
-                                                    <p className="mb-0"><span className="fw-semibold">NOTES:</span>
-                                                        <span id="note"> All accounts are to be paid within 7 days from receipt of invoice. To be paid by cheque or
-                                                            credit card or direct payment online. If account is not paid within 7
-                                                            days the credits details supplied as confirmation of work undertaken
-                                                            will be charged the agreed quoted fee noted above.
-                                                        </span>
-                                                    </p>
-                                                </div>
-                                            </div> */}
 
                       <div className="print-container d-flex justify-content-between mt-4">
                         <div className="canvas-container">

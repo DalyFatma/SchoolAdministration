@@ -19,6 +19,13 @@ export const journeySlice = createApi({
         },
         providesTags: ["Journey"],
       }),
+      fetchJourneyById: builder.query<Journey, string | void>({
+        query: (_id) => ({
+          url: `/getJourney/${_id}`,
+          method: "GET",
+        }),
+        providesTags: ["Journey"],
+      }),
       addNewJourney: builder.mutation<void, Journey>({
         query(payload) {
           return {
@@ -43,5 +50,6 @@ export const journeySlice = createApi({
 export const {
 useGetAllJourneyQuery,
 useAddNewJourneyMutation,
-useDeleteJourneyMutation
+useDeleteJourneyMutation,
+useFetchJourneyByIdQuery
 } = journeySlice;
