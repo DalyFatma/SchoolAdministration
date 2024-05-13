@@ -23,7 +23,7 @@ import { useAddStudentMutation } from "features/student/studentSlice";
 import Swal from "sweetalert2";
 // import { useAppDispatch } from "slices/hook";
 const AddNewStudent = () => {
-  document.title = "Create Account | School Administration";
+  document.title = "Create Account | Affiliate Administration";
 
   // const [selectedFiles, setselectedFiles] = useState([]);
   // const [showAdditionalForm, setShowAdditionalForm] = useState(false);

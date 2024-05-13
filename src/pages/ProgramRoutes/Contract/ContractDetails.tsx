@@ -32,12 +32,13 @@ const ContractDetails: React.FC = () => {
   const [vehicleType, setVehicleType] = useState<VehicleType | null>(null);
   const location = useLocation();
   const contract = location.state;
-
+console.log("contract",contract)
   const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const { data = [] } = useGetQuoteByIdScheduleQuery({
     id_schedule: contract?.idProgram?._id!,
   });
+  console.log("data",data)
   const ownerSignatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const clientSignatureCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -478,8 +479,8 @@ const ContractDetails: React.FC = () => {
                                   {item.date} at {item?.pickup_time}
                                 </td>
                                 <td>{item.destination_point.placeName}</td>
-                                <td className="text-end">
-                                  {item?.return_time}
+                                <td>
+                                   {item?.return_time}
                                 </td>
                                 <td className="text-end">
                                   {item.mid_stations.length}

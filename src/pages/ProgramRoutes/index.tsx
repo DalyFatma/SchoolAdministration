@@ -248,7 +248,7 @@ const ProgramList = (props: any) => {
       handleResponseMsgSubmit();
       sendResponseMutation(sendResponse)
         .then(() => notifySuccess())
-        .then(() => navigate("/list-of-program"));
+        .then(() => navigate("/programming/listofprogram"));
     } catch (error) {
       notifyError(error);
     }
@@ -267,7 +267,7 @@ const ProgramList = (props: any) => {
           <span>
             <Link to="#">
               <span className="text-secondary" onClick={() => tog_Pickup()}>
-                {cell.origin_point.placeName}
+                {cell?.origin_point?.placeName!}
               </span>
             </Link>
           </span>
@@ -285,7 +285,7 @@ const ProgramList = (props: any) => {
                 className="text-secondary"
                 onClick={() => tog_Destination()}
               >
-                {cell.destination_point.placeName}
+                {cell?.destination_point?.placeName!}
               </span>
             </Link>
           </span>
@@ -472,7 +472,30 @@ const ProgramList = (props: any) => {
 
             <li>
               <Link
-                to={`/program-details/${row.Name}`}
+                to={"/programgroups"}
+                className="badge badge-soft-success edit-item-btn"
+                state={row}
+              >
+                <i
+                  className="ph ph-users-three"
+                  style={{
+                    transition: "transform 0.3s ease-in-out",
+                    cursor: "pointer",
+                    fontSize: "1.5em",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.2)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                ></i>
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                to={`/program-details/${row.programName}`}
                 className="badge badge-soft-primary edit-item-btn"
                 state={row}
               >
@@ -704,30 +727,29 @@ const ProgramList = (props: any) => {
           </Modal.Header>
           <Modal.Body className="p-4">
             <Form onSubmit={onSubmitSendResponse}>
-           
               <Col lg={12} className="mb-2">
                 <Form.Label htmlFor="unit_price">Unit Price</Form.Label>
                 <Form.Control
-                      type="text"
-                      name="unit_price"
-                      id="unit_price"
-                      placeholder="£ 00.00"
-                      defaultValue={programLocation?.state?.unit_price!}
-                      readOnly
-                    />
+                  type="text"
+                  name="unit_price"
+                  id="unit_price"
+                  placeholder="£ 00.00"
+                  defaultValue={programLocation?.state?.unit_price!}
+                  readOnly
+                />
               </Col>
               <Col lg={12} className="mb-2">
-                    <Form.Label htmlFor="total_price">Total Price</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="total_price"
-                      id="total_price"
-                      placeholder="£ 00.00"
-                      // onChange={onChangeUnitPrice}
-                      defaultValue={programLocation?.state?.total_price!}
-                      readOnly
-                    />
-                  </Col>
+                <Form.Label htmlFor="total_price">Total Price</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="total_price"
+                  id="total_price"
+                  placeholder="£ 00.00"
+                  // onChange={onChangeUnitPrice}
+                  defaultValue={programLocation?.state?.total_price!}
+                  readOnly
+                />
+              </Col>
               <Col lg={12} className="mb-2">
                 <Form.Label htmlFor="notes_for_client">Notes</Form.Label>
                 <textarea
@@ -783,8 +805,8 @@ const ProgramList = (props: any) => {
           </Modal.Body>
         </Modal>
 
-         {/* Modal Display Notes  */}
-         <Modal
+        {/* Modal Display Notes  */}
+        <Modal
           className="fade zoomIn"
           size="lg"
           show={openChatModal}
@@ -799,7 +821,6 @@ const ProgramList = (props: any) => {
             </h5>
           </Modal.Header>
           <Modal.Body className="p-4">
-            
             {programLocation?.state?.notes_for_client!.map((notes: any) => (
               <Card>
                 <Card.Header>

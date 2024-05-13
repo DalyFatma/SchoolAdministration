@@ -81,7 +81,7 @@ export const studentSlice = createApi({
 
       removeStudentFromGroup : builder.mutation<void, { studentId: string, groupId: string }>({
         query: ({ studentId, groupId }) => ({
-          url: `students/${studentId}/groups/${groupId}`,
+          url: `student/${studentId}/groups/${groupId}`,
           method: 'DELETE',
         }),
         invalidatesTags: ['Student'],
@@ -101,6 +101,8 @@ export const studentSlice = createApi({
         }),
         invalidatesTags: ["Student"],
       }),
+
+     
     };
   },
 });

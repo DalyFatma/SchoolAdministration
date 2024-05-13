@@ -37,6 +37,7 @@ import { useGetAllJourneyQuery } from "features/journey/journey";
 import { useSelector } from "react-redux";
 import { RootState } from "app/store";
 import { selectCurrentUser } from "features/account/authSlice";
+import { number } from "yup";
 
 interface Option {
   value: string;
@@ -89,6 +90,14 @@ interface RouteSegment {
 interface stopTime {
   hours: number;
   minutes: number;
+}
+
+interface stopLocation {
+  placeName: string,
+  coordinates: {
+    lat: number,
+    lng: number,
+  }
 }
 
 const AddProgramm = (props: any) => {
@@ -162,8 +171,8 @@ const AddProgramm = (props: any) => {
 
   const [stops, setStops] = useState<google.maps.LatLng[]>([]);
 
-  const [waypts, setWaypts] = useState<google.maps.DirectionsWaypoint[]>([]);
-
+  const [waypts, setWaypts] = useState<any[]>([]);
+  const [stopLocations, setStopLocations] = useState<stopLocation[]>([]);
   const [stopTimes, setStopTimes] = useState<stopTime[]>([]);
 
   const [routeSegments, setRouteSegments] = useState<RouteSegment[]>([]);
@@ -200,6 +209,7 @@ const AddProgramm = (props: any) => {
   const [programmData, setProgrammData] = useState({
     programName: "",
     note: "",
+    school_id:"",
     origin_point: {
       placeName: "",
       coordinates: {
@@ -210,7 +220,13 @@ const AddProgramm = (props: any) => {
     stops: [
       {
         id: "",
-        address: "",
+        address: {
+          placeName: "",
+          coordinates: {
+            lat: 0,
+            lng: 0,
+          },
+        },
         time: "",
       },
     ],
@@ -229,12 +245,12 @@ const AddProgramm = (props: any) => {
     freeDays_date: [""],
     exceptDays: [""],
     recommanded_capacity: "",
+
     extra: [""],
     notes: "",
     dropOff_time: "",
     pickUp_Time: "",
     workDates: [""],
-    clientID: "",
     program_status: [
       {
         status: "",
@@ -277,7 +293,7 @@ const AddProgramm = (props: any) => {
 
       createProgram(programmData)
         .then(() => notify())
-        .then(() => navigate("/listofprogram"));
+        .then(() => navigate("/programming/listofprogram"));
     } catch (error) {
       console.log(error);
     }
@@ -305,6 +321,13 @@ const AddProgramm = (props: any) => {
     console.log(newWaypts);
     setWaypts(newWaypts);
     console.log(waypts);
+
+    const newStopLocations = [...stopLocations];
+    newStopLocations.splice(idToRemove - 1, 1);
+    console.log(newStopLocations);
+    setStopLocations(newStopLocations);
+    console.log(newStopLocations);
+
     calculateRoute();
   };
 
@@ -741,7 +764,9 @@ const AddProgramm = (props: any) => {
     }
   };
   const handleNextStep = (isResume: boolean) => {
+
     if (isResume === true) {
+      programmData["school_id"]=user?._id!;
       programmData["extra"] = selected;
       programmData["program_status"] = [
         {
@@ -773,8 +798,7 @@ const AddProgramm = (props: any) => {
       programmData["freeDays_date"] = freeDates;
       programmData["journeyType"] = selectedJourney;
       programmData["luggage"] = selectedLuggage;
-      programmData['vehiculeType'] = selectedVehicleType;
-      programmData['clientID'] = user?._id! ;
+      programmData["vehiculeType"] = selectedVehicleType;
 
       const dropYear = dropOff_date!.getFullYear();
       const dropMonth = dropOff_date!.getMonth() + 1;
@@ -847,7 +871,11 @@ const AddProgramm = (props: any) => {
       for (let i = 0; i < waypts.length; i++) {
         stops.push({
           id: "",
-          address: String(waypts[i].location),
+          address: {
+            placeName:waypts[i].location,
+            coordinates: waypts[i].coordinates
+          },
+
           time:
             String(stopTimes[i].hours).padStart(2, "0") +
             ":" +
@@ -926,15 +954,29 @@ const AddProgramm = (props: any) => {
       const location = place.geometry?.location;
       if (location) {
         const nom = { lat: location.lat(), lng: location.lng() };
+        console.log("Stop location", nom);
         setStop(nom);
 
         const status = place.business_status;
         const formattedAddress = place.formatted_address;
         const wayPoint = {
           location: formattedAddress,
+          coordinates: {
+            lat: nom.lat,
+            lng: nom.lng
+          },
           stopover: true,
         };
         setWaypts((waypts) => [...waypts, wayPoint]);
+
+        // const stopLocation = {
+        //   placeName: String(formattedAddress),
+        //   coordinates: {
+        //     lat: nom.lat,
+        //     lng: nom.lng,
+        //   },
+        // };
+        // setStopLocations((stopLocations) => [...stopLocations, stopLocation]);
 
         console.log(`Name: ${name}`);
         console.log(`Business Status: ${status}`);
@@ -1020,13 +1062,19 @@ const AddProgramm = (props: any) => {
     setLoading(true);
 
     const directionsService = new google.maps.DirectionsService();
-
+    let waypoints = [];
+    for(let point of waypts){
+      waypoints.push({
+        location: point.location,
+        stopover: true
+      })
+    }
     directionsService.route(
       {
         origin: originRef.current.value,
         destination: destinationRef.current.value,
         travelMode: google.maps.TravelMode.DRIVING,
-        waypoints: waypts,
+        waypoints: waypoints,
       },
       (result, status) => {
         setLoading(false);

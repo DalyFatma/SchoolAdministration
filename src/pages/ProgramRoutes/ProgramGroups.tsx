@@ -11,13 +11,13 @@ import {
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import TableContainer from "Common/TableContainer";
-import { Link, useNavigate } from "react-router-dom";
-import Selection from "./Selection";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Selection from "../Students/Groups/Selection";
 import Swal from "sweetalert2";
 import SimpleBar from "simplebar-react";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../app/store"; // Import your RootState interface
-import { selectCurrentUser } from "../../../features/account/authSlice";
+import { RootState } from "../../app/store"; // Import your RootState interface
+import { selectCurrentUser } from "../../features/account/authSlice";
 import {
   useFetchStudentsQuery,
   useRemoveStudentFromGroupMutation,
@@ -66,12 +66,16 @@ interface Student {
   groupId?: string | null;
   groupJoiningDate: string | null;
 }
-const Group = () => {
+const ProgramGroups = () => {
   document.title = "Group | School Administration";
   const navigate = useNavigate();
-  const user = useSelector((state: RootState) => selectCurrentUser(state));
+  const user: any = useSelector((state: RootState) => selectCurrentUser(state));
   console.log("user",user);
-  
+  const location=useLocation()
+
+  console.log("location", location)
+
+
   const [modal_AddShippingModals, setmodal_AddShippingModals] =
     useState<boolean>(false);
   const [filteredStudent, setFilteredStudent] = useState<Student[]>([]);
@@ -88,7 +92,14 @@ const Group = () => {
   const [showGroups, setShowGroups] = useState<boolean>(false);
   const [showGroupDetails, setShowGroupsDetails] = useState<any>({});
   const [selectedStudents, setSelectedStudents] = useState([]);
-  const { data = [] } = useFetchGroupQuery();
+  const { data: AllGroups = [] } = useFetchGroupQuery();
+  console.log(AllGroups)
+
+  const result = AllGroups.filter(
+    (groups: any) =>
+      groups?.program?._id! === (location.state ? location.state._id : undefined)
+  );
+ 
   const { data: students = [] } = useFetchStudentsQuery();
   const { data: AllPrograms = [] } = useFetchProgrammsQuery();
 
@@ -97,7 +108,10 @@ const Group = () => {
   const [createGroup] = useAddGroupMutation();
   const [AddStudentToGroup] = useAddStudentToGroupMutation();
 
-  console.log(data, "students");
+  const groups = location?.state?.students_groups!;
+  console.log("Groups",groups,);
+
+  
 
   const filtered = students.filter((students) => students.groupId === null);
   console.log("filter1", filtered);
@@ -151,7 +165,7 @@ const Group = () => {
       .then(() => tog_AddStudents())
       .then(() => setShowGroups(!showGroups))
       .then(() => navigate("/groups"))
-      .catch((error: any) => {
+      .catch((error) => {
         console.error(error);
       });
     window.location.reload();
@@ -265,12 +279,7 @@ const Group = () => {
         disableFilters: true,
         filterable: true,
       },
-      {
-        Header: "Description",
-        accessor: "note",
-        disableFilters: true,
-        filterable: true,
-      },
+
       {
         Header: "Students",
         accessor: "students",
@@ -304,10 +313,11 @@ const Group = () => {
         },
       },
       {
-        Header: "Action",
+        Header: "Actions",
         disableFilters: true,
         filterable: true,
         accessor: (cellProps: GroupInterface) => {
+          console.log(cellProps)
           return (
             <ul className="hstack gap-2 list-unstyled mb-0">
               <li>
@@ -393,7 +403,7 @@ const Group = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Group" pageTitle="Employee" />
+          <Breadcrumb title={location?.state?.programName!} pageTitle="Group" />
           <Card id="shipmentsList">
             <Card.Header className="border-bottom-dashed">
               <Row className="g-3">
@@ -423,7 +433,7 @@ const Group = () => {
               {/* <div className="table-responsive table-card"> */}
               <TableContainer
                 columns={columns || []}
-                data={data || []}
+                data={groups || []}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}
@@ -639,14 +649,12 @@ const Group = () => {
               </table>
               <div className="card card-height-100">
                 <SimpleBar>
-                  
                   {showGroupDetails.students &&
                   showGroupDetails.students.length === 0 ? (
                     <div className="p-3">
                       <p>No students to display</p>
                     </div>
                   ) : (
-                    
                     showGroupDetails.students?.map(
                       (student: {
                         id_file: string;
@@ -777,4 +785,4 @@ const Group = () => {
   );
 };
 
-export default Group;
+export default ProgramGroups;

@@ -7,7 +7,7 @@ import TopTrips from './TopTrips';
 
 const Dashboard = () => {
 
-    document.title = "Dashboard | School Administration";
+    document.title = "Dashboard | Affiliate Administration";
 
     return (
         <React.Fragment>

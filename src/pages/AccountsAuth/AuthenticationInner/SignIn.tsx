@@ -21,7 +21,7 @@ import { useFormik } from "formik";
 // import { setCredentials } from "pages/compte/authSlice";
 
 const SignIn = () => {
-  document.title = "Sign In | School Administration";
+  document.title = "Sign In | Affiliate Administration";
 
   // const [login, { isLoading }] = useLoginMutation();
   // const [formState, setFormState] = React.useState<LoginRequest>({

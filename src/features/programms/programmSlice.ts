@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export interface Programm {
   _id?: string;
   note:string;
+  school_id:string;
   programName: string;
   origin_point: {
     placeName: string;
@@ -13,7 +14,13 @@ export interface Programm {
   };
   stops: {
     id: string;
-    address: string;
+    address: {
+      placeName:string,
+      coordinates:{
+        lat:number,
+        lng:number
+      }
+    },
     time: string;
   }[];
   destination_point: {
@@ -36,7 +43,6 @@ export interface Programm {
   dropOff_time: string;
   pickUp_Time: string;
   workDates: string[];
-  clientID:string,
   program_status?: {
     status: string,
     date_status: string,

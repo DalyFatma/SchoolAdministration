@@ -26,7 +26,7 @@ import spinner6 from "assets/images/logo-sm.png";
 import Success from "assets/images/success-img.png";
 
 const Offers = () => {
-  document.title = "Offers | School Administration";
+  document.title = "Offers | Affiliate Administration";
 
   // Pagination
   const [pagination, setPagination] = useState<boolean>(true);

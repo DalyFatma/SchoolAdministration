@@ -92,13 +92,15 @@ import ProgramRoutes from "pages/ProgramRoutes";
 import Profile from "pages/Accounts/Students/Profil";
 import Settings from "pages/Settings";
 import EditParent from "pages/Accounts/Parents/EditParent";
-import ProgramClone from "pages/ProgramRoutes/ProgramClone";
 import ProgramDetails from "pages/ProgramRoutes/ProgramDetails";
 import Program from "pages/Program";
 import AddProgramm from "pages/ProgramRoutes/AddProgramm";
 import Login from "pages/Authentication/Login";
 import Claims from "pages/Claims/Index";
 import ArchivedComplains from "pages/Claims/ArchivedComplains";
+
+import ProgramGroups from "pages/ProgramRoutes/ProgramGroups"
+import StopsManagement from "pages/ProgramRoutes/StopsManagement";
 
 const authProtectedRoutes = [
   
@@ -108,6 +110,9 @@ const authProtectedRoutes = [
   { path: "/map-tracking", component: <Tracking /> },
   { path: "/delays&changes", component: <DelaysChanges /> },
 
+  { path: "/programgroups", component: <ProgramGroups /> },
+
+  { path: "/stopsmanagement", component: <StopsManagement /> },
   // ? operations management
 
   { path: "/operations-management", component: <OperationsManagement /> },
@@ -187,10 +192,11 @@ const authProtectedRoutes = [
 
  { path: "/invoices", component: <InvoiceListTable /> },
 
- { path: "/list-of-program", component: < ProgramRoutes/> },
- { path: "/program/:name", component: < ProgramClone/> },
+ { path: "/programming/listofprogram", component: < ProgramRoutes/> },
  { path: "/program-details/:name", component: < ProgramDetails/> },
  { path: "/program", component: < Program/> },
+
+
 
  { path: "/", exact: true, component: <Navigate to="/map-tracking" /> },
   { path: "*", component: <Navigate to="/map-tracking" /> },

@@ -54,7 +54,7 @@ export const groupSlice = createApi({
       }),
       addStudentToGroup: builder.mutation<void, AddStudentToGroupInterface>({
         query: ({ _id, students }) => ({
-          url: "/addEmployeesToGroup",
+          url: "/addStudentToGroup",
           method: "POST",
           body: { _id, students }, 
         }),
