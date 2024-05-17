@@ -92,6 +92,25 @@ const StopsManagement = () => {
             setDirections(result);
             if (result.routes && result.routes.length > 0) {
               //console.log("Route drawn successfully");
+
+              let newAssignments = [];
+
+              for(let group of program.students_groups){
+                for(let student of group.students){
+                  if(student.stop_point !== null){
+                    newAssignments.push({
+                        student: student._id,
+                        stop: student.stop_point,
+                      })
+                  }
+                }
+              }
+
+              console.log("Assigned students",newAssignments);
+
+              setAssignedPassengers(newAssignments);
+
+              
             } else {
               console.error("No routes found in the directions result");
             }
@@ -545,10 +564,7 @@ const StopsManagement = () => {
             </Card.Body>
           </Card>
         </Col>
-        <div>
-        <h5>Assigned Students</h5>
-       
-      </div>
+     
         <Form
           onSubmit={onSubmitStudents}
           className="d-flex justify-content-end"

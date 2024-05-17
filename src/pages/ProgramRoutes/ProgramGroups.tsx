@@ -594,7 +594,7 @@ const ProgramGroups = () => {
                       </span>
                     </td>
                   </tr>
-                  <tr>
+                  {/* <tr>
                     <td>
                       <span className="text-muted">Description:</span>
                     </td>
@@ -603,8 +603,8 @@ const ProgramGroups = () => {
                         {showGroupDetails.note}
                       </span>
                     </td>
-                  </tr>
-                  <tr>
+                  </tr> */}
+                  {/* <tr>
                     <td>
                       <span className="text-muted">Program:</span>
                     </td>
@@ -613,8 +613,8 @@ const ProgramGroups = () => {
                         {showGroupDetails.program?.programName!}
                       </span>
                     </td>
-                  </tr>
-                  <tr>
+                  </tr> */}
+                  {/* <tr>
                     <td>
                       <span className="text-muted">Start Date:</span>
                     </td>
@@ -623,8 +623,8 @@ const ProgramGroups = () => {
                         {showGroupDetails.startDate}
                       </span>
                     </td>
-                  </tr>
-                  <tr>
+                  </tr> */}
+                  {/* <tr>
                     <td>
                       <span className="text-muted">Status:</span>
                     </td>
@@ -639,7 +639,7 @@ const ProgramGroups = () => {
                         {showGroupDetails.status}
                       </span>
                     </td>
-                  </tr>
+                  </tr> */}
                   <tr>
                     <td>
                       <span className="text-muted ">Students List:</span>
