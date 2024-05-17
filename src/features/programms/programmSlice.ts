@@ -63,12 +63,36 @@ export interface SendResponse {
     date_status: string,
   }[];
 }
+
+export interface GroupInterface {
+  _id?:string,
+  groupName: string,
+  note:string,
+  startPoint: string,
+  dateStart: string,
+  timeStart: string,
+  Destination: string,
+  dateEnd: string,
+  timeEnd: string,
+  status: string,
+  id_school: string,
+  program:string
+  students: {
+    _id: string;
+    firstName: string,
+    lastName: string,
+    id_file:string,
+    groupId?:string,
+    groupJoiningDate?:string
+}[];
+}
+
 export const programmSlice = createApi({
   reducerPath: "programm",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:3000/api/programm/",
   }),
-  tagTypes: ["Programm","SendResponse"],
+  tagTypes: ["Programm","SendResponse","GroupInterface"],
   endpoints(builder) {
     return {
       fetchProgramms: builder.query<Programm[], number | void>({
@@ -87,6 +111,14 @@ export const programmSlice = createApi({
           };
         },
         invalidatesTags: ["Programm"],
+      }),
+
+      fetchGroupStudentByIdGroup: builder.query<GroupInterface[], string | void>({
+        query: (_id) => ({
+          url: `get-program-groups-students/${_id}`,
+          method: "GET",
+        }),
+        providesTags: ["GroupInterface"],
       }),
 
       deleteProgram: builder.mutation<void, string>({
@@ -123,4 +155,4 @@ export const programmSlice = createApi({
   },
 });
 
-export const { useAddProgrammMutation, useFetchProgrammsQuery,useDeleteProgramMutation ,  useSendResponseMutation,} = programmSlice;
+export const { useAddProgrammMutation, useFetchProgrammsQuery,useDeleteProgramMutation ,  useSendResponseMutation,useFetchGroupStudentByIdGroupQuery} = programmSlice;

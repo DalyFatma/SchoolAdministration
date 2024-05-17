@@ -18,17 +18,22 @@ import { useFetchJourneyByIdQuery } from "features/journey/journey";
 const ProgramDetails = (props: any) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const location = useLocation();
-  const program = location.state; // Access state
 
+  let program: any;
+
+  program = location.state;
+
+  console.log(program);
+  
   const [directions, setDirections] =
     useState<google.maps.DirectionsResult | null>(null);
   const [stopCoordinates, setStopCoordinates] = useState<
     google.maps.LatLngLiteral[]
   >([]);
 
-  const OneVehicleType = useFetchVehicleTypeByIdQuery(program.vehiculeType);
-  const OneLuggage = useFetchLuggageByIdQuery(program.luggage);
-  const OneJourney = useFetchJourneyByIdQuery(program.journeyType);
+  // const OneVehicleType = useFetchVehicleTypeByIdQuery(program.vehiculeType);
+  // const OneLuggage = useFetchLuggageByIdQuery(program.luggage);
+  const OneJourney = useFetchJourneyByIdQuery(program?.journeyType!);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
@@ -36,17 +41,16 @@ const ProgramDetails = (props: any) => {
   });
   useEffect(() => {
     if (isLoaded && program) {
-
       const directionsService = new google.maps.DirectionsService();
-      const waypoints = program.stops.map((stop: any) => ({
-        location: { query: stop.address }, // Use the address from autocomplete
+      const waypoints = program?.stops?.map((stop: any) => ({
+        location: { query: stop?.address?.placeName! }, // Use the address from autocomplete
         stopover: true,
       }));
 
       directionsService.route(
         {
-          origin: program.origin_point.coordinates,
-          destination: program.destination_point.coordinates,
+          origin: program?.origin_point?.coordinates!,
+          destination: program?.destination_point?.coordinates!,
           travelMode: google.maps.TravelMode.DRIVING,
           waypoints,
         },
@@ -90,7 +94,7 @@ const ProgramDetails = (props: any) => {
             <h5 className="card-title mb-0 flex-grow-1">Program Details</h5>
             <div className="flex-shrink-0">
               <p className="mb-0">
-                Start Date: <b>{program.pickUp_date}</b>
+                Start Date: <b>{program?.pickUp_date!}</b>
               </p>
             </div>
           </div>
@@ -100,11 +104,11 @@ const ProgramDetails = (props: any) => {
         <Card.Header>
           <div className="d-flex align-items-center">
             <h5 className="card-title mb-0 flex-grow-1">
-              Program Details : <span> {program.programName}</span>
+              Program Details : <span> {program?.programName!}</span>
             </h5>
             <div className="flex-shrink-0">
               <p className="mb-0">
-                Start Date: <b>{program.pickUp_date}</b>
+                Start Date: <b>{program?.pickUp_date!}</b>
               </p>
             </div>
           </div>
@@ -120,16 +124,20 @@ const ProgramDetails = (props: any) => {
                       <p className="mb-0">
                         Start Point:{" "}
                         <span className="fw-medium">
-                          {program.origin_point.placeName}
+                          {program?.origin_point?.placeName!}
                         </span>
                       </p>
                       <p className="mb-1">
                         Start Time:{" "}
-                        <span className="fw-medium">{program.pickUp_Time}</span>
+                        <span className="fw-medium">
+                          {program?.pickUp_Time!}
+                        </span>
                       </p>
                       <p className="mb-0">
                         Start Date:{" "}
-                        <span className="fw-medium">{program.pickUp_date}</span>
+                        <span className="fw-medium">
+                          {program?.pickUp_date!}
+                        </span>
                       </p>
                     </div>
                     <div className="avatar-sm flex-shrink-0">
@@ -150,19 +158,19 @@ const ProgramDetails = (props: any) => {
                       <p className="mb-0">
                         End Point:{" "}
                         <span className="fw-medium">
-                          {program.destination_point.placeName}
+                          {program?.destination_point?.placeName!}
                         </span>
                       </p>
                       <p className="mb-1">
                         End Time:{" "}
                         <span className="fw-medium">
-                          {program.dropOff_time}
+                          {program?.dropOff_time!}
                         </span>
                       </p>
                       <p className="mb-0">
                         End Date:{" "}
                         <span className="fw-medium">
-                          {program.droppOff_date}
+                          {program?.droppOff_date!}
                         </span>
                       </p>
                     </div>
@@ -184,13 +192,13 @@ const ProgramDetails = (props: any) => {
                       <p className="mb-0 fw-medium">
                         Free Dates:{" "}
                         <span className="fw-medium">
-                          {program.freeDays_date.join(" / ")}
+                          {program?.freeDays_date!.join(" / ")}
                         </span>
                       </p>
                       <p className="mb-0">
                         Except Days:{" "}
                         <span className="fw-medium">
-                          {program.exceptDays.join(" / ")}
+                          {program?.exceptDays!.join(" / ")}
                         </span>
                       </p>
                       <p className="mb-1">
@@ -216,16 +224,17 @@ const ProgramDetails = (props: any) => {
                       <p className="mb-0 fw-medium">
                         Capacity:{" "}
                         <span className="fw-medium">
-                          {program.recommanded_capacity}
+                          {program?.recommanded_capacity!}
                         </span>
                       </p>
                       <p className="mb-0">
-                        note: <span className="fw-medium">{program.notes}</span>
+                        note:{" "}
+                        <span className="fw-medium">{program?.notes!}</span>
                       </p>
                       <p className="mb-1">
                         Extra :{" "}
                         <span className="fw-medium">
-                          {program.extra.join(" , ")}
+                          {program?.extra!.join(" , ")}
                         </span>
                       </p>
                       {/* <p className="mb-1">Extra</p> */}
@@ -250,7 +259,7 @@ const ProgramDetails = (props: any) => {
                       <p className="mb-0 fw-medium">
                         Unit Price:{" "}
                         <span className="fw-medium">
-                          £ {program.unit_price}
+                          £ {program?.unit_price!}
                         </span>
                       </p>
                       {/* <p className="mb-0">
@@ -259,25 +268,25 @@ const ProgramDetails = (props: any) => {
                       <p className="mb-1">
                         Total Price :{" "}
                         <span className="fw-medium">
-                          £ {program.total_price}
+                          £ {program?.total_price!}
                         </span>
                       </p>
                       <p className="mb-1">
                         Within Payment Days :{" "}
-                        {program.within_payment_days === "1" ? (
+                        {program?.within_payment_days! === "1" ? (
                           <span className="fw-medium">
-                            {program.within_payment_days} day
+                            {program?.within_payment_days!} day
                           </span>
                         ) : (
                           <span className="fw-medium">
-                            {program.within_payment_days} days
+                            {program?.within_payment_days!} days
                           </span>
                         )}
                       </p>
                       <p className="mb-1">
                         Invoice Frequency :{" "}
                         <span className="fw-medium">
-                          {program.invoiceFrequency}
+                          {program?.invoiceFrequency!}
                         </span>
                       </p>
                       {/* <p className="mb-1">Extra</p> */}
@@ -296,7 +305,7 @@ const ProgramDetails = (props: any) => {
                 <Card.Body>
                   <div className="d-flex gap-3">
                     <div className="flex-grow-1">
-                      <h6 className="fs-18 mb-3">Vehicle</h6>
+                      {/*<h6 className="fs-18 mb-3">Vehicle</h6>
                       <p className="mb-0 fw-medium">
                         Vehicle Type:{" "}
                         <span className="fw-medium">
@@ -308,11 +317,11 @@ const ProgramDetails = (props: any) => {
                         <span className="fw-medium">
                           {OneLuggage.currentData?.description}
                         </span>
-                      </p>
+                      </p> */}
                       <p className="mb-1">
                         Journey Type :{" "}
                         <span className="fw-medium">
-                          {OneJourney.currentData?.type}
+                          {OneJourney?.currentData?.type!}
                         </span>
                       </p>
                       {/* <p className="mb-1">Extra</p> */}
@@ -377,18 +386,18 @@ const ProgramDetails = (props: any) => {
             </Col>
 
             <Col lg={3}>
-              <Col className="justify-content-start">
+              {/* <Col className="justify-content-start">
                 <Col className="text-center completed ">
                   <span className="is-complete"></span>
                   <div className="card mt-3 mb-0 bg-secondary bg-opacity-10 border-0">
                     <div className="card-body">
                       <h6 className="fs-17">
-                        <i className="bi bi-pin-angle"></i>{" "}
-                        {program.origin_point.placeName}{" "}
+                        <i className="bi bi-geo-alt-fill"></i>{" "}
+                        {program?.origin_point.placeName!}{" "}
                       </h6>
                       <p className="text-muted fs-15 mb-0">
                         <i className="bi bi-stopwatch"></i>{" "}
-                        {program.pickUp_Time}
+                        {program?.pickUp_Time!}
                       </p>
                     </div>
                   </div>
@@ -398,28 +407,32 @@ const ProgramDetails = (props: any) => {
                   <div className="card mt-3 mb-0 bg-warning bg-opacity-10 border-0">
                     <div className="card-body">
                       <h6 className="fs-17">
-                        <i className="bi bi-pin-angle"></i>{" "}
-                        {program.destination_point.placeName}
+                        <i className="bi bi-geo-fill"></i>{" "}
+                        {program?.destination_point?.placeName!}
                       </h6>
                       <p className="text-muted fs-15 mb-0">
                         <i className="bi bi-stopwatch"></i>{" "}
-                        {program.dropOff_time}
+                        {program?.dropOff_time!}
                       </p>
                     </div>
                   </div>
                 </Col>
-              </Col>
-              <Col className="justify-content-start">
-                {program.stops.map((stop: any, _id: any) => (
+              </Col> */}
+              <Col
+                className="justify-content-start"
+                style={{ maxHeight: "400px", overflowX: "auto" }}
+              >
+                {program?.stops?.map((stop: any, _id: any) => (
                   <Col key={stop._id} className="text-center completed ">
                     <span className="is-complete"></span>
-                    <div className="card mt-3 mb-0 bg-danger bg-opacity-10 border-0">
+                    <div className="card mt-3 mb-0 bg-success bg-opacity-10 border-0">
                       <div className="card-body">
                         <h6 className="fs-17">
-                          <i className="bi bi-pin-angle"></i> {stop.address}
+                          <i className="b i bi-truck-front-fill"></i>{" "}
+                          {stop?.address?.placeName!}
                         </h6>
                         <p className="text-muted fs-15 mb-0">
-                          <i className="bi bi-stopwatch"></i> {stop.time}
+                          <i className="bi bi-stopwatch"></i> {stop?.time!}
                         </p>
                       </div>
                     </div>
@@ -431,7 +444,7 @@ const ProgramDetails = (props: any) => {
                 <Link to={"/stopsmanagement"} state={program}>
                   <Button type="button" className="add-btn mt-3">
                     <i className="ri-map-pin-line label-icon align-middle fs-16 me-2"></i>{" "}
-                    Stops Management
+                    Stops / Students Management
                   </Button>
                 </Link>
               </Col>

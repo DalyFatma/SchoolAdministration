@@ -32,7 +32,12 @@ export interface Student {
   PhotoIdExtension:string,
   idSchool?: string,
   groupId?:string | null ,
-  groupJoiningDate:string | null 
+  groupJoiningDate:string | null ,
+
+}
+
+export interface StudentsStops {
+  studentList: any[]
 }
 
 export const studentSlice = createApi({
@@ -102,6 +107,17 @@ export const studentSlice = createApi({
         invalidatesTags: ["Student"],
       }),
 
+      updateStudentStops: builder.mutation<void, StudentsStops>({
+        query(payload) {
+          return {
+            url: "/update-students-stops",
+            method: "POST",
+            body: payload,
+          };
+        },
+        //invalidatesTags: ["StudentsStops"],
+      }),
+
      
     };
   },
@@ -111,5 +127,6 @@ export const {
   useFetchStudentsQuery,
   useAddStudentMutation,
   useDeleteStudentMutation,
-  useRemoveStudentFromGroupMutation
+  useRemoveStudentFromGroupMutation,
+  useUpdateStudentStopsMutation
 } = studentSlice;

@@ -28,8 +28,9 @@ import {
   useAddStudentToGroupMutation,
   useDeleteGroupMutation,
   useFetchGroupQuery,
+ 
 } from "features/group/groupSlice";
-import { useFetchProgrammsQuery } from "features/programms/programmSlice";
+import { useFetchProgrammsQuery, useFetchGroupStudentByIdGroupQuery } from "features/programms/programmSlice";
 
 interface Student {
   [x: string]: any;
@@ -103,13 +104,21 @@ const ProgramGroups = () => {
   const { data: students = [] } = useFetchStudentsQuery();
   const { data: AllPrograms = [] } = useFetchProgrammsQuery();
 
+  let progId = localStorage.getItem('id_current_prog');
+
+  const { data = [] } = useFetchGroupStudentByIdGroupQuery(String(progId));
+
+  console.log("Hard coded",data)
+
   const [deleteGroup] = useDeleteGroupMutation();
   const [deleteStudent] = useRemoveStudentFromGroupMutation();
   const [createGroup] = useAddGroupMutation();
   const [AddStudentToGroup] = useAddStudentToGroupMutation();
 
-  const groups = location?.state?.students_groups!;
-  console.log("Groups",groups,);
+
+
+  // const groups = location?.state?.students_groups!;
+  // console.log("Groups",groups,);
 
   
 
@@ -164,7 +173,7 @@ const ProgramGroups = () => {
       })
       .then(() => tog_AddStudents())
       .then(() => setShowGroups(!showGroups))
-      .then(() => navigate("/groups"))
+      .then(() => navigate("/programgroups"))
       .catch((error) => {
         console.error(error);
       });
@@ -323,7 +332,7 @@ const ProgramGroups = () => {
               <li>
                 <Link
                   to="#"
-                  state={cellProps}
+                  //state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"
                   onClick={() => {
@@ -407,7 +416,7 @@ const ProgramGroups = () => {
           <Card id="shipmentsList">
             <Card.Header className="border-bottom-dashed">
               <Row className="g-3">
-                <Col xxl={3} lg={6}>
+                <Col lg={6}>
                   <div className="search-box">
                     <input
                       type="text"
@@ -417,7 +426,7 @@ const ProgramGroups = () => {
                     <i className="ri-search-line search-icon"></i>
                   </div>
                 </Col>
-                <Col className="col-xxl-auto col-sm-auto ms-auto">
+                {/* <Col className="col-xxl-auto col-sm-auto ms-auto">
                   <Button
                     variant="success"
                     onClick={() => tog_AddShippingModals()}
@@ -426,14 +435,14 @@ const ProgramGroups = () => {
                     <i className="bi bi-plus-circle me-1 align-middle"></i> Add
                     New Group
                   </Button>
-                </Col>
+                </Col> */}
               </Row>
             </Card.Header>
             <Card.Body className="p-0">
               {/* <div className="table-responsive table-card"> */}
               <TableContainer
                 columns={columns || []}
-                data={groups || []}
+                data={data || []}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}

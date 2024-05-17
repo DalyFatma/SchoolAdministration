@@ -89,6 +89,11 @@ const Group = () => {
   const [showGroupDetails, setShowGroupsDetails] = useState<any>({});
   const [selectedStudents, setSelectedStudents] = useState([]);
   const { data = [] } = useFetchGroupQuery();
+
+
+  console.log("Api data",data)
+
+
   const { data: students = [] } = useFetchStudentsQuery();
   const { data: AllPrograms = [] } = useFetchProgrammsQuery();
 
@@ -125,20 +130,20 @@ const Group = () => {
     setSelectedProgram(value);
   };
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      [e.target.id]: e.target.value,
-    }));
-  };
-  const onSubmitGroup = (e: React.FormEvent<HTMLFormElement>) => {
-    formData["program"] = selectedProgram;
-    e.preventDefault();
-    formData["students"] = selectedStudents;
-    createGroup(formData).then(() => setFormData(formData));
-    notify();
-    tog_AddShippingModals();
-  };
+  // const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setFormData((prevState) => ({
+  //     ...prevState,
+  //     [e.target.id]: e.target.value,
+  //   }));
+  // };
+  // const onSubmitGroup = (e: React.FormEvent<HTMLFormElement>) => {
+  //   formData["program"] = selectedProgram;
+  //   e.preventDefault();
+  //   formData["students"] = selectedStudents;
+  //   createGroup(formData).then(() => setFormData(formData));
+  //   notify();
+  //   tog_AddShippingModals();
+  // };
 
   const onSubmitEmployeesToGroup = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -157,30 +162,30 @@ const Group = () => {
     window.location.reload();
   };
 
-  const [formData, setFormData] = useState({
-    _id: "",
-    groupName: "",
-    note: "",
-    startPoint: "",
-    dateStart: "",
-    timeStart: "",
-    Destination: "",
-    dateEnd: "",
-    timeEnd: "",
-    status: "",
-    program: "",
-    id_school: user?._id!,
-    students: [
-      {
-        _id: "",
-        firstName: "",
-        lastName: "",
-        id_file: "",
-        groupId: "",
-        groupJoiningDate: "",
-      },
-    ],
-  });
+  // const [formData, setFormData] = useState({
+  //   _id: "",
+  //   groupName: "",
+  //   note: "",
+  //   startPoint: "",
+  //   dateStart: "",
+  //   timeStart: "",
+  //   Destination: "",
+  //   dateEnd: "",
+  //   timeEnd: "",
+  //   status: "",
+  //   program: "",
+  //   id_school: user?._id!,
+  //   students: [
+  //     {
+  //       _id: "",
+  //       firstName: "",
+  //       lastName: "",
+  //       id_file: "",
+  //       groupId: "",
+  //       groupJoiningDate: "",
+  //     },
+  //   ],
+  // });
   const [updatedformData, setupdatedFormData] = useState({
     _id: "",
     students: [""],
@@ -266,10 +271,11 @@ const Group = () => {
         filterable: true,
       },
       {
-        Header: "Description",
-        accessor: "note",
+        Header: "Program Name",
+        accessor: "program.programName",
         disableFilters: true,
         filterable: true,
+        
       },
       {
         Header: "Students",
@@ -407,7 +413,7 @@ const Group = () => {
                     <i className="ri-search-line search-icon"></i>
                   </div>
                 </Col>
-                <Col className="col-xxl-auto col-sm-auto ms-auto">
+                {/* <Col className="col-xxl-auto col-sm-auto ms-auto">
                   <Button
                     variant="success"
                     onClick={() => tog_AddShippingModals()}
@@ -416,7 +422,7 @@ const Group = () => {
                     <i className="bi bi-plus-circle me-1 align-middle"></i> Add
                     New Group
                   </Button>
-                </Col>
+                </Col> */}
               </Row>
             </Card.Header>
             <Card.Body className="p-0">
@@ -452,7 +458,7 @@ const Group = () => {
           </Card>
 
           {/* Modal add Group */}
-          <Modal
+          {/* <Modal
             className="fade zoomIn"
             size="lg"
             show={modal_AddShippingModals}
@@ -546,7 +552,7 @@ const Group = () => {
                 </Row>
               </Form>
             </Modal.Body>
-          </Modal>
+          </Modal> */}
           {/* modal add new employees to the group */}
         </Container>
       </div>
@@ -574,17 +580,7 @@ const Group = () => {
                         {showGroupDetails.groupName}
                       </span>
                     </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <span className="text-muted">Description:</span>
-                    </td>
-                    <td>
-                      <span className="fw-medium text-uppercase">
-                        {showGroupDetails.note}
-                      </span>
-                    </td>
-                  </tr>
+                  </tr> 
                   <tr>
                     <td>
                       <span className="text-muted">Program:</span>
@@ -595,32 +591,7 @@ const Group = () => {
                       </span>
                     </td>
                   </tr>
-                  <tr>
-                    <td>
-                      <span className="text-muted">Start Date:</span>
-                    </td>
-                    <td>
-                      <span className="fw-medium">
-                        {showGroupDetails.startDate}
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <span className="text-muted">Status:</span>
-                    </td>
-                    <td>
-                      <span
-                        className={
-                          showGroupDetails.status === "Expired"
-                            ? "badge bg-danger-subtle text-danger text-uppercase"
-                            : "badge bg-success-subtle text-success text-uppercase"
-                        }
-                      >
-                        {showGroupDetails.status}
-                      </span>
-                    </td>
-                  </tr>
+  
                   <tr>
                     <td>
                       <span className="text-muted ">Students List:</span>

@@ -6,46 +6,76 @@ import {
   Col,
   Tab,
   Nav,
+  Form,
+  Button,
 } from "react-bootstrap";
-import { useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
+
+import Select from "react-select";
 
 import {
   DirectionsRenderer,
   GoogleMap,
+  InfoWindow,
+  Marker,
   useJsApiLoader,
 } from "@react-google-maps/api";
+import SelectionStudentStops from "./SelectionStudentStops";
+import "./SelectionStudentStop.css";
+
+import start_clicked from "../../assets/images/start_clicked.png";
+import start_unclicked from "../../assets/images/start_unclicked.png";
+import dest_clicked from "../../assets/images/dest_clicked.png";
+import dest_unclicked from "../../assets/images/dest_unclicked.png";
+import { useUpdateStudentStopsMutation } from "features/student/studentSlice";
+import { useNavigate } from "react-router-dom";
+
+import Swal from "sweetalert2";
 
 const StopsManagement = () => {
   document.title = "New Jobs | Affiliate Administration";
-  const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
+
+  const [activeVerticalTab, setactiveVerticalTab] = useState<number>(0);
+  const navigate = useNavigate();
+
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
+  const [clickedMarkerIndex, setClickedMarkerIndex] = useState(-2);
+
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [selectedStop, setSelectedStop] = useState<any>(null);
+  const [assignedPassengers, setAssignedPassengers] = useState<any[]>([]);
+
+  const [selectedPassengers, setSelectedPassengers] = useState([]);
+
   const location = useLocation();
+  const [updateStudentsStops] = useUpdateStudentStopsMutation();
 
   let program = location.state;
 
-  console.log(program);
+  console.log("Program object", program);
 
   const [directions, setDirections] =
     useState<google.maps.DirectionsResult | null>(null);
-  const [stopCoordinates, setStopCoordinates] = useState<
-    google.maps.LatLngLiteral[]
-  >([]);
+
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
     libraries: ["places"],
   });
+  const [assignedStudents, setAssignedStudents] = useState([]);
 
-  const getConsernedStudents = (group: any,index: any) => {
-    setactiveVerticalTab(index + 1)
-    console.log("Conserned Students",group.students);
-  }
-
+  useEffect(() => {
+    // Check if program object exists
+    if (program) {
+      // Assuming assigned students data is present in program object
+      setAssignedStudents(program.assignedStudents); // Update assigned students state
+    }
+  }, [program]);
   useEffect(() => {
     if (isLoaded && program) {
       const directionsService = new google.maps.DirectionsService();
       const waypoints = program.stops.map((stop: any) => ({
-        location: { query: stop.address }, // Use the address from autocomplete
+        location: { query: stop.address.placeName }, // Use the address from autocomplete
         stopover: true,
       }));
 
@@ -58,13 +88,10 @@ const StopsManagement = () => {
         },
         (result, status) => {
           if (result !== null && status === google.maps.DirectionsStatus.OK) {
+            // console.log(result);
             setDirections(result);
             if (result.routes && result.routes.length > 0) {
-              const newStopCoordinates = result.routes[0].legs.map((leg) => ({
-                lat: leg.start_location.lat(),
-                lng: leg.start_location.lng(),
-              }));
-              setStopCoordinates(newStopCoordinates);
+              //console.log("Route drawn successfully");
             } else {
               console.error("No routes found in the directions result");
             }
@@ -87,131 +114,454 @@ const StopsManagement = () => {
   const handleMapLoad = (map: any) => {
     setMap(map);
   };
+
+  const handleStopMarkerClick = (stop: any, index: any) => {
+    console.log("Clicked Stop", stop);
+    console.log("Clicked Stop", stop.address);
+    setClickedMarkerIndex(index);
+    setSelectedStop(stop.address);
+  };
+
+  const handleStartPointMarkerClick = () => {
+    console.log("Clicked orirgin", program.origin_point);
+    setClickedMarkerIndex(-1);
+    let origin = {
+      coordinates: {
+        lat: String(program.origin_point.coordinates.lat),
+        lng: String(program.origin_point.coordinates.lng),
+      },
+      placeName: program.origin_point.placeName,
+    };
+    setSelectedStop(origin);
+  };
+
+  const handleDestinationPointMarkerClick = () => {
+    console.log("Clicked Destination", program.destination_point);
+    setClickedMarkerIndex(program.stops.length);
+    let dest = {
+      coordinates: {
+        lat: String(program.destination_point.coordinates.lat),
+        lng: String(program.destination_point.coordinates.lng),
+      },
+      placeName: program.destination_point.placeName,
+    };
+    setSelectedStop(dest);
+  };
+
+  const handleGroupSelection = (group: any) => {
+    // console.log("Selected group", group);
+    setSelectedGroup(group);
+    setSelectedStop(null);
+    setClickedMarkerIndex(-2);
+  };
+
+  const handleAssignPassengers = (passengers: any) => {
+    // console.log("Selected passengers", passengers);
+    if (!selectedStop) return;
+    const newAssignments = passengers.map((passenger: any) => ({
+      student: passenger.value,
+      stop: selectedStop,
+    }));
+    // console.log("Selected newAssignments", newAssignments);
+    setAssignedPassengers((prevAssignments: any) => [
+      ...prevAssignments.filter(
+        (a: any) => !passengers.some((p: any) => p.value === a.student)
+      ),
+      ...newAssignments,
+    ]);
+  };
+
+  const handleUnassignPassenger = (passenger: any) => {
+    //  console.log("Selected unassign passenger", passenger);
+    setAssignedPassengers((prevAssignments) =>
+      prevAssignments.filter((a) => a.student !== passenger._id)
+    );
+  };
+
+  const isGroupFullyAssigned = (group: any) => {
+    // console.log("isGroupFullyAssigned", group);
+    return group.students.every((p: any) =>
+      assignedPassengers.some((a: any) => a.student === p._id)
+    );
+  };
+
+  const filteredPassengers = selectedGroup
+    ? selectedGroup.students.filter(
+        (p: any) => !assignedPassengers.some((a) => a.student === p._id)
+      )
+    : [];
+
+  const passengerOptions = filteredPassengers.map((passenger: any) => ({
+    value: passenger._id,
+    label: passenger.firstName + passenger.lastName,
+  }));
+
+  const handleChange = (selectedOptions: any) => {
+    // console.log("SelectedOptions", selectedOptions);
+    setSelectedPassengers(selectedOptions || []);
+  };
+
+  const handleAssignClick = () => {
+    // console.log("PassengerSelect js selectedPassengers", selectedPassengers);
+    handleAssignPassengers(selectedPassengers);
+    setSelectedPassengers([]);
+  };
+
+  // console.log("filteredPassengers", filteredPassengers);
+
+  const filteredAssignments = selectedStop
+    ? assignedPassengers.filter(
+        (a) => a.stop.placeName === selectedStop.placeName
+      )
+    : [];
+
+  console.log("filteredAssignments normal", filteredAssignments);
+
+  console.log("assignedPassengers normal", assignedPassengers);
+
+  const notify = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Students successfully assigned to their stop points",
+      showConfirmButton: false,
+      timer: 2000,
+    });
+  };
+
+  const onSubmitStudents = (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      console.log("assignedPassengers api", assignedPassengers);
+      let data = {
+        studentList: assignedPassengers,
+      };
+      updateStudentsStops(data).then((result: any) => {
+        console.log("Api result", result);
+
+        notify();
+        navigate("/programming/listofprogram");
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <React.Fragment>
       <Row style={{ marginTop: "100px" }}>
         <Col xl={12}>
-          <Card>
+          <Card style={{ height: "70vh" }}>
             <Card.Body className="form-steps">
               <div className="vertical-navs-step">
-                  <Row className="gy-5">
-                    <Col lg={3}>
-                      <Nav
-                        as="div"
-                        variant="pills"
-                        className="nav flex-column custom-nav nav-pills"
-                        role="tablist"
-                        aria-orientation="vertical"
-                      >
-                        {program.students_groups.map(
+                <Row className="gy-5">
+                  <Col lg={2}>
+                    <div>
+                      <h5>Select a Group</h5>
+                      <div style={{ maxHeight: "470px", overflowX: "auto" }}>
+                        {program?.students_groups!.map(
                           (group: any, index: any) => (
-                            <Nav.Link
-                              as="button"
+                            <div
+                              style={{
+                                cursor: "pointer",
+                                marginTop: "20px",
+                                fontWeight: "500",
+                                padding: "7px",
+                                borderRadius: "7px",
+
+                                border: isGroupFullyAssigned(group)
+                                  ? "none"
+                                  : "1px solid #06d6a0",
+                                backgroundColor:
+                                  selectedGroup?.groupName === group.groupName
+                                    ? "rgb(230, 230, 230)"
+                                    : isGroupFullyAssigned(group)
+                                    ? "#06d6a0"
+                                    : "transparent",
+                                color:
+                                  selectedGroup?.groupName ===
+                                    group.groupName &&
+                                  isGroupFullyAssigned(group)
+                                    ? "black"
+                                    : isGroupFullyAssigned(group)
+                                    ? "white"
+                                    : "black",
+                              }}
                               className={
-                                activeVerticalTab > index
-                                  ? "nav-link done"
-                                  : "nav-link"
+                                selectedGroup?.groupName === group.groupName
+                                  ? "selected_group"
+                                  : "not_selected_group"
                               }
-                              eventKey={index + 1}
-                              onClick={() => getConsernedStudents(group, index)}
+                              key={index}
+                              onClick={() => handleGroupSelection(group)}
                             >
-                              <span className="step-title me-2">
-                                <i className="ri-close-circle-fill step-icon me-2"></i>{" "}
-                                {group.groupName}
-                              </span>
-                            </Nav.Link>
+                              {isGroupFullyAssigned(group) ? (
+                                <i className="bi bi-check-circle-fill fs-16 icon"></i>
+                              ) : (
+                                <i className="bi bi-hourglass-split text-warning fs-16 icon"></i>
+                              )}
+                              {group.groupName}
+                            </div>
                           )
                         )}
-
-                        {/* <Nav.Link
-                          as="button"
-                          className={
-                            activeVerticalTab > 3 ? "nav-link done" : "nav-link"
-                          }
-                          eventKey="3"
-                          onClick={() => setactiveVerticalTab(3)}
-                        >
-                          <span className="step-title me-2">
-                            <i className="ri-close-circle-fill step-icon me-2"></i>{" "}
-                            Step 3
-                          </span>
-                          Payment
-                        </Nav.Link>
-                        <Nav.Link
-                          as="button"
-                          className={
-                            activeVerticalTab > 4 ? "nav-link done" : "nav-link"
-                          }
-                          eventKey="4"
-                          onClick={() => setactiveVerticalTab(4)}
-                        >
-                          <span className="step-title me-2">
-                            <i className="ri-close-circle-fill step-icon me-2"></i>{" "}
-                            Step 4
-                          </span>
-                          Finish
-                        </Nav.Link> */}
-                      </Nav>
-                    </Col>
-                    <Col lg={9}>
-                      <div className="px-lg-4">
-                      <Tab.Container activeKey={activeVerticalTab}>
-                        <Tab.Content>
-                          <Tab.Pane eventKey={activeVerticalTab}>
-                            <div>
-                              <h5
-                                style={{
-                                  textAlign: "center",
-                                  marginBottom: "20px",
-                                }}
-                              >
-                                {
-                                  program.students_groups[activeVerticalTab - 1]
-                                    .groupName
-                                }
-                              </h5>
-                            </div>
-                          </Tab.Pane>
-                        </Tab.Content>
-                        </Tab.Container>
-                        <div>
-                          <Row className="g-3">
-                            <Col lg={12}>
-                              <div style={{ height: "500px", width: "100%" }}>
-                                <GoogleMap
-                                  mapContainerStyle={{
-                                    height: "100%",
-                                    width: "100%",
-                                  }}
-                                  zoom={8}
-                                  //center={{ lat: -34.397, lng: 150.644 }}
-                                  onLoad={handleMapLoad}
-                                >
-                                  {/* Render directions */}
-                                  {directions && (
-                                    <DirectionsRenderer
-                                      directions={directions}
-                                      options={{
-                                        polylineOptions: {
-                                          strokeColor: "red",
-                                          strokeOpacity: 0.8,
-                                          strokeWeight: 4,
-                                        },
-                                      }}
-                                    />
-                                  )}
-                                </GoogleMap>
-                              </div>
-                            </Col>
-                          </Row>
-                        </div>
                       </div>
-                    </Col>
-                  </Row>
+                    </div>
+                  </Col>
+                  <Col lg={10}>
+                    <div className="px-lg-4">
+                      <div>
+                        <Row className="g-3">
+                          <Col lg={6}>
+                            <div style={{ height: "500px", width: "100%" }}>
+                              <GoogleMap
+                                mapContainerStyle={{
+                                  height: "100%",
+                                  width: "100%",
+                                }}
+                                zoom={8}
+                                //center={{ lat: -34.397, lng: 150.644 }}
+                                onLoad={handleMapLoad}
+                              >
+                                {directions && (
+                                  <DirectionsRenderer
+                                    directions={directions}
+                                    options={{
+                                      polylineOptions: {
+                                        strokeColor: "red",
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 4,
+                                      },
+                                      suppressMarkers: true,
+                                    }}
+                                  />
+                                )}
+                                {clickedMarkerIndex === -1 ? (
+                                  <Marker
+                                    position={program.origin_point.coordinates}
+                                    onClick={() =>
+                                      handleStartPointMarkerClick()
+                                    }
+                                    icon={{
+                                      url: start_clicked,
+                                      scaledSize: new window.google.maps.Size(
+                                        40,
+                                        40
+                                      ),
+                                    }}
+                                  />
+                                ) : (
+                                  <Marker
+                                    position={program.origin_point.coordinates}
+                                    onClick={() =>
+                                      handleStartPointMarkerClick()
+                                    }
+                                    icon={{
+                                      url: start_unclicked,
+                                      scaledSize: new window.google.maps.Size(
+                                        40,
+                                        40
+                                      ),
+                                    }}
+                                  />
+                                )}
+
+                                {program.stops.map((stop: any, index: any) => (
+                                  <Marker
+                                    key={index}
+                                    position={{
+                                      lat: Number(
+                                        stop?.address?.coordinates?.lat
+                                      ),
+                                      lng: Number(
+                                        stop?.address?.coordinates?.lng
+                                      ),
+                                    }}
+                                    onClick={() =>
+                                      handleStopMarkerClick(stop, index)
+                                    }
+                                    icon={{
+                                      path: google.maps.SymbolPath.CIRCLE,
+                                      fillColor:
+                                        clickedMarkerIndex === index
+                                          ? "#32CD32"
+                                          : "#FF0000",
+                                      fillOpacity: 1,
+                                      strokeColor: "black",
+                                      strokeWeight: 1,
+                                      scale: 8,
+                                    }}
+                                  />
+                                ))}
+
+                                {clickedMarkerIndex === program.stops.length ? (
+                                  <Marker
+                                    position={
+                                      program.destination_point.coordinates
+                                    }
+                                    onClick={() =>
+                                      handleDestinationPointMarkerClick()
+                                    }
+                                    icon={{
+                                      url: dest_clicked,
+                                      scaledSize: new window.google.maps.Size(
+                                        40,
+                                        40
+                                      ),
+                                    }}
+                                  />
+                                ) : (
+                                  <Marker
+                                    position={
+                                      program.destination_point.coordinates
+                                    }
+                                    onClick={() =>
+                                      handleDestinationPointMarkerClick()
+                                    }
+                                    icon={{
+                                      url: dest_unclicked,
+                                      scaledSize: new window.google.maps.Size(
+                                        40,
+                                        40
+                                      ),
+                                    }}
+                                  />
+                                )}
+                              </GoogleMap>
+                            </div>
+                          </Col>
+                          <Col lg={6}>
+                            <Tab.Container activeKey={activeVerticalTab}>
+                              <Tab.Content>
+                                <Tab.Pane eventKey={activeVerticalTab}>
+                                  <div>
+                                    <h5
+                                      style={{
+                                        textAlign: "center",
+                                        marginBottom: "20px",
+                                      }}
+                                    >
+                                      {selectedGroup?.groupName!}
+                                    </h5>
+                                  </div>
+                                </Tab.Pane>
+                              </Tab.Content>
+                            </Tab.Container>
+                            <div className="mb-3">
+                              <Form.Label
+                                htmlFor="choices-multiple-remove-button"
+                                className="text-muted"
+                                style={{ width: "100%" }}
+                              >
+                                {selectedStop && (
+                                  <>
+                                    <div>
+                                      <div
+                                        style={{
+                                          marginBottom: "20px",
+                                          fontSize: "1rem",
+                                          color: "#000",
+                                        }}
+                                      >
+                                        <strong>Stop point: </strong>
+                                        {selectedStop.placeName}
+                                      </div>
+                                      <h5 style={{ marginBottom: "20px" }}>
+                                        Select Passengers
+                                      </h5>
+                                      <Select
+                                        isMulti
+                                        options={passengerOptions}
+                                        value={selectedPassengers}
+                                        onChange={handleChange}
+                                      />
+                                      <Button
+                                        style={{
+                                          marginTop: "15px",
+                                          marginBottom: "20px",
+                                        }}
+                                        className="btn btn-info btn-label rounded-pill"
+                                        onClick={handleAssignClick}
+                                      >
+                                        <i className="ri-add-circle-line label-icon align-middle rounded-pill fs-16 me-2"></i>
+                                        Assign to Stop
+                                      </Button>
+                                    </div>
+                                    <div
+                                      style={{
+                                        maxHeight: "300px",
+                                        overflowX: "auto",
+                                      }}
+                                    >
+                                      <h5>Assigned Passengers</h5>
+                                      <table width={"100%"}>
+                                        {filteredAssignments.map(
+                                          (assignment: any, index: any) => {
+                                            const passenger =
+                                              selectedGroup.students.find(
+                                                (p: any) =>
+                                                  p._id === assignment.student
+                                              );
+                                            if (!passenger) return null;
+                                            return (
+                                              <tr key={index}>
+                                                <td>
+                                                  {passenger.firstName +
+                                                    passenger.lastName}
+                                                </td>
+
+                                                <td>
+                                                  <Button
+                                                    className="btn btn-danger btn-label rounded-pill"
+                                                    style={{
+                                                      marginBottom: "10px",
+                                                    }}
+                                                    onClick={() =>
+                                                      handleUnassignPassenger(
+                                                        passenger
+                                                      )
+                                                    }
+                                                  >
+                                                    <i className="ri-delete-bin-line label-icon align-middle rounded-pill fs-16 me-2"></i>
+                                                    Unassign
+                                                  </Button>
+                                                </td>
+                                              </tr>
+                                            );
+                                          }
+                                        )}
+                                      </table>
+                                    </div>
+                                  </>
+                                )}
+                              </Form.Label>
+                            </div>
+                          </Col>
+                        </Row>
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
               </div>
             </Card.Body>
           </Card>
         </Col>
+        <div>
+        <h5>Assigned Students</h5>
+       
+      </div>
+        <Form
+          onSubmit={onSubmitStudents}
+          className="d-flex justify-content-end"
+        >
+          <Button
+            variant="success"
+            type="submit"
+            className="w-sm"
+            style={{ marginRight: "20px" }}
+          >
+            Save Changes
+          </Button>
+        </Form>
       </Row>
     </React.Fragment>
   );

@@ -475,6 +475,7 @@ const ProgramList = (props: any) => {
                 to={"/programgroups"}
                 className="badge badge-soft-success edit-item-btn"
                 state={row}
+                onClick={() =>  localStorage.setItem('id_current_prog', row._id)}
               >
                 <i
                   className="ph ph-users-three"
