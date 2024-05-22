@@ -33,12 +33,15 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const StopsManagement = () => {
-  document.title = "New Jobs | Affiliate Administration";
+  document.title = "Stops Management | School Administration";
 
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(0);
   const navigate = useNavigate();
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
+
+  const [disabledSubmit, setDisabledSubmit] = useState(true);
+  const [totalStudentsNumber, setTotalStudentsNumber] = useState(0);
 
   const [clickedMarkerIndex, setClickedMarkerIndex] = useState(-2);
 
@@ -95,22 +98,35 @@ const StopsManagement = () => {
 
               let newAssignments = [];
 
-              for(let group of program.students_groups){
-                for(let student of group.students){
-                  if(student.stop_point !== null){
+              let total = 0;
+
+              for (let group of program.students_groups) {
+                total += group.students.length;
+                for (let student of group.students) {
+                  if (student.stop_point !== null) {
                     newAssignments.push({
-                        student: student._id,
-                        stop: student.stop_point,
-                      })
+                      student: student._id,
+                      stop: student.stop_point,
+                    });
                   }
                 }
               }
 
-              console.log("Assigned students",newAssignments);
+              setTotalStudentsNumber(total);
+
+              console.log("Assigned students", newAssignments);
 
               setAssignedPassengers(newAssignments);
 
-              
+              console.log("totalStudentsNumber", total);
+              console.log("assignedPassengers.length", newAssignments.length);
+
+              if (newAssignments.length < total) {
+                console.log("hello");
+                setDisabledSubmit(true);
+              } else {
+                setDisabledSubmit(false);
+              }
             } else {
               console.error("No routes found in the directions result");
             }
@@ -181,13 +197,24 @@ const StopsManagement = () => {
       student: passenger.value,
       stop: selectedStop,
     }));
-    // console.log("Selected newAssignments", newAssignments);
+    //console.log("Selected newAssignments", newAssignments);
     setAssignedPassengers((prevAssignments: any) => [
       ...prevAssignments.filter(
         (a: any) => !passengers.some((p: any) => p.value === a.student)
       ),
       ...newAssignments,
     ]);
+
+    let oldFilteredAssignments = assignedPassengers.filter(
+      (a: any) => !passengers.some((p: any) => p.value === a.student)
+    );
+    console.log("assignedPassengers assign", oldFilteredAssignments);
+
+    if ((oldFilteredAssignments.length + newAssignments.length) < totalStudentsNumber) {
+      setDisabledSubmit(true);
+    } else {
+      setDisabledSubmit(false);
+    }
   };
 
   const handleUnassignPassenger = (passenger: any) => {
@@ -195,6 +222,19 @@ const StopsManagement = () => {
     setAssignedPassengers((prevAssignments) =>
       prevAssignments.filter((a) => a.student !== passenger._id)
     );
+
+    let newAssignments = assignedPassengers.filter((a: any) => a.student !== passenger._id)
+
+    console.log(
+      "assignedPassengers unassign",
+      newAssignments
+    );
+
+    if (newAssignments.length < totalStudentsNumber) {
+      setDisabledSubmit(true);
+    } else {
+      setDisabledSubmit(false);
+    }
   };
 
   const isGroupFullyAssigned = (group: any) => {
@@ -516,7 +556,7 @@ const StopsManagement = () => {
                                         {filteredAssignments.map(
                                           (assignment: any, index: any) => {
                                             const passenger =
-                                              selectedGroup.students.find(
+                                              selectedGroup?.students.find(
                                                 (p: any) =>
                                                   p._id === assignment.student
                                               );
@@ -564,12 +604,13 @@ const StopsManagement = () => {
             </Card.Body>
           </Card>
         </Col>
-     
+
         <Form
           onSubmit={onSubmitStudents}
           className="d-flex justify-content-end"
         >
           <Button
+            disabled={disabledSubmit}
             variant="success"
             type="submit"
             className="w-sm"

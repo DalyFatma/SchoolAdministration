@@ -13,11 +13,17 @@ import Breadcrumb from "Common/BreadCrumb";
 import { sellerGrid } from "Common/data";
 import { Link, useParams } from "react-router-dom";
 import { useGetAllContractsQuery } from "features/contract/contractSlice";
+import { selectCurrentUser } from "../../../features/account/authSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../app/store";
 
 const Contract = () => {
   document.title = "Contracts | School Administration";
 
+
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
   const { data = [] } = useGetAllContractsQuery();
+  const schoolContracts = data.filter((contractForSchool:any)=> contractForSchool?.school_id?._id! === user?._id!)
 
   // Pagination
   const [pagination, setPagination] = useState<boolean>(true);
@@ -189,7 +195,7 @@ const Contract = () => {
                     </Modal> */}
 
           <Row id="seller-list">
-            {(data || []).map((item: any, key: number) => (
+            {(schoolContracts || []).map((item: any, key: number) => (
               <Col xxl={3} lg={6} key={key}>
                 <Card>
                   <Card.Body className="p-4">

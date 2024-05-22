@@ -19,6 +19,7 @@ import { journeySlice } from "features/journey/journey";
 import { complainSlice } from "features/complains/ComplainSlice";
 import { noteSlice } from "features/notes/noteSlice";
 import { groupSlice } from "features/group/groupSlice";
+import { passengerAndLuggageSlice } from "features/PassengerAndLuggageLimits/passengerAndLuggageSlice";
 
 
 export const store = configureStore({
@@ -34,6 +35,7 @@ export const store = configureStore({
     [complainSlice.reducerPath]:complainSlice.reducer,
     [noteSlice.reducerPath]:noteSlice.reducer,
     [groupSlice.reducerPath]: groupSlice.reducer,
+    [passengerAndLuggageSlice.reducerPath]: passengerAndLuggageSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -53,6 +55,7 @@ export const store = configureStore({
       complainSlice.middleware,
       noteSlice.middleware,
       groupSlice.middleware,
+      passengerAndLuggageSlice.middleware,
     ]);
   },
 });

@@ -38,6 +38,8 @@ const LoadingContainer = () => <div>Loading...</div>;
 const ProgramList = (props: any) => {
   document.title = "List of Programs | School Administration";
   const user = useSelector((state: RootState) => selectCurrentUser(state));
+   
+
   const [modal_Pickup, setmodal_Pickup] = useState<boolean>(false);
   const [modal_Destination, setmodal_Destination] = useState<boolean>(false);
 
@@ -46,6 +48,10 @@ const ProgramList = (props: any) => {
     setOpenChatModal(!openChatModal);
   };
   const { data = [] } = useFetchProgrammsQuery();
+
+  const schoolPrograms = data.filter((programForSchool:any)=> programForSchool?.school_id?._id! === user?._id!)
+  console.log("schoolPrograms",schoolPrograms)
+
   function tog_Pickup() {
     setmodal_Pickup(!modal_Pickup);
   }
@@ -145,6 +151,10 @@ const ProgramList = (props: any) => {
         date_status: "",
       },
     ],
+    unit_price: "",
+    total_price: "",
+    invoiceFrequency: "",
+    within_payment_days: "",
   };
   const notifySuccess = () => {
     Swal.fire({
@@ -706,7 +716,7 @@ const ProgramList = (props: any) => {
                 </Row>
               </Card.Header>
               <Card.Body>
-                <DataTable columns={columns} data={data} pagination />
+                <DataTable columns={columns} data={schoolPrograms} pagination />
               </Card.Body>
             </Card>
           </Col>

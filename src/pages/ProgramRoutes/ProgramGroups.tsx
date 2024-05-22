@@ -108,7 +108,8 @@ const ProgramGroups = () => {
 
   const { data = [] } = useFetchGroupStudentByIdGroupQuery(String(progId));
 
-  console.log("Hard coded",data)
+  console.log("Hard coded",data) 
+  
 
   const [deleteGroup] = useDeleteGroupMutation();
   const [deleteStudent] = useRemoveStudentFromGroupMutation();

@@ -23,7 +23,7 @@ const ProgramDetails = (props: any) => {
 
   program = location.state;
 
-  console.log(program);
+  console.log("program details", program);
   
   const [directions, setDirections] =
     useState<google.maps.DirectionsResult | null>(null);
